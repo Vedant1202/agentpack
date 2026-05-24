@@ -1,0 +1,25 @@
+[build-system]
+requires = ["setuptools>=61.0"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "agentpack"
+version = "0.1.0"
+description = "A document-to-agent-context compiler."
+authors = [
+    { name = "Your Name", email = "your.email@example.com" }
+]
+readme = "README.md"
+requires-python = ">=3.9"
+dependencies = [
+    "typer>=0.9.0",
+    "pydantic>=2.0.0",
+    "pymupdf>=1.23.0",
+    "pandas>=2.0.0",
+    "tiktoken>=0.5.0",
+    "pyyaml>=6.0",
+    "pyinstaller>=6.0.0"
+]
+
+[project.scripts]
+agentpack = "agentpack.cli:app"

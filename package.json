@@ -1,0 +1,24 @@
+{
+  "name": "agentpack-cli",
+  "version": "0.1.0",
+  "description": "AgentPack document-to-agent-context compiler",
+  "bin": {
+    "agentpack": "dist/agentpack"
+  },
+  "files": [
+    "dist/agentpack"
+  ],
+  "scripts": {
+    "build:binary": "source venv/bin/activate && pyinstaller --onefile --name agentpack src/agentpack/__main__.py",
+    "build:python": "python3 -m build",
+    "publish:pypi": "python3 -m twine upload dist/*",
+    "publish:npm": "npm run build:binary && npm publish",
+    "changelog": "npx auto-changelog -p",
+    "release:create": "gh release create v$npm_package_version --title \"AgentPack v$npm_package_version\" --generate-notes",
+    "release:upload": "gh release upload v$npm_package_version dist/*",
+    "release:github": "npm run build:binary && npm run release:create && npm run release:upload",
+    "publish:all": "npm run changelog && npm run publish:pypi && npm run publish:npm && npm run release:github"
+  },
+  "author": "",
+  "license": "ISC"
+}
