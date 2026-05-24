@@ -3,6 +3,7 @@ from agentpack.pack import write_pack
 from agentpack.validate import validate_pack
 from agentpack.audit import audit_pack
 from agentpack.retrieve import search_pack
+from agentpack.eval.runner import run_eval
 
 app = typer.Typer(help="AgentPack CLI", no_args_is_help=True)
 
@@ -63,6 +64,18 @@ def retrieve(pack_dir: str, query: str, top_k: int = typer.Option(5, help="Numbe
         typer.echo(f"   chunk: {res['path']}")
         typer.echo(f"   tokens: {res['token_count']}")
         typer.echo(f"   score: {res['score']:.2f}")
+
+@app.command(name="eval")
+def evaluate(benchmark_dir: str):
+    """Runs a deterministic evaluation benchmark."""
+    typer.echo(f"Running evaluation on {benchmark_dir}...")
+    report = run_eval(benchmark_dir)
+    if report.startswith("Error:"):
+        typer.secho(report, fg=typer.colors.RED)
+        raise typer.Exit(code=1)
+    else:
+        typer.echo(report)
+        typer.secho("\nEvaluation complete.", fg=typer.colors.GREEN)
 
 if __name__ == "__main__":
     app()
