@@ -62,8 +62,11 @@ def search_pack(pack_dir: str, query: str, top_k: int = 5) -> List[Dict]:
         
     cur = conn.cursor()
     
-    # Simple clean query for FTS5 (OR query for terms)
-    clean_query = " OR ".join([f'"{w}"' for w in query.replace('"', '').split() if w])
+    import re
+    # Strip non-alphanumeric characters (like '?' or '.') but keep spaces and hyphens
+    clean_str = re.sub(r'[^a-zA-Z0-9\-\s]', ' ', query)
+    # Split by whitespace, wrap each term in quotes for FTS, and join with OR
+    clean_query = " OR ".join([f'"{w}"' for w in clean_str.split() if w])
     if not clean_query:
         return []
         
