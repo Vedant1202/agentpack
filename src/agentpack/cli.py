@@ -2,6 +2,7 @@ import typer
 from agentpack.pack import write_pack
 from agentpack.validate import validate_pack
 from agentpack.audit import audit_pack
+from agentpack.retrieve import search_pack
 
 app = typer.Typer(help="AgentPack CLI", no_args_is_help=True)
 
@@ -36,6 +37,32 @@ def audit(pack_dir: str):
     else:
         typer.echo(report)
         typer.secho("\nAudit report generated.", fg=typer.colors.GREEN)
+
+@app.command()
+def retrieve(pack_dir: str, query: str, top_k: int = typer.Option(5, help="Number of results to return")):
+    """Retrieves top-k evidence chunks from a pack."""
+    typer.echo(f"Searching for '{query}' in {pack_dir}...")
+    results = search_pack(pack_dir, query, top_k)
+    
+    if not results:
+        typer.secho("No results found.", fg=typer.colors.YELLOW)
+        return
+        
+    for i, res in enumerate(results):
+        source = res['citation'].get('source_path', res['source_id'])
+        section = res['citation'].get('section', '')
+        page = res['citation'].get('page', '')
+        
+        cite_str = source
+        if page:
+            cite_str += f", page {page}"
+        if section:
+            cite_str += f", {section}"
+            
+        typer.secho(f"\n{i+1}. {cite_str}", fg=typer.colors.CYAN, bold=True)
+        typer.echo(f"   chunk: {res['path']}")
+        typer.echo(f"   tokens: {res['token_count']}")
+        typer.echo(f"   score: {res['score']:.2f}")
 
 if __name__ == "__main__":
     app()
