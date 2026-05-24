@@ -1,2 +1,10 @@
 .plans
 .antigravitycli
+venv
+test_docs
+build/
+dist/
+*.egg-info/
+*.spec
+output/
+.DS_Store
