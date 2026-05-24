@@ -8,3 +8,6 @@ dist/
 *.spec
 output/
 .DS_Store
+docs/test.txt
+benchmarks/test_benchmark
+.env
