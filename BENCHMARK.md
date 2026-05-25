@@ -8,7 +8,7 @@ Modern Large Language Models (LLMs) feature massive context windows, leading man
 
 Traditional "Naive RAG" attempts to solve this by slicing documents into arbitrary character counts. This approach frequently fractures semantic boundaries, such as splitting financial tables or sentences in half, leading to low-quality retrieval.
 
-**The Goal:** To demonstrate that AgentPack's agentic parsing and intelligent semantic chunking provide a superior context layer. I test this by holding the LLM constant across all pipelines. The V1 claim is verifiable: *Given the same Gemini model, AgentPack provides better context than raw document stuffing or naive RAG.*
+**The Goal:** To demonstrate that AgentPack's agentic parsing and intelligent semantic chunking provide a superior context layer. I test this by holding the LLM constant across all pipelines. The claim is verifiable: *Given the same Gemini model, AgentPack provides better context than raw document stuffing or naive RAG.*
 
 ## 2. Methodology & Dataset
 I evaluated the pipelines using a rigorous "LLM-as-a-Judge" architecture on a complex financial dataset.
