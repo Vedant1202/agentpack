@@ -1,1 +1,0 @@
-Patient eligibility requires a PHQ-9 score above 10.
