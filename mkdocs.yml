@@ -1,0 +1,23 @@
+site_name: AgentPack Documentation
+site_url: https://yourusername.github.io/agentpack/
+
+theme:
+  name: material
+  palette:
+    scheme: slate
+
+plugins:
+  - search
+  - mkdocstrings:
+      handlers:
+        python:
+          paths: [src]
+
+nav:
+  - Home: ../README.md
+  - Architecture & Internals: architecture.md
+  - CLI Reference: cli-reference.md
+  - Benchmark: ../BENCHMARK.md
+  - API Reference:
+    - Core: api/core.md
+    - Parsers: api/parsers.md

@@ -28,3 +28,9 @@ dependencies = [
 
 [project.scripts]
 agentpack = "agentpack.cli:app"
+
+[project.optional-dependencies]
+docs = [
+    "mkdocs-material>=9.0.0",
+    "mkdocstrings[python]>=0.24.0"
+]
