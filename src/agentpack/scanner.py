@@ -30,7 +30,7 @@ def load_ignore_spec(directory: Path, no_gitignore: bool, no_default_patterns: b
         with open(agentpackignore_path, "r", encoding="utf-8") as f:
             lines.extend(f.readlines())
             
-    return pathspec.PathSpec.from_lines('gitwildmatch', lines)
+    return pathspec.PathSpec.from_lines('gitignore', lines)
 
 def scan_directory(
     directory: str, 
@@ -45,8 +45,8 @@ def scan_directory(
     dir_path = Path(directory)
     
     ignore_spec = load_ignore_spec(dir_path, no_gitignore, no_default_patterns)
-    include_spec = pathspec.PathSpec.from_lines('gitwildmatch', include_patterns) if include_patterns else None
-    exclude_spec = pathspec.PathSpec.from_lines('gitwildmatch', exclude_patterns) if exclude_patterns else None
+    include_spec = pathspec.PathSpec.from_lines('gitignore', include_patterns) if include_patterns else None
+    exclude_spec = pathspec.PathSpec.from_lines('gitignore', exclude_patterns) if exclude_patterns else None
     
     for root, dirs, files in os.walk(dir_path):
         rel_root = Path(root).relative_to(dir_path)
