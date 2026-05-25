@@ -82,6 +82,19 @@ def evaluate(benchmark_dir: str):
         typer.echo(report)
         typer.secho("\nEvaluation complete.", fg=typer.colors.GREEN)
 
+@app.command(name="gen-eval")
+def gen_eval(benchmark_dir: str, gen_model: str = "gemini-3.5-flash", judge_model: str = "gemini-3.1-pro"):
+    """Evaluate Generative QA using AgentPack"""
+    from agentpack.eval.generation import run_generation_eval
+    
+    typer.echo(f"Running generative evaluation on {benchmark_dir}...")
+    report = run_generation_eval(benchmark_dir, gen_model, judge_model)
+    if report.startswith("Error"):
+        typer.secho(report, fg=typer.colors.RED)
+    else:
+        typer.echo(report)
+        typer.secho("Generation evaluation complete.", fg=typer.colors.GREEN)
+
 @app.command(name="prep-benchmark")
 def prep_benchmark(dataset: str = typer.Option("financebench", help="Dataset to slice"), sample_size: int = typer.Option(10, help="Number of documents to sample")):
     """Downloads and slices a public dataset into a benchmark format."""
