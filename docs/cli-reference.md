@@ -8,10 +8,18 @@ The AgentPack CLI provides several commands to manage, validate, and query your 
 Pack documents into an agent-friendly context pack.
 
 ```bash
-agentpack pack <input_dir> --out <output_dir>
+agentpack pack <input_dir> --out <output_dir> [OPTIONS]
 ```
 - `<input_dir>`: The directory containing your raw documents (`.txt`, `.md`, `.csv`, `.pdf`).
 - `--out`: The output directory where the pack will be generated.
+- `--include`: Include only files matching these glob patterns (comma-separated).
+- `-i, --ignore, --exclude`: Additional glob patterns to exclude.
+- `--no-gitignore`: Don't use `.gitignore` or `.agentpackignore` rules for filtering files.
+- `--no-default-patterns`: Don't apply built-in ignore patterns (e.g. `.git`, `node_modules`).
+- `--include-hidden`: Include hidden files and directories.
+- `--remove-empty-lines`: Automatically strip blank lines from text and markdown files to save tokens.
+- `--verbose`: Enable detailed debug logging.
+- `--quiet`: Suppress all console output except errors.
 
 ### `agentpack audit`
 Generates an audit report for a context pack, highlighting extraction warnings (e.g., empty files, PDFs with no readable text) and statistics.

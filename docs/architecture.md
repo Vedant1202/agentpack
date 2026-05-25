@@ -15,8 +15,10 @@ flowchart TD
     end
 
     subgraph AgentPack Processing
+        S[Security & Scanner]
+        A --> S
         B[Parsers]
-        A --> B
+        S --> B
         C[Chunker]
         B --> C
     end
@@ -57,6 +59,11 @@ agentpack-output/
 
 ### `manifest.yml`
 This is the core of the pack. It acts as the registry for all processed files. It maps original document sources to their resulting chunks and maintains citation metadata, ensuring that every piece of text sent to an agent can be traced back to its origin.
+
+### Security & Scanning Layer
+Before parsing, AgentPack acts as a firewall against context bloat and secret leakage:
+1. **Filtering Engine:** It uses `pathspec` to deeply respect `.gitignore` and `.agentpackignore` rules, ensuring irrelevant files (like `node_modules/` or test suites) never reach the LLM. It also excludes hidden directories by default.
+2. **Secret Detection:** AgentPack ships with `detect-secrets`. Users are instructed to run a baseline scan (`detect-secrets scan > .secrets.baseline`) before packing, actively preventing API keys and passwords from entering the final context window.
 
 ### Parsers
 AgentPack uses specialized parsers for different file types to ensure maximum fidelity:

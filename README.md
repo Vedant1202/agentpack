@@ -28,7 +28,13 @@ pip install -e .
 
 ## Quick Start
 
-### 1. Compile a Pack
+### 1. Scan for Secrets (Recommended)
+Before compiling a pack, ensure you aren't accidentally leaking API keys or secrets into the LLM context window. AgentPack automatically installs Yelp's `detect-secrets`.
+```bash
+detect-secrets scan > .secrets.baseline
+```
+
+### 2. Compile a Pack
 Point AgentPack at any folder containing your documents (`.txt`, `.md`, `.csv`, `.pdf`).
 
 ```bash
