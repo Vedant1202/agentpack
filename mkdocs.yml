@@ -6,6 +6,14 @@ theme:
   palette:
     scheme: slate
 
+markdown_extensions:
+  - pymdownx.superfences:
+      custom_fences:
+        - name: mermaid
+          class: mermaid
+          format: !!python/name:pymdownx.superfences.fence_code_format
+  - pymdownx.snippets
+
 plugins:
   - search
   - mkdocstrings:
@@ -14,10 +22,10 @@ plugins:
           paths: [src]
 
 nav:
-  - Home: ../README.md
+  - Home: index.md
   - Architecture & Internals: architecture.md
   - CLI Reference: cli-reference.md
-  - Benchmark: ../BENCHMARK.md
+  - Benchmark: benchmark.md
   - API Reference:
     - Core: api/core.md
     - Parsers: api/parsers.md
