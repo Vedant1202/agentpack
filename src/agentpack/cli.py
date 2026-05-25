@@ -83,12 +83,12 @@ def evaluate(benchmark_dir: str):
         typer.secho("\nEvaluation complete.", fg=typer.colors.GREEN)
 
 @app.command(name="gen-eval")
-def gen_eval(benchmark_dir: str, gen_model: str = "gemini-3.5-flash", judge_model: str = "gemini-3.1-pro"):
+def gen_eval(benchmark_dir: str, gen_model: str = "gemini-1.5-flash", judge_model: str = "gemini-1.5-pro", limit: int = typer.Option(None, help="Limit number of queries for a smoke test")):
     """Evaluate Generative QA using AgentPack"""
     from agentpack.eval.generation import run_generation_eval
     
     typer.echo(f"Running generative evaluation on {benchmark_dir}...")
-    report = run_generation_eval(benchmark_dir, gen_model, judge_model)
+    report = run_generation_eval(benchmark_dir, gen_model, judge_model, limit)
     if report.startswith("Error"):
         typer.secho(report, fg=typer.colors.RED)
     else:

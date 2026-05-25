@@ -90,11 +90,12 @@ def build_vector_index(pack_dir: Path, vector_path: Path, meta_path: Path):
     try:
         from tqdm import tqdm
         embeddings = []
-        for emb in tqdm(embedding_model.embed(texts), total=len(texts), desc="Generating FastEmbed Vectors"):
+        # Use a small batch size to prevent freezing on low-RAM machines and update progress bar frequently
+        for emb in tqdm(embedding_model.embed(texts, batch_size=16), total=len(texts), desc="Generating FastEmbed Vectors"):
             embeddings.append(emb)
         embeddings = np.array(embeddings)
     except ImportError:
-        embeddings_iter = embedding_model.embed(texts)
+        embeddings_iter = embedding_model.embed(texts, batch_size=16)
         embeddings = np.array(list(embeddings_iter))
     
     np.save(vector_path, embeddings)
@@ -236,8 +237,24 @@ def search_hybrid(pack_dir: str, query: str, top_k: int = 5, alpha: float = 0.5)
 
 def search_pack(pack_dir: str, query: str, top_k: int = 5, mode: str = "hybrid") -> List[Dict]:
     if mode == "fts":
-        return search_fts(pack_dir, query, top_k)
+        results = search_fts(pack_dir, query, top_k)
     elif mode == "vector":
-        return search_vector(pack_dir, query, top_k)
+        results = search_vector(pack_dir, query, top_k)
     else:
-        return search_hybrid(pack_dir, query, top_k)
+        results = search_hybrid(pack_dir, query, top_k)
+        
+    # Attach actual text content for LLM generation
+    import sqlite3
+    from pathlib import Path
+    db_path = Path(pack_dir) / "indexes" / "lexical_index.db"
+    if db_path.exists():
+        conn = sqlite3.connect(db_path)
+        cur = conn.cursor()
+        for r in results:
+            cur.execute("SELECT content FROM chunks_fts WHERE chunk_id = ?", (r["chunk_id"],))
+            row = cur.fetchone()
+            if row:
+                r["content"] = row[0]
+        conn.close()
+        
+    return results

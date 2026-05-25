@@ -16,7 +16,7 @@ class JudgeScore(BaseModel):
     context_relevance_score: int = Field(description="0-5. Did the retrieved context actually contain the answer to the question?")
     reasoning: str = Field(description="Brief explanation of the scores.")
 
-def run_generation_eval(benchmark_dir: str, generation_model: str, judge_model: str):
+def run_generation_eval(benchmark_dir: str, generation_model: str, judge_model: str, limit: int = None):
     if not os.environ.get("GEMINI_API_KEY"):
         return "Error: GEMINI_API_KEY environment variable is not set."
         
@@ -44,9 +44,16 @@ def run_generation_eval(benchmark_dir: str, generation_model: str, judge_model: 
         ("AgentPack (Vector)", lambda c, q, k: search_pack(str(pack_dir), q, top_k=k, mode="vector"))
     ]
     
-    judgments = {m[0]: {"correctness": 0, "faithfulness": 0, "answer_rel": 0, "context_rel": 0, "count": 0} for m in modes}
+    judgments = {m[0]: {"correctness": 0, "faithfulness": 0, "answer_rel": 0, "context_rel": 0, "count": 0, "tokens": 0} for m in modes}
     
-    for q_id, q_text in tqdm(queries.items(), desc="Generating & Judging Answers"):
+    query_items = list(queries.items())
+    if limit is not None:
+        query_items = query_items[:limit]
+        
+    import tiktoken
+    encoder = tiktoken.get_encoding("cl100k_base")
+        
+    for q_id, q_text in tqdm(query_items, desc="Generating & Judging Answers"):
         expected_list = gold.get(q_id, [])
         expected = expected_list[0] if expected_list else "No gold answer."
         results_out[q_id] = {"question": q_text, "expected": expected, "modes": {}}
@@ -59,6 +66,10 @@ def run_generation_eval(benchmark_dir: str, generation_model: str, judge_model: 
                 chunks = search_func(corpus_dir, q_text, top_k=3)
                 
             context_text = "\n\n---\n\n".join([c.get("content", "") for c in chunks])
+            
+            # Count Tokens
+            token_count = len(encoder.encode(context_text))
+            judgments[mode_name]["tokens"] += token_count
             
             # 2. Generate Answer
             prompt = f"Answer the following question based ONLY on the provided context.\n\nContext:\n{context_text}\n\nQuestion:\n{q_text}"
@@ -97,6 +108,7 @@ def run_generation_eval(benchmark_dir: str, generation_model: str, judge_model: 
                     "answer_relevance": ar_score,
                     "context_relevance": cr_score
                 },
+                "tokens": token_count,
                 "judge_reasoning": reasoning
             }
             judgments[mode_name]["correctness"] += c_score
@@ -112,11 +124,11 @@ def run_generation_eval(benchmark_dir: str, generation_model: str, judge_model: 
     # Output Report
     report = [
         f"# AgentPack Generative Eval: {base.name}",
-        f"Queries: {len(queries)}",
+        f"Queries: {len(query_items)}",
         f"Generation Model: {generation_model}",
         f"Judge Model: {judge_model}\n",
-        "| Mode | Correctness (0-5) | Faithfulness (0-5) | Answer Relevance (0-5) | Context Relevance (0-5) |",
-        "|---|---|---|---|---|"
+        "| Mode | Correctness (0-5) | Faithfulness (0-5) | Answer Relevance (0-5) | Context Relevance (0-5) | Avg Context Tokens | Avg LLM Cost ($) |",
+        "|---|---|---|---|---|---|---|"
     ]
     
     for mode in judgments:
@@ -126,10 +138,12 @@ def run_generation_eval(benchmark_dir: str, generation_model: str, judge_model: 
             avg_f = judgments[mode]["faithfulness"] / count
             avg_ar = judgments[mode]["answer_rel"] / count
             avg_cr = judgments[mode]["context_rel"] / count
+            avg_tokens = judgments[mode]["tokens"] / count
+            avg_cost = avg_tokens * (0.25 / 1_000_000)
         else:
-            avg_c = avg_f = avg_ar = avg_cr = 0
+            avg_c = avg_f = avg_ar = avg_cr = avg_tokens = avg_cost = 0
             
-        report.append(f"| {mode} | {avg_c:.2f} | {avg_f:.2f} | {avg_ar:.2f} | {avg_cr:.2f} |")
+        report.append(f"| {mode} | {avg_c:.2f} | {avg_f:.2f} | {avg_ar:.2f} | {avg_cr:.2f} | {avg_tokens:.1f} | ${avg_cost:.6f} |")
         
     report_text = "\n".join(report)
     with open(base / "generation_report.md", "w", encoding="utf-8") as f:

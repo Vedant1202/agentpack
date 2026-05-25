@@ -101,7 +101,8 @@ def raw_file_search(corpus_dir: Path, query: str, top_k: int = 5) -> List[Dict]:
         results.append({
             "path": path,
             "token_count": len(encoder.encode(content)),
-            "score": rank
+            "score": rank,
+            "content": content
         })
     return results
 
@@ -122,10 +123,12 @@ def naive_chunk_search(corpus_dir: Path, query: str, top_k: int = 5, chunk_size:
             
     encoder = tiktoken.get_encoding("cl100k_base")
     results = []
-    for path, cid, rank, content in cur.fetchall():
+    for path, chunk_id, rank, content in cur.fetchall():
         results.append({
+            "chunk_id": chunk_id,
             "path": path,
             "token_count": len(encoder.encode(content)),
-            "score": rank
+            "score": rank,
+            "content": content
         })
     return results

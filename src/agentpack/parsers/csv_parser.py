@@ -22,15 +22,19 @@ class CSVParser(Parser):
                     message="CSV file is empty."
                 ))
             else:
-                # Convert the entire CSV to a single markdown table text for the block for now
-                table_text = df.to_markdown(index=False)
-                blocks.append(DocumentBlock(
-                    block_id=f"{source_id}_table0",
-                    source_id=source_id,
-                    type="table",
-                    text=table_text,
-                    row_range=(1, len(df))
-                ))
+                # Break CSV into 50-row chunks to preserve headers and avoid massive blocks
+                chunk_size = 50
+                for start_row in range(0, len(df), chunk_size):
+                    end_row = min(start_row + chunk_size, len(df))
+                    df_chunk = df.iloc[start_row:end_row]
+                    table_text = df_chunk.to_markdown(index=False)
+                    blocks.append(DocumentBlock(
+                        block_id=f"{source_id}_table_{start_row}",
+                        source_id=source_id,
+                        type="table",
+                        text=table_text,
+                        row_range=(start_row + 1, end_row)
+                    ))
         except Exception as e:
             warnings.append(ExtractionWarning(
                 source_id=source_id,
