@@ -7,7 +7,7 @@ Instead of forcing AI agents to parse messy, disparate file formats (PDFs, CSVs,
 ## The V1 Claim
 **Given the same LLM, AgentPack provides better context than raw document stuffing or naive RAG.**
 
-We recently benchmarked AgentPack against standard RAG baselines on 42 complex financial queries from FinanceBench. The results prove that AgentPack reduces context bloat, improves evidence retrieval, preserves citations, and helps the exact same LLM produce more grounded answers.
+We recently benchmarked AgentPack against standard RAG baselines on 42 complex financial queries from [Patronus AI FinanceBench](https://github.com/patronus-ai/financebench). The results prove that AgentPack reduces context bloat, improves evidence retrieval, preserves citations, and helps the exact same LLM produce more grounded answers.
 
 **Benchmark Highlights:**
 * **161x Reduction in Token Cost:** Cut context token usage from 424k to 2.6k, saving ~$0.10 per query.
@@ -15,18 +15,6 @@ We recently benchmarked AgentPack against standard RAG baselines on 42 complex f
 * **"Lost in the Middle" Prevention:** Outperformed raw document stuffing in correctness by preventing the LLM from drowning in noise.
 
 Read the full scientific methodology and results in [BENCHMARK.md](./BENCHMARK.md).
-
-## Architecture Overview
-
-```mermaid
-flowchart LR
-    Docs[Raw Docs] --> Parsers[Parsers]
-    Parsers --> Chunker[Chunker]
-    Chunker --> Pack[Context Pack]
-    Pack --> Agent[LLM Agent]
-```
-
-For a deep dive into how AgentPack parses, chunks, and indexes data, see [Architecture & Internals](./docs/architecture.md).
 
 ## Installation
 
@@ -72,6 +60,18 @@ AgentPack provides a rich CLI for auditing, validating, and testing your context
 - **Markdown**: Semantic heading-aware section path tracking.
 - **CSV**: Uses Pandas & Tabulate to convert tabular data into Markdown tables.
 - **PDF**: Accurate page-by-page PyMuPDF extraction.
+
+## Architecture Overview
+
+```mermaid
+flowchart LR
+    Docs[Raw Docs] --> Parsers[Parsers]
+    Parsers --> Chunker[Chunker]
+    Chunker --> Pack[Context Pack]
+    Pack --> Agent[LLM Agent]
+```
+
+For a deep dive into how AgentPack parses, chunks, and indexes data, see [Architecture & Internals](./docs/architecture.md).
 
 ---
 *Built with ❤️ for Agents.*
