@@ -36,6 +36,24 @@ def write_pack(
     quiet: bool = False,
     remove_empty_lines: bool = False
 ):
+    """
+    Scans an input directory, parses supported files, chunks them, and generates a context pack.
+    
+    This acts as the main orchestration engine for AgentPack, coordinating the Scanner, Parsers,
+    and Chunker to produce a finalized `manifest.yml` and structured context directory.
+
+    Args:
+        input_dir (str): The root directory containing raw documents to scan.
+        output_dir (str): The destination directory where the pack will be written.
+        include_patterns (List[str], optional): Glob patterns of files to exclusively include.
+        exclude_patterns (List[str], optional): Glob patterns of files to exclude.
+        no_gitignore (bool, optional): If True, ignores `.gitignore` and `.agentpackignore` files.
+        no_default_patterns (bool, optional): If True, disables built-in ignore rules (e.g. `.git/`).
+        include_hidden (bool, optional): If True, includes hidden files and directories.
+        verbose (bool, optional): If True, enables detailed progress logging.
+        quiet (bool, optional): If True, suppresses all non-error output.
+        remove_empty_lines (bool, optional): If True, strips empty lines from parsed text/markdown blocks to save tokens.
+    """
     in_path = Path(input_dir)
     out_path = Path(output_dir)
     

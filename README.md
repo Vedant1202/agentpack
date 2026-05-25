@@ -41,6 +41,12 @@ Point AgentPack at any folder containing your documents (`.txt`, `.md`, `.csv`, 
 agentpack pack ./my_docs --out ./agentpack-output
 ```
 
+**Key Compilation Options:**
+- `--include "*.md,*.txt"`: Only pack specific files or extensions.
+- `--ignore "tests/,drafts/"`: Exclude specific directories or files.
+- `--remove-empty-lines`: Compress text files to save LLM tokens.
+- `--no-gitignore`: Ignore `.gitignore` rules and pack everything.
+
 ### 2. Retrieve
 AgentPack comes with a built-in hybrid search engine (SQLite FTS5 + FastEmbed vector search) to test your chunks instantly.
 

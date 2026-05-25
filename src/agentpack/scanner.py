@@ -40,7 +40,20 @@ def scan_directory(
     include_patterns: Optional[List[str]] = None,
     exclude_patterns: Optional[List[str]] = None
 ) -> List[Path]:
-    """Recursively scans a directory and returns a list of supported files."""
+    """
+    Recursively scans a directory and returns a list of supported files, respecting ignore rules.
+
+    Args:
+        directory (str): The root directory to scan.
+        include_hidden (bool, optional): If True, includes hidden files and directories.
+        no_gitignore (bool, optional): If True, skips loading rules from `.gitignore` and `.agentpackignore`.
+        no_default_patterns (bool, optional): If True, skips the built-in ignore lists (`.git`, `node_modules`, etc.).
+        include_patterns (List[str], optional): If provided, only files matching these gitignore-style patterns are returned.
+        exclude_patterns (List[str], optional): If provided, files matching these gitignore-style patterns are skipped.
+
+    Returns:
+        List[Path]: A list of absolute or relative Path objects for files that should be packed.
+    """
     paths = []
     dir_path = Path(directory)
     
