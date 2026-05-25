@@ -5,11 +5,22 @@ from pathlib import Path
 from typing import List, Dict
 
 def _extract_text(file_path: Path) -> str:
-    try:
-        with open(file_path, "r", encoding="utf-8", errors="replace") as f:
-            return f.read()
-    except Exception:
-        return ""
+    if file_path.suffix.lower() == ".pdf":
+        try:
+            import fitz
+            doc = fitz.open(file_path)
+            text = []
+            for page in doc:
+                text.append(page.get_text("text"))
+            return "\n".join(text)
+        except Exception:
+            return ""
+    else:
+        try:
+            with open(file_path, "r", encoding="utf-8", errors="replace") as f:
+                return f.read()
+        except Exception:
+            return ""
 
 def raw_file_search(corpus_dir: Path, query: str, top_k: int = 5) -> List[Dict]:
     conn = sqlite3.connect(":memory:")
@@ -19,7 +30,7 @@ def raw_file_search(corpus_dir: Path, query: str, top_k: int = 5) -> List[Dict]:
     for root, _, files in os.walk(corpus_dir):
         for file in files:
             p = Path(root) / file
-            if p.suffix in [".txt", ".md", ".csv"]:
+            if p.suffix in [".txt", ".md", ".csv", ".pdf"]:
                 content = _extract_text(p)
                 cur.execute("INSERT INTO files_fts (path, content) VALUES (?, ?)", (p.name, content))
                 
@@ -53,7 +64,7 @@ def naive_chunk_search(corpus_dir: Path, query: str, top_k: int = 5, chunk_size:
     for root, _, files in os.walk(corpus_dir):
         for file in files:
             p = Path(root) / file
-            if p.suffix in [".txt", ".md", ".csv"]:
+            if p.suffix in [".txt", ".md", ".csv", ".pdf"]:
                 content = _extract_text(p)
                 for i in range(0, len(content), chunk_size):
                     chunk_text = content[i:i+chunk_size]

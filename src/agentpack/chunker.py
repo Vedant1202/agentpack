@@ -11,20 +11,22 @@ class Chunk:
         self.content = content
         self.metadata = metadata
 
-def chunk_document(doc: SourceDocument, max_tokens: int = 800) -> List[Chunk]:
+def chunk_document(doc: SourceDocument, max_tokens: int = 800, overlap_percent: float = 0.15) -> List[Chunk]:
     encoder = tiktoken.get_encoding("cl100k_base")
     chunks = []
     
-    current_content = []
+    current_blocks = []
     current_tokens = 0
     current_metadata = {"source_path": doc.path}
     chunk_index = 0
     
+    overlap_tokens_target = int(max_tokens * overlap_percent)
+    
     def create_chunk():
-        nonlocal current_content, current_tokens, chunk_index, current_metadata
-        if not current_content:
+        nonlocal current_blocks, current_tokens, chunk_index, current_metadata
+        if not current_blocks:
             return
-        content_str = "\n\n".join(current_content)
+        content_str = "\n\n".join([b["text"] for b in current_blocks])
         chunk_id = f"{doc.source_id}_chunk_{chunk_index:03d}"
         chunks.append(Chunk(
             chunk_id=chunk_id,
@@ -35,8 +37,21 @@ def chunk_document(doc: SourceDocument, max_tokens: int = 800) -> List[Chunk]:
             metadata=current_metadata.copy()
         ))
         chunk_index += 1
-        current_content = []
-        current_tokens = 0
+        
+        # Keep blocks for overlap
+        overlap_blocks = []
+        overlap_toks = 0
+        for b in reversed(current_blocks):
+            if overlap_toks + b["tokens"] > overlap_tokens_target:
+                break
+            # don't overlap tables to avoid duplicating massive tables
+            if b["type"] == "table" and overlap_toks > 0:
+                break
+            overlap_blocks.insert(0, b)
+            overlap_toks += b["tokens"]
+            
+        current_blocks = overlap_blocks
+        current_tokens = overlap_toks
 
     for block in doc.blocks:
         if not block.text:
@@ -50,12 +65,15 @@ def chunk_document(doc: SourceDocument, max_tokens: int = 800) -> List[Chunk]:
         if block.page:
             current_metadata["page"] = block.page
             
+        if block.row_range:
+            current_metadata["row_range"] = list(block.row_range)
+            
         # Very large blocks might exceed max_tokens, in a full implementation we'd split the block itself.
         # For this MVP, we will just start a new chunk if adding this block pushes us over, unless we are empty.
         if current_tokens + block_tokens > max_tokens and current_tokens > 0:
             create_chunk()
             
-        current_content.append(block.text)
+        current_blocks.append({"text": block.text, "tokens": block_tokens, "type": block.type})
         current_tokens += block_tokens
         
     create_chunk()

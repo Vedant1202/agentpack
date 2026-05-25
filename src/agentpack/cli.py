@@ -40,10 +40,15 @@ def audit(pack_dir: str):
         typer.secho("\nAudit report generated.", fg=typer.colors.GREEN)
 
 @app.command()
-def retrieve(pack_dir: str, query: str, top_k: int = typer.Option(5, help="Number of results to return")):
+def retrieve(
+    pack_dir: str, 
+    query: str, 
+    top_k: int = typer.Option(5, help="Number of results to return"),
+    mode: str = typer.Option("hybrid", help="Search mode: hybrid, vector, or fts")
+):
     """Retrieves top-k evidence chunks from a pack."""
-    typer.echo(f"Searching for '{query}' in {pack_dir}...")
-    results = search_pack(pack_dir, query, top_k)
+    typer.echo(f"Searching for '{query}' in {pack_dir} using {mode} mode...")
+    results = search_pack(pack_dir, query, top_k, mode=mode)
     
     if not results:
         typer.secho("No results found.", fg=typer.colors.YELLOW)
@@ -76,6 +81,26 @@ def evaluate(benchmark_dir: str):
     else:
         typer.echo(report)
         typer.secho("\nEvaluation complete.", fg=typer.colors.GREEN)
+
+@app.command(name="prep-benchmark")
+def prep_benchmark(dataset: str = typer.Option("financebench", help="Dataset to slice"), sample_size: int = typer.Option(10, help="Number of documents to sample")):
+    """Downloads and slices a public dataset into a benchmark format."""
+    from agentpack.eval.benchmarks import slice_financebench, slice_tatqa, slice_qasper
+    
+    out_dir = f"benchmarks/{dataset}_sample"
+    typer.echo(f"Preparing {dataset} into {out_dir} with {sample_size} samples...")
+    
+    if dataset == "financebench":
+        slice_financebench(out_dir, sample_size=sample_size)
+    elif dataset == "tatqa":
+        slice_tatqa(out_dir, sample_size=sample_size)
+    elif dataset == "qasper":
+        slice_qasper(out_dir, sample_size=sample_size)
+    else:
+        typer.secho(f"Unsupported dataset: {dataset}", fg=typer.colors.RED)
+        raise typer.Exit(code=1)
+        
+    typer.secho("Preparation complete.", fg=typer.colors.GREEN)
 
 if __name__ == "__main__":
     app()
