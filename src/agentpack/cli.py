@@ -8,11 +8,40 @@ from agentpack.eval.runner import run_eval
 app = typer.Typer(help="AgentPack CLI", no_args_is_help=True)
 
 @app.command()
-def pack(input_dir: str, out: str = typer.Option(..., help="Output directory")):
+def pack(
+    input_dir: str, 
+    out: str = typer.Option(..., help="Output directory"),
+    include: str = typer.Option(None, help="Include only files matching these glob patterns (comma-separated)"),
+    exclude: str = typer.Option(None, "-i", "--ignore", help="Additional patterns to exclude (comma-separated)"),
+    no_gitignore: bool = typer.Option(False, help="Don't use .gitignore rules for filtering files"),
+    no_default_patterns: bool = typer.Option(False, help="Don't apply built-in ignore patterns"),
+    include_hidden: bool = typer.Option(False, help="Include hidden directories"),
+    verbose: bool = typer.Option(False, help="Enable detailed debug logging"),
+    quiet: bool = typer.Option(False, help="Suppress all console output except errors"),
+    remove_empty_lines: bool = typer.Option(False, help="Remove blank lines from all text files")
+):
     """Pack documents into an agent-friendly context pack."""
-    typer.echo(f"Packing {input_dir} into {out}...")
-    write_pack(input_dir, out)
-    typer.echo("Done.")
+    if not quiet:
+        typer.echo(f"Packing {input_dir} into {out}...")
+        
+    include_patterns = include.split(",") if include else None
+    exclude_patterns = exclude.split(",") if exclude else None
+
+    write_pack(
+        input_dir=input_dir, 
+        output_dir=out,
+        include_patterns=include_patterns,
+        exclude_patterns=exclude_patterns,
+        no_gitignore=no_gitignore,
+        no_default_patterns=no_default_patterns,
+        include_hidden=include_hidden,
+        verbose=verbose,
+        quiet=quiet,
+        remove_empty_lines=remove_empty_lines
+    )
+    
+    if not quiet:
+        typer.echo("Done.")
 
 @app.command()
 def validate(pack_dir: str):

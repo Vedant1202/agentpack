@@ -24,7 +24,18 @@ def get_parser(suffix: str):
         return PDFParser()
     return None
 
-def write_pack(input_dir: str, output_dir: str):
+def write_pack(
+    input_dir: str, 
+    output_dir: str,
+    include_patterns: List[str] = None,
+    exclude_patterns: List[str] = None,
+    no_gitignore: bool = False,
+    no_default_patterns: bool = False,
+    include_hidden: bool = False,
+    verbose: bool = False,
+    quiet: bool = False,
+    remove_empty_lines: bool = False
+):
     in_path = Path(input_dir)
     out_path = Path(output_dir)
     
@@ -33,7 +44,17 @@ def write_pack(input_dir: str, output_dir: str):
     (out_path / "tables").mkdir(exist_ok=True)
     (out_path / "reports").mkdir(exist_ok=True)
     
-    files = scan_directory(input_dir)
+    files = scan_directory(
+        input_dir,
+        include_hidden=include_hidden,
+        no_gitignore=no_gitignore,
+        no_default_patterns=no_default_patterns,
+        include_patterns=include_patterns,
+        exclude_patterns=exclude_patterns
+    )
+    
+    if verbose and not quiet:
+        print(f"Found {len(files)} files to pack.")
     
     sources = []
     all_chunks = []
@@ -43,6 +64,12 @@ def write_pack(input_dir: str, output_dir: str):
         parser = get_parser(file_path.suffix)
         if not parser:
             continue
+            
+        if verbose and not quiet:
+            print(f"Parsing: {file_path}")
+            
+        if hasattr(parser, 'remove_empty_lines'):
+            parser.remove_empty_lines = remove_empty_lines
             
         doc: SourceDocument = parser.parse(file_path, source_id)
         
