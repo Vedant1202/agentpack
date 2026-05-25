@@ -11,3 +11,5 @@ output/
 docs/test.txt
 benchmarks/test_benchmark
 .env
+benchmarks/phase1-benchmarks
+benchmarks/financebench_sample/
