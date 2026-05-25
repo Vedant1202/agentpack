@@ -1,5 +1,5 @@
 {
-  "name": "agentpack-cli",
+  "name": "agent-context-packager",
   "version": "0.1.0",
   "description": "AgentPack document-to-agent-context compiler",
   "bin": {

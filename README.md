@@ -18,8 +18,21 @@ Read the full scientific methodology and results in [BENCHMARK.md](https://githu
 
 ## Installation
 
+You can install AgentPack via pip or npm.
+
+**Option 1: Using pip (Python)**
 ```bash
-git clone https://github.com/yourusername/agentpack.git
+pip install agent-context-packager
+```
+
+**Option 2: Using npm (Node.js/CLI binary)**
+```bash
+npm install -g agent-context-packager
+```
+
+**Option 3: From Source**
+```bash
+git clone https://github.com/Vedant1202/agentpack.git
 cd agentpack
 python3 -m venv venv
 source venv/bin/activate
