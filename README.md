@@ -14,6 +14,19 @@ I benchmarked AgentPack against standard RAG baselines on 42 complex financial q
 * **2x Context Relevance:** Vastly outperformed naive chunking in retrieving semantically complete financial tables.
 * **"Lost in the Middle" Prevention:** Outperformed raw document stuffing in correctness by preventing the LLM from drowning in noise.
 
+AgentPack is best treated as an offline document-to-agent-context compiler. It reduces context bloat, but a strong reasoning model is still required to solve complex queries.
+
+| Signal | What good looks like |
+|--------|----------------------|
+| **Token reduction** | ~161x reduction (99% smaller) compared to raw document stuffing |
+| **Context per query** | Averages ~2.6k high-signal tokens per retrieval (vs 400k+ for raw files) |
+| **Context Relevance** | ~2x more relevant than naive chunking; preserves tabular and semantic boundaries |
+| **Cost Savings** | Drops LLM input cost per query from ~$0.11 to <$0.0007 |
+| **Noise Prevention** | Prevents the "Lost in the Middle" phenomenon; higher correctness despite less text |
+| **The Bottleneck** | AgentPack provides the context, but you still need a frontier model to perform the final reasoning |
+
+*Use deterministic, LLM-as-a-judge evals instead of trusting raw compression numbers.*
+
 Read the full scientific methodology and results in [BENCHMARK.md](https://github.com/Vedant1202/agentpack/blob/main/BENCHMARK.md).
 
 ## Installation
