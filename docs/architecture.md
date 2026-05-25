@@ -26,11 +26,13 @@ flowchart TD
         E[Safe Markdown Chunks]
         F[Extracted CSV Tables]
         G[(SQLite FTS5 Indexes)]
+        V[(Vector Embeddings)]
         
         C --> D
         C --> E
         C --> F
         C --> G
+        C --> V
     end
 
     subgraph Runtime
@@ -64,4 +66,7 @@ AgentPack uses specialized parsers for different file types to ensure maximum fi
 - **PDF**: Uses PyMuPDF for accurate page-by-page text extraction.
 
 ### Indexing
-Instead of forcing agents to process thousands of tokens for every query, AgentPack creates a lightning-fast SQLite FTS5 (Full-Text Search) index of the chunks. This allows agents to retrieve exactly the evidence they need with sub-second latency.
+Instead of forcing agents to process thousands of tokens for every query, AgentPack creates dual indexes for lightning-fast retrieval:
+- **Lexical Index (SQLite FTS5)**: A Full-Text Search index optimized for exact keyword matching and fast lexical lookups.
+- **Vector Index (FastEmbed + NumPy)**: Generates dense vector embeddings for semantic search, capturing the underlying meaning of the text.
+- **Hybrid Search**: By default, retrieval combines both lexical and vector scores, allowing agents to retrieve exactly the evidence they need with sub-second latency and high semantic accuracy.

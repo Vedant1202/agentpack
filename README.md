@@ -48,7 +48,7 @@ agentpack pack ./my_docs --out ./agentpack-output
 ```
 
 ### 2. Retrieve
-AgentPack comes with a built-in lightning-fast SQLite FTS5 search engine to test your chunks instantly.
+AgentPack comes with a built-in hybrid search engine (SQLite FTS5 + FastEmbed vector search) to test your chunks instantly.
 
 ```bash
 agentpack retrieve ./agentpack-output "eligibility criteria" --top-k 5
