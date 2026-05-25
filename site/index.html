@@ -766,7 +766,7 @@
 <p>Instead of forcing AI agents to parse messy, disparate file formats (PDFs, CSVs, Markdown, text) at runtime, AgentPack is an offline <strong>document-to-agent-context compiler</strong>. It takes unstructured knowledge bases, turns them into clean semantic chunks with citations, retrieves the right evidence, and sends only high-signal context to the model.</p>
 <h2 id="the-benchmark">The Benchmark</h2>
 <p><strong>Given the same LLM, AgentPack provides better context than raw document stuffing or naive RAG.</strong></p>
-<p>We recently benchmarked AgentPack against standard RAG baselines on 42 complex financial queries from <a href="https://github.com/patronus-ai/financebench">Patronus AI FinanceBench</a>. The results prove that AgentPack reduces context bloat, improves evidence retrieval, preserves citations, and helps the exact same LLM produce more grounded answers.</p>
+<p>I benchmarked AgentPack against standard RAG baselines on 42 complex financial queries from <a href="https://github.com/patronus-ai/financebench">Patronus AI FinanceBench</a>. The results prove that AgentPack reduces context bloat, improves evidence retrieval, preserves citations, and helps the exact same LLM produce more grounded answers.</p>
 <p><strong>Benchmark Highlights:</strong>
 * <strong>161x Reduction in Token Cost:</strong> Cut context token usage from 424k to 2.6k, saving ~$0.10 per query.
 * <strong>2x Context Relevance:</strong> Vastly outperformed naive chunking in retrieving semantically complete financial tables.
