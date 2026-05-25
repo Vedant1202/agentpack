@@ -85,5 +85,12 @@ flowchart LR
 
 For a deep dive into how AgentPack parses, chunks, and indexes data, see [Architecture & Internals](https://github.com/Vedant1202/agentpack/blob/main/docs/architecture.md).
 
+## Current Limitations & Roadmap
+AgentPack is currently focused on text-based semantic extraction. The following features are on the roadmap but **not yet implemented**:
+- **Image Understanding / Vision**: AgentPack does not currently run OCR or vision models on images embedded within PDFs or Markdown files. Images are currently ignored during the parsing phase.
+- **Complex Table Structures**: While basic CSVs are supported, highly nested or merged-cell tables within PDFs are not perfectly reconstructed yet.
+- **Web Crawling**: You currently need to provide local files. Direct URL scraping is planned.
+- **Cloud Vector DB Integration**: Retrieval currently runs locally using SQLite FTS5 and FastEmbed. Connectors for Pinecone, Weaviate, or Qdrant are planned.
+
 ---
 *Built with ❤️ for Agents.*
