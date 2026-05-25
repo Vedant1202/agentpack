@@ -13,3 +13,4 @@ benchmarks/test_benchmark
 .env
 benchmarks/phase1-benchmarks
 benchmarks/financebench_sample/
+__pycache__/
