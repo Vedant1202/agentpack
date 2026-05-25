@@ -8,6 +8,9 @@ class MarkdownParser(Parser):
         with open(file_path, "r", encoding="utf-8", errors="replace") as f:
             content = f.read()
 
+        if getattr(self, "remove_empty_lines", False):
+            content = "\n".join([line for line in content.split("\n") if line.strip()])
+
         checksum = hashlib.sha256(content.encode("utf-8")).hexdigest()
         blocks = []
         warnings = []
