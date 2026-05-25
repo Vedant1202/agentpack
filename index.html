@@ -381,6 +381,17 @@
   
 </li>
       
+        <li class="md-nav__item">
+  <a href="#current-limitations-roadmap" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Current Limitations &amp; Roadmap
+      
+    </span>
+  </a>
+  
+</li>
+      
     </ul>
   
 </nav>
@@ -722,6 +733,17 @@
   
 </li>
       
+        <li class="md-nav__item">
+  <a href="#current-limitations-roadmap" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Current Limitations &amp; Roadmap
+      
+    </span>
+  </a>
+  
+</li>
+      
     </ul>
   
 </nav>
@@ -796,6 +818,12 @@ pip<span class="w"> </span>install<span class="w"> </span>-e<span class="w"> </s
     Chunker --&gt; Pack[Context Pack]
     Pack --&gt; Agent[LLM Agent]</code></pre>
 <p>For a deep dive into how AgentPack parses, chunks, and indexes data, see <a href="https://github.com/Vedant1202/agentpack/blob/main/docs/architecture.md">Architecture &amp; Internals</a>.</p>
+<h2 id="current-limitations-roadmap">Current Limitations &amp; Roadmap</h2>
+<p>AgentPack is currently focused on text-based semantic extraction. The following features are on the roadmap but <strong>not yet implemented</strong>:
+- <strong>Image Understanding / Vision</strong>: AgentPack does not currently run OCR or vision models on images embedded within PDFs or Markdown files. Images are currently ignored during the parsing phase.
+- <strong>Complex Table Structures</strong>: While basic CSVs are supported, highly nested or merged-cell tables within PDFs are not perfectly reconstructed yet.
+- <strong>Web Crawling</strong>: You currently need to provide local files. Direct URL scraping is planned.
+- <strong>Cloud Vector DB Integration</strong>: Retrieval currently runs locally using SQLite FTS5 and FastEmbed. Connectors for Pinecone, Weaviate, or Qdrant are planned.</p>
 <hr />
 <p><em>Built with ❤️ for Agents.</em></p>
 
