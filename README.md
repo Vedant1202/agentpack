@@ -14,7 +14,7 @@ We recently benchmarked AgentPack against standard RAG baselines on 42 complex f
 * **2x Context Relevance:** Vastly outperformed naive chunking in retrieving semantically complete financial tables.
 * **"Lost in the Middle" Prevention:** Outperformed raw document stuffing in correctness by preventing the LLM from drowning in noise.
 
-Read the full scientific methodology and results in [BENCHMARK.md](BENCHMARK.md).
+Read the full scientific methodology and results in [BENCHMARK.md](./BENCHMARK.md).
 
 ## Architecture Overview
 
@@ -26,7 +26,7 @@ flowchart LR
     Pack --> Agent[LLM Agent]
 ```
 
-For a deep dive into how AgentPack parses, chunks, and indexes data, see [Architecture & Internals](docs/architecture.md).
+For a deep dive into how AgentPack parses, chunks, and indexes data, see [Architecture & Internals](./docs/architecture.md).
 
 ## Installation
 
@@ -65,7 +65,7 @@ agentpack eval ./benchmarks/my_dataset
 
 AgentPack provides a rich CLI for auditing, validating, and testing your context packs (including Generative QA evaluations). 
 
-**[📖 Read the full CLI Reference](docs/cli-reference.md)**
+**[📖 Read the full CLI Reference](./docs/cli-reference.md)**
 
 ## Supported Parsers
 - **TXT**: Paragraph-aware splitting.
