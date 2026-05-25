@@ -7,7 +7,7 @@ Instead of forcing AI agents to parse messy, disparate file formats (PDFs, CSVs,
 ## The Benchmark
 **Given the same LLM, AgentPack provides better context than raw document stuffing or naive RAG.**
 
-We recently benchmarked AgentPack against standard RAG baselines on 42 complex financial queries from [Patronus AI FinanceBench](https://github.com/patronus-ai/financebench). The results prove that AgentPack reduces context bloat, improves evidence retrieval, preserves citations, and helps the exact same LLM produce more grounded answers.
+I benchmarked AgentPack against standard RAG baselines on 42 complex financial queries from [Patronus AI FinanceBench](https://github.com/patronus-ai/financebench). The results prove that AgentPack reduces context bloat, improves evidence retrieval, preserves citations, and helps the exact same LLM produce more grounded answers.
 
 **Benchmark Highlights:**
 * **161x Reduction in Token Cost:** Cut context token usage from 424k to 2.6k, saving ~$0.10 per query.
