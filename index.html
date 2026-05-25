@@ -773,12 +773,20 @@
 * <strong>"Lost in the Middle" Prevention:</strong> Outperformed raw document stuffing in correctness by preventing the LLM from drowning in noise.</p>
 <p>Read the full scientific methodology and results in <a href="https://github.com/Vedant1202/agentpack/blob/main/BENCHMARK.md">BENCHMARK.md</a>.</p>
 <h2 id="installation">Installation</h2>
-<div class="highlight"><pre><span></span><code>git<span class="w"> </span>clone<span class="w"> </span>https://github.com/yourusername/agentpack.git
+<p>You can install AgentPack via pip or npm.</p>
+<p><strong>Option 1: Using pip (Python)</strong>
+<div class="highlight"><pre><span></span><code>pip<span class="w"> </span>install<span class="w"> </span>agent-context-packager
+</code></pre></div></p>
+<p><strong>Option 2: Using npm (Node.js/CLI binary)</strong>
+<div class="highlight"><pre><span></span><code>npm<span class="w"> </span>install<span class="w"> </span>-g<span class="w"> </span>agent-context-packager
+</code></pre></div></p>
+<p><strong>Option 3: From Source</strong>
+<div class="highlight"><pre><span></span><code>git<span class="w"> </span>clone<span class="w"> </span>https://github.com/Vedant1202/agentpack.git
 <span class="nb">cd</span><span class="w"> </span>agentpack
 python3<span class="w"> </span>-m<span class="w"> </span>venv<span class="w"> </span>venv
 <span class="nb">source</span><span class="w"> </span>venv/bin/activate
 pip<span class="w"> </span>install<span class="w"> </span>-e<span class="w"> </span>.
-</code></pre></div>
+</code></pre></div></p>
 <h2 id="quick-start">Quick Start</h2>
 <h3 id="1-scan-for-secrets-recommended">1. Scan for Secrets (Recommended)</h3>
 <p>Before compiling a pack, ensure you aren't accidentally leaking API keys or secrets into the LLM context window. AgentPack automatically installs Yelp's <code>detect-secrets</code>.
