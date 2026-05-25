@@ -8,15 +8,15 @@ Modern Large Language Models (LLMs) feature massive context windows, leading man
 
 Traditional "Naive RAG" attempts to solve this by slicing documents into arbitrary character counts. This approach frequently fractures semantic boundaries, such as splitting financial tables or sentences in half, leading to low-quality retrieval.
 
-**The Goal:** To demonstrate that AgentPack's agentic parsing and intelligent semantic chunking provide a superior context layer. We test this by holding the LLM constant across all pipelines. The V1 claim is verifiable: *Given the same Gemini model, AgentPack provides better context than raw document stuffing or naive RAG.*
+**The Goal:** To demonstrate that AgentPack's agentic parsing and intelligent semantic chunking provide a superior context layer. I test this by holding the LLM constant across all pipelines. The V1 claim is verifiable: *Given the same Gemini model, AgentPack provides better context than raw document stuffing or naive RAG.*
 
 ## 2. Methodology & Dataset
-We evaluated the pipelines using a rigorous "LLM-as-a-Judge" architecture on a complex financial dataset.
+I evaluated the pipelines using a rigorous "LLM-as-a-Judge" architecture on a complex financial dataset.
 
 ### 2.1 Dataset Selection & Sampling
-We utilized the [Patronus AI FinanceBench](https://github.com/patronus-ai/financebench) dataset [1] (also available on [HuggingFace](https://huggingface.co/datasets/PatronusAI/financebench)). The dataset includes real SEC 10-K filings, earnings reports, and complex financial Q&A.
+I utilized the [Patronus AI FinanceBench](https://github.com/patronus-ai/financebench) dataset [1] (also available on [HuggingFace](https://huggingface.co/datasets/PatronusAI/financebench)). The dataset includes real SEC 10-K filings, earnings reports, and complex financial Q&A.
 
-Using our internal `agentpack prep-benchmark` tool, we randomly sampled **50 unique documents and queries** from the dataset. During the offline preparation phase, 8 of these entries were discarded due to dead PDF links or unreadable formats, resulting in a final, robust evaluation set of **42 complex financial queries**.
+Using my internal `agentpack prep-benchmark` tool, I randomly sampled **50 unique documents and queries** from the dataset. During the offline preparation phase, 8 of these entries were discarded due to dead PDF links or unreadable formats, resulting in a final, robust evaluation set of **42 complex financial queries**.
 
 ### 2.2 Gold Standards
 For deterministic evaluation, the benchmark relies on two primary files generated during sampling:
@@ -31,7 +31,7 @@ The evaluation script checks whether the AgentPack context chunks retrieved for 
 - **Evaluation Metrics:** The outputs were graded using the RAGAS / TruLens metric triad [2]: Correctness, Faithfulness, Answer Relevance, and Context Relevance.
 
 ### 2.4 Pipelines Evaluated
-We tested three distinct context pipelines:
+I tested three distinct context pipelines:
 1.  **Raw File:** The entire, unedited PDF/document is passed as context.
 2.  **Naive Chunk:** The document is sliced into basic 4,000-character chunks with no semantic awareness. Top-3 chunks retrieved via lexical search.
 3.  **AgentPack (Vector):** The document is parsed via AgentPack's offline compiler, preserving tables and semantic sections. Top-3 chunks retrieved via dense vector embeddings (FastEmbed).
