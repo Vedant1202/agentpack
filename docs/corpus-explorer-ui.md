@@ -4,6 +4,9 @@ The **AgentPack Corpus Explorer** is a local, interactive web application that a
 
 Instead of staring at massive JSON lines files, the Corpus Explorer turns your vector database into a holistic, interactive universe.
 
+![The Corpus Universe (Overview)](./assets/overview.png)
+*Get a bird's-eye view of your entire processed knowledge base.*
+
 ## Why use the Corpus Explorer?
 When you compile a folder of unstructured documents into an AgentPack, the CLI performs semantic chunking, embeds the text, and links chunks based on sequence and semantics.
 
@@ -40,11 +43,22 @@ The UI hooks directly into the AgentPack SQLite FTS5 + FastEmbed vector engine.
 - The UI will instantly dim non-matching chunks.
 - Matching chunks will glow amber, and the UI will draw dashed **hybrid trajectory paths** between them to visualize the search path.
 
+![Visualizing Hybrid Retrieval (Search)](./assets/search.png)
+*Test your RAG queries instantly and see the semantic paths the vector engine took to find them.*
+
 ### Context Sidebar
 When you click on a chunk, the right-hand panel instantly updates to show:
 - The raw Markdown/Text content of the chunk.
 - Token counts and source file metadata.
 - A live calculation of **Semantic Neighbors**, allowing you to click through and explore semantically similar chunks across entirely different documents.
 
+![Deep-Dive into Semantic Boundaries (Node Drilldown)](./assets/node_click.png)
+*Click any chunk to inspect its exact boundaries, raw text content, and nearest semantic neighbors.*
+
 ### Onboarding
 The UI comes with an interactive Shepherd.js onboarding tour to guide you through your first time exploring the corpus.
+
+### Built-in Dark Mode
+A sleek, low-strain dark interface perfectly designed for late-night prompt engineering and context debugging.
+
+![Built-in Dark Mode](./assets/dark_mode.png)

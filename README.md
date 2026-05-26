@@ -102,6 +102,9 @@ If you installed AgentPack with the `[ui]` extra, you can launch a local WebGL-p
 ```bash
 agentpack ui ./agentpack-output --port 8000
 ```
+
+![Visualizing Hybrid Retrieval (Search)](./docs/assets/search.png)
+
 **[🖼️ Read the full UI breakdown](https://github.com/Vedant1202/agentpack/blob/main/docs/corpus-explorer-ui.md)**
 
 ## Comprehensive CLI Documentation
