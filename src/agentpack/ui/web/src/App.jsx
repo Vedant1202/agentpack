@@ -256,7 +256,7 @@ export default function App() {
 
       tour.addStep({
         id: 'search',
-        title: 'Search the Galaxy',
+        title: 'Search the Corpus',
         text: "Type any query here to search the vector database. We'll highlight matching chunks and draw hybrid trajectory paths between them.",
         attachTo: { element: '.tour-search', on: 'bottom' },
         buttons: [btnBack, btnNext]
@@ -575,7 +575,7 @@ export default function App() {
                                 <Info size={16} /> How to explore
                             </h4>
                             <ul className="text-xs space-y-2 opacity-80 list-disc pl-4">
-                                <li><strong>Pan & Zoom</strong> to explore the document galaxy.</li>
+                                <li><strong>Pan & Zoom</strong> to explore the document corpus.</li>
                                 <li><strong>Click</strong> a chunk to reveal its contents and semantic relations.</li>
                                 <li><strong>Search</strong> to query the vector database and highlight matching topics.</li>
                             </ul>
