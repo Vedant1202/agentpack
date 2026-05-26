@@ -437,6 +437,17 @@
   
 </li>
         
+          <li class="md-nav__item">
+  <a href="#built-in-dark-mode" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Built-in Dark Mode
+      
+    </span>
+  </a>
+  
+</li>
+        
       </ul>
     </nav>
   
@@ -702,6 +713,17 @@
   
 </li>
         
+          <li class="md-nav__item">
+  <a href="#built-in-dark-mode" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Built-in Dark Mode
+      
+    </span>
+  </a>
+  
+</li>
+        
       </ul>
     </nav>
   
@@ -727,6 +749,8 @@
 <h1 id="agentpack-corpus-explorer">AgentPack Corpus Explorer</h1>
 <p>The <strong>AgentPack Corpus Explorer</strong> is a local, interactive web application that allows you to visually audit, explore, and debug your compiled context packs before handing them off to an LLM.</p>
 <p>Instead of staring at massive JSON lines files, the Corpus Explorer turns your vector database into a holistic, interactive universe.</p>
+<p><img alt="The Corpus Universe (Overview)" src="../assets/overview.png" />
+<em>Get a bird's-eye view of your entire processed knowledge base.</em></p>
 <h2 id="why-use-the-corpus-explorer">Why use the Corpus Explorer?</h2>
 <p>When you compile a folder of unstructured documents into an AgentPack, the CLI performs semantic chunking, embeds the text, and links chunks based on sequence and semantics.</p>
 <p>The UI helps you answer critical questions:
@@ -752,13 +776,20 @@ Then open <code>http://localhost:8000</code> in your browser.</p>
 - Type a query into the search bar.
 - The UI will instantly dim non-matching chunks.
 - Matching chunks will glow amber, and the UI will draw dashed <strong>hybrid trajectory paths</strong> between them to visualize the search path.</p>
+<p><img alt="Visualizing Hybrid Retrieval (Search)" src="../assets/search.png" />
+<em>Test your RAG queries instantly and see the semantic paths the vector engine took to find them.</em></p>
 <h3 id="context-sidebar">Context Sidebar</h3>
 <p>When you click on a chunk, the right-hand panel instantly updates to show:
 - The raw Markdown/Text content of the chunk.
 - Token counts and source file metadata.
 - A live calculation of <strong>Semantic Neighbors</strong>, allowing you to click through and explore semantically similar chunks across entirely different documents.</p>
+<p><img alt="Deep-Dive into Semantic Boundaries (Node Drilldown)" src="../assets/node_click.png" />
+<em>Click any chunk to inspect its exact boundaries, raw text content, and nearest semantic neighbors.</em></p>
 <h3 id="onboarding">Onboarding</h3>
 <p>The UI comes with an interactive Shepherd.js onboarding tour to guide you through your first time exploring the corpus.</p>
+<h3 id="built-in-dark-mode">Built-in Dark Mode</h3>
+<p>A sleek, low-strain dark interface perfectly designed for late-night prompt engineering and context debugging.</p>
+<p><img alt="Built-in Dark Mode" src="../assets/dark_mode.png" /></p>
 
 
 

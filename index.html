@@ -811,6 +811,10 @@
 
 
 <h1 id="agentpack">AgentPack</h1>
+<p><a href="https://pypi.org/project/agent-context-packager/"><img alt="PyPI version" src="https://badge.fury.io/py/agent-context-packager.svg" /></a>
+<a href="https://www.npmjs.com/package/agent-context-packager"><img alt="npm version" src="https://badge.fury.io/js/agent-context-packager.svg" /></a>
+<a href="https://pypi.org/project/agent-context-packager/"><img alt="Python Versions" src="https://img.shields.io/pypi/pyversions/agent-context-packager.svg" /></a>
+<a href="https://opensource.org/licenses/ISC"><img alt="License: ISC" src="https://img.shields.io/badge/License-ISC-blue.svg" /></a></p>
 <p><strong>AgentPack</strong> improves the context pipeline for document-grounded agents.</p>
 <p>Instead of forcing AI agents to parse messy, disparate file formats (PDFs, CSVs, Markdown, text) at runtime, AgentPack is an offline <strong>document-to-agent-context compiler</strong>. It takes unstructured knowledge bases, turns them into clean semantic chunks with citations, retrieves the right evidence, and sends only high-signal context to the model.</p>
 <h2 id="the-benchmark">The Benchmark</h2>
@@ -900,9 +904,10 @@ pip<span class="w"> </span>install<span class="w"> </span>-e<span class="w"> </s
 </code></pre></div>
 <h3 id="4-visualize-with-the-corpus-explorer">4. Visualize with the Corpus Explorer</h3>
 <p>If you installed AgentPack with the <code>[ui]</code> extra, you can launch a local WebGL-powered 2D physics visualization of your compiled chunks. This allows you to visually debug chunk sizes, semantic similarities, and hybrid search trajectories.</p>
-<p><div class="highlight"><pre><span></span><code>agentpack<span class="w"> </span>ui<span class="w"> </span>./agentpack-output<span class="w"> </span>--port<span class="w"> </span><span class="m">8000</span>
+<div class="highlight"><pre><span></span><code>agentpack<span class="w"> </span>ui<span class="w"> </span>./agentpack-output<span class="w"> </span>--port<span class="w"> </span><span class="m">8000</span>
 </code></pre></div>
-<strong><a href="https://github.com/Vedant1202/agentpack/blob/main/docs/corpus-explorer-ui.md">🖼️ Read the full UI breakdown</a></strong></p>
+<p><img alt="Visualizing Hybrid Retrieval (Search)" src="./docs/assets/search.png" /></p>
+<p><strong><a href="https://github.com/Vedant1202/agentpack/blob/main/docs/corpus-explorer-ui.md">🖼️ Read the full UI breakdown</a></strong></p>
 <h2 id="comprehensive-cli-documentation">Comprehensive CLI Documentation</h2>
 <p>AgentPack provides a rich CLI for auditing, validating, and testing your context packs (including Generative QA evaluations). </p>
 <p><strong><a href="https://github.com/Vedant1202/agentpack/blob/main/docs/cli-reference.md">📖 Read the full CLI Reference</a></strong></p>
