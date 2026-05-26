@@ -3,7 +3,10 @@ import json
 import yaml
 from pathlib import Path
 from tqdm import tqdm
-from google import genai
+try:
+    from google import genai
+except ImportError:
+    genai = None
 from pydantic import BaseModel, Field
 
 from agentpack.eval.baselines import raw_file_search, naive_chunk_search
@@ -17,6 +20,9 @@ class JudgeScore(BaseModel):
     reasoning: str = Field(description="Brief explanation of the scores.")
 
 def run_generation_eval(benchmark_dir: str, generation_model: str, judge_model: str, limit: int = None):
+    if not genai:
+        return "Error: google-genai package is not installed. Please install it to use gen-eval."
+        
     if not os.environ.get("GEMINI_API_KEY"):
         return "Error: GEMINI_API_KEY environment variable is not set."
         

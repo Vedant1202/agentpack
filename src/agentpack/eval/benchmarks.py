@@ -1,6 +1,9 @@
 import json
 import yaml
-import requests
+try:
+    import requests
+except ImportError:
+    requests = None
 from pathlib import Path
 from typing import List, Dict
 
@@ -12,6 +15,10 @@ def slice_financebench(output_dir: str, sample_size: int = 10):
         from datasets import load_dataset
     except ImportError:
         print("Please install datasets: pip install datasets")
+        return
+        
+    if not requests:
+        print("Please install requests: pip install requests")
         return
         
     out_path = Path(output_dir)
