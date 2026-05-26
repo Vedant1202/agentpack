@@ -283,6 +283,8 @@ def get_neighbors(req: NeighborQuery):
                 })
                 
         return {"neighbors": neighbors[:req.top_k]}
+    except HTTPException:
+        raise
     except Exception as e:
         raise HTTPException(status_code=500, detail=str(e))
 
