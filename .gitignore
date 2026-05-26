@@ -22,3 +22,4 @@ corpus_visualization_example.html
 treemap_event_debug.txt
 .gitignore
 ideas.html
+.coverage
