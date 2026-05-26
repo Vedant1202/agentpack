@@ -17,11 +17,11 @@
     "release:create": "gh release create v$npm_package_version --title \"AgentPack v$npm_package_version\" --generate-notes",
     "release:upload": "gh release upload v$npm_package_version dist/*",
     "release:github": "npm run build:binary && npm run release:create && npm run release:upload",
-    "publish:all": "npm run changelog && npm run release:github",
+    "publish:all": "npm run changelog && npm run publish:pypi && npm run publish:npm && npm run release:github",
     "publish:npm:beta": "npm run build:binary && npm publish --tag beta",
     "release:create:beta": "gh release create v$npm_package_version --title \"AgentPack v$npm_package_version (Beta)\" --prerelease --generate-notes",
     "release:github:beta": "npm run build:binary && npm run release:create:beta && npm run release:upload",
-    "publish:all:beta": "npm run changelog && npm run release:github:beta"
+    "publish:all:beta": "npm run changelog && npm run publish:pypi && npm run publish:npm:beta && npm run release:github:beta"
   },
   "author": "",
   "license": "ISC"
