@@ -84,7 +84,7 @@ AgentPack comes with a built-in hybrid search engine (SQLite FTS5 + FastEmbed ve
 agentpack retrieve ./agentpack-output "eligibility criteria" --top-k 5
 ```
 
-### 3. V1 Deterministic Eval
+### 3. Deterministic Eval
 Benchmark AgentPack against naive chunking using our offline evaluation harness.
 
 ```bash
