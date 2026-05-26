@@ -10,8 +10,8 @@
   ],
   "scripts": {
     "build:binary": ". venv/bin/activate && pyinstaller --onefile --name agentpack src/agentpack/__main__.py",
-    "build:python": "python3 -m build",
-    "publish:pypi": "npm run build:python && python3 -m twine upload dist/*.whl dist/*.tar.gz",
+    "build:python": ". venv/bin/activate && python3 -I -m build",
+    "publish:pypi": "npm run build:python && . venv/bin/activate && python3 -I -m twine upload dist/*.whl dist/*.tar.gz",
     "publish:npm": "npm run build:binary && npm publish",
     "changelog": "npx auto-changelog -p",
     "release:create": "gh release create v$npm_package_version --title \"AgentPack v$npm_package_version\" --generate-notes",
