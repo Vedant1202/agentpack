@@ -38,14 +38,6 @@ function getSourceName(chunk) {
   return chunk?.citation?.source_path || chunk?.source || "unknown";
 }
 
-function getSectionName(chunk) {
-  const sectionPath = chunk?.citation?.section_path;
-  if (Array.isArray(sectionPath) && sectionPath.length) return sectionPath.slice(-2).join(" > ");
-  if (chunk?.citation?.section) return chunk.citation.section;
-  if (chunk?.citation?.page) return `PDF page ${chunk.citation.page}`;
-  return chunk?.title || "Unsectioned";
-}
-
 // ==========================================
 // GRAPH DATA BUILDER
 // ==========================================
@@ -329,6 +321,7 @@ export default function App() {
   // 4. Fetch Neighbors when a chunk is selected
   useEffect(() => {
     if (!selectedNodeId || selectedNodeId.startsWith("doc_")) {
+        // eslint-disable-next-line react-hooks/set-state-in-effect
         setNeighbors([]);
         return;
     }
