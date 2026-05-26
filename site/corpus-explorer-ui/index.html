@@ -8,13 +8,13 @@
       
       
       
-        <link rel="canonical" href="https://yourusername.github.io/agentpack/cli-reference/">
+        <link rel="canonical" href="https://yourusername.github.io/agentpack/corpus-explorer-ui/">
       
       
-        <link rel="prev" href="../architecture/">
+        <link rel="prev" href="../cli-reference/">
       
       
-        <link rel="next" href="../corpus-explorer-ui/">
+        <link rel="next" href="../benchmark/">
       
       
         
@@ -25,7 +25,7 @@
     
     
       
-        <title>CLI Reference - AgentPack Documentation</title>
+        <title>Corpus Explorer UI - AgentPack Documentation</title>
       
     
     
@@ -76,7 +76,7 @@
     <div data-md-component="skip">
       
         
-        <a href="#agentpack-cli-reference" class="md-skip">
+        <a href="#agentpack-corpus-explorer" class="md-skip">
           Skip to content
         </a>
       
@@ -112,7 +112,7 @@
         <div class="md-header__topic" data-md-component="header-topic">
           <span class="md-ellipsis">
             
-              CLI Reference
+              Corpus Explorer UI
             
           </span>
         </div>
@@ -259,6 +259,33 @@
       
   
   
+  
+  
+    <li class="md-nav__item">
+      <a href="../cli-reference/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    CLI Reference
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+    
+      
+      
+  
+  
     
   
   
@@ -278,7 +305,7 @@
   <span class="md-ellipsis">
     
   
-    CLI Reference
+    Corpus Explorer UI
   
 
     
@@ -296,7 +323,7 @@
   <span class="md-ellipsis">
     
   
-    CLI Reference
+    Corpus Explorer UI
   
 
     
@@ -322,83 +349,55 @@
     <ul class="md-nav__list" data-md-component="toc" data-md-scrollfix>
       
         <li class="md-nav__item">
-  <a href="#core-commands" class="md-nav__link">
+  <a href="#why-use-the-corpus-explorer" class="md-nav__link">
     <span class="md-ellipsis">
       
-        Core Commands
+        Why use the Corpus Explorer?
       
     </span>
   </a>
-  
-    <nav class="md-nav" aria-label="Core Commands">
-      <ul class="md-nav__list">
-        
-          <li class="md-nav__item">
-  <a href="#agentpack-pack" class="md-nav__link">
-    <span class="md-ellipsis">
-      
-        agentpack pack
-      
-    </span>
-  </a>
-  
-</li>
-        
-          <li class="md-nav__item">
-  <a href="#agentpack-audit" class="md-nav__link">
-    <span class="md-ellipsis">
-      
-        agentpack audit
-      
-    </span>
-  </a>
-  
-</li>
-        
-          <li class="md-nav__item">
-  <a href="#agentpack-retrieve" class="md-nav__link">
-    <span class="md-ellipsis">
-      
-        agentpack retrieve
-      
-    </span>
-  </a>
-  
-</li>
-        
-          <li class="md-nav__item">
-  <a href="#agentpack-validate" class="md-nav__link">
-    <span class="md-ellipsis">
-      
-        agentpack validate
-      
-    </span>
-  </a>
-  
-</li>
-        
-      </ul>
-    </nav>
   
 </li>
       
         <li class="md-nav__item">
-  <a href="#evaluation-commands" class="md-nav__link">
+  <a href="#installation" class="md-nav__link">
     <span class="md-ellipsis">
       
-        Evaluation Commands
+        Installation
       
     </span>
   </a>
   
-    <nav class="md-nav" aria-label="Evaluation Commands">
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#running-the-explorer" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Running the Explorer
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#key-features" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Key Features
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Key Features">
       <ul class="md-nav__list">
         
           <li class="md-nav__item">
-  <a href="#agentpack-eval" class="md-nav__link">
+  <a href="#holistic-corpus-explorer-map" class="md-nav__link">
     <span class="md-ellipsis">
       
-        agentpack eval
+        Holistic Corpus Explorer Map
       
     </span>
   </a>
@@ -406,10 +405,10 @@
 </li>
         
           <li class="md-nav__item">
-  <a href="#agentpack-gen-eval" class="md-nav__link">
+  <a href="#interactive-hybrid-search" class="md-nav__link">
     <span class="md-ellipsis">
       
-        agentpack gen-eval
+        Interactive Hybrid Search
       
     </span>
   </a>
@@ -417,10 +416,21 @@
 </li>
         
           <li class="md-nav__item">
-  <a href="#agentpack-prep-benchmark" class="md-nav__link">
+  <a href="#context-sidebar" class="md-nav__link">
     <span class="md-ellipsis">
       
-        agentpack prep-benchmark
+        Context Sidebar
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#onboarding" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Onboarding
       
     </span>
   </a>
@@ -436,33 +446,6 @@
   
 </nav>
       
-    </li>
-  
-
-    
-      
-      
-  
-  
-  
-  
-    <li class="md-nav__item">
-      <a href="../corpus-explorer-ui/" class="md-nav__link">
-        
-  
-  
-  <span class="md-ellipsis">
-    
-  
-    Corpus Explorer UI
-  
-
-    
-  </span>
-  
-  
-
-      </a>
     </li>
   
 
@@ -631,83 +614,55 @@
     <ul class="md-nav__list" data-md-component="toc" data-md-scrollfix>
       
         <li class="md-nav__item">
-  <a href="#core-commands" class="md-nav__link">
+  <a href="#why-use-the-corpus-explorer" class="md-nav__link">
     <span class="md-ellipsis">
       
-        Core Commands
+        Why use the Corpus Explorer?
       
     </span>
   </a>
-  
-    <nav class="md-nav" aria-label="Core Commands">
-      <ul class="md-nav__list">
-        
-          <li class="md-nav__item">
-  <a href="#agentpack-pack" class="md-nav__link">
-    <span class="md-ellipsis">
-      
-        agentpack pack
-      
-    </span>
-  </a>
-  
-</li>
-        
-          <li class="md-nav__item">
-  <a href="#agentpack-audit" class="md-nav__link">
-    <span class="md-ellipsis">
-      
-        agentpack audit
-      
-    </span>
-  </a>
-  
-</li>
-        
-          <li class="md-nav__item">
-  <a href="#agentpack-retrieve" class="md-nav__link">
-    <span class="md-ellipsis">
-      
-        agentpack retrieve
-      
-    </span>
-  </a>
-  
-</li>
-        
-          <li class="md-nav__item">
-  <a href="#agentpack-validate" class="md-nav__link">
-    <span class="md-ellipsis">
-      
-        agentpack validate
-      
-    </span>
-  </a>
-  
-</li>
-        
-      </ul>
-    </nav>
   
 </li>
       
         <li class="md-nav__item">
-  <a href="#evaluation-commands" class="md-nav__link">
+  <a href="#installation" class="md-nav__link">
     <span class="md-ellipsis">
       
-        Evaluation Commands
+        Installation
       
     </span>
   </a>
   
-    <nav class="md-nav" aria-label="Evaluation Commands">
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#running-the-explorer" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Running the Explorer
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#key-features" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Key Features
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Key Features">
       <ul class="md-nav__list">
         
           <li class="md-nav__item">
-  <a href="#agentpack-eval" class="md-nav__link">
+  <a href="#holistic-corpus-explorer-map" class="md-nav__link">
     <span class="md-ellipsis">
       
-        agentpack eval
+        Holistic Corpus Explorer Map
       
     </span>
   </a>
@@ -715,10 +670,10 @@
 </li>
         
           <li class="md-nav__item">
-  <a href="#agentpack-gen-eval" class="md-nav__link">
+  <a href="#interactive-hybrid-search" class="md-nav__link">
     <span class="md-ellipsis">
       
-        agentpack gen-eval
+        Interactive Hybrid Search
       
     </span>
   </a>
@@ -726,10 +681,21 @@
 </li>
         
           <li class="md-nav__item">
-  <a href="#agentpack-prep-benchmark" class="md-nav__link">
+  <a href="#context-sidebar" class="md-nav__link">
     <span class="md-ellipsis">
       
-        agentpack prep-benchmark
+        Context Sidebar
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#onboarding" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Onboarding
       
     </span>
   </a>
@@ -758,56 +724,41 @@
 
 
 
-<h1 id="agentpack-cli-reference">AgentPack CLI Reference</h1>
-<p>The AgentPack CLI provides several commands to manage, validate, and query your context packs.</p>
-<h2 id="core-commands">Core Commands</h2>
-<h3 id="agentpack-pack"><code>agentpack pack</code></h3>
-<p>Pack documents into an agent-friendly context pack.</p>
-<p><div class="highlight"><pre><span></span><code>agentpack<span class="w"> </span>pack<span class="w"> </span>&lt;input_dir&gt;<span class="w"> </span>--out<span class="w"> </span>&lt;output_dir&gt;<span class="w"> </span><span class="o">[</span>OPTIONS<span class="o">]</span>
+<h1 id="agentpack-corpus-explorer">AgentPack Corpus Explorer</h1>
+<p>The <strong>AgentPack Corpus Explorer</strong> is a local, interactive web application that allows you to visually audit, explore, and debug your compiled context packs before handing them off to an LLM.</p>
+<p>Instead of staring at massive JSON lines files, the Corpus Explorer turns your vector database into a holistic, interactive universe.</p>
+<h2 id="why-use-the-corpus-explorer">Why use the Corpus Explorer?</h2>
+<p>When you compile a folder of unstructured documents into an AgentPack, the CLI performs semantic chunking, embeds the text, and links chunks based on sequence and semantics.</p>
+<p>The UI helps you answer critical questions:
+- Are my chunks too large or too small?
+- Is my hybrid search retrieving the correct evidence for my query?
+- How are different files semantically related to each other?</p>
+<h2 id="installation">Installation</h2>
+<p>The UI requires additional dependencies (like FastAPI and Uvicorn). You can install them by using the <code>[ui]</code> extra:</p>
+<div class="highlight"><pre><span></span><code>pip<span class="w"> </span>install<span class="w"> </span><span class="s2">&quot;agent-context-packager[ui]&quot;</span>
 </code></pre></div>
-- <code>&lt;input_dir&gt;</code>: The directory containing your raw documents (<code>.txt</code>, <code>.md</code>, <code>.csv</code>, <code>.pdf</code>).
-- <code>--out</code>: The output directory where the pack will be generated.
-- <code>--include</code>: Include only files matching these glob patterns (comma-separated).
-- <code>-i, --ignore, --exclude</code>: Additional glob patterns to exclude.
-- <code>--no-gitignore</code>: Don't use <code>.gitignore</code> or <code>.agentpackignore</code> rules for filtering files.
-- <code>--no-default-patterns</code>: Don't apply built-in ignore patterns (e.g. <code>.git</code>, <code>node_modules</code>).
-- <code>--include-hidden</code>: Include hidden files and directories.
-- <code>--remove-empty-lines</code>: Automatically strip blank lines from text and markdown files to save tokens.
-- <code>--verbose</code>: Enable detailed debug logging.
-- <code>--quiet</code>: Suppress all console output except errors.</p>
-<h3 id="agentpack-audit"><code>agentpack audit</code></h3>
-<p>Generates an audit report for a context pack, highlighting extraction warnings (e.g., empty files, PDFs with no readable text) and statistics.</p>
-<div class="highlight"><pre><span></span><code>agentpack<span class="w"> </span>audit<span class="w"> </span>&lt;pack_dir&gt;
+<h2 id="running-the-explorer">Running the Explorer</h2>
+<p>After compiling a pack, launch the explorer by pointing it to your output directory:</p>
+<p><div class="highlight"><pre><span></span><code>agentpack<span class="w"> </span>ui<span class="w"> </span>./agentpack-output<span class="w"> </span>--port<span class="w"> </span><span class="m">8000</span>
 </code></pre></div>
-<h3 id="agentpack-retrieve"><code>agentpack retrieve</code></h3>
-<p>Retrieves top-k evidence chunks from a pack using the built-in SQLite FTS5 lexical search engine.</p>
-<p><div class="highlight"><pre><span></span><code>agentpack<span class="w"> </span>retrieve<span class="w"> </span>&lt;pack_dir&gt;<span class="w"> </span><span class="s2">&quot;&lt;query&gt;&quot;</span><span class="w"> </span>--top-k<span class="w"> </span><span class="m">5</span><span class="w"> </span>--mode<span class="w"> </span>hybrid
-</code></pre></div>
-- <code>&lt;query&gt;</code>: The search term.
-- <code>--top-k</code>: Number of results to return (default: 5).
-- <code>--mode</code>: Search mode to use (<code>hybrid</code>, <code>vector</code>, or <code>fts</code>. default: <code>hybrid</code>).</p>
-<h3 id="agentpack-validate"><code>agentpack validate</code></h3>
-<p>Validates the structural integrity of a context pack, ensuring all expected files and tables exist and are properly referenced in the manifest.</p>
-<div class="highlight"><pre><span></span><code>agentpack<span class="w"> </span>validate<span class="w"> </span>&lt;pack_dir&gt;
-</code></pre></div>
-<h2 id="evaluation-commands">Evaluation Commands</h2>
-<h3 id="agentpack-eval"><code>agentpack eval</code></h3>
-<p>Runs a deterministic evaluation benchmark against your pack using <code>queries.yml</code> and <code>gold_evidence.yml</code>. Calculates Hit@K, MRR, Citation Precision, and Context Token Savings.</p>
-<div class="highlight"><pre><span></span><code>agentpack<span class="w"> </span><span class="nb">eval</span><span class="w"> </span>./benchmarks/my_dataset
-</code></pre></div>
-<h3 id="agentpack-gen-eval"><code>agentpack gen-eval</code></h3>
-<p>Evaluates Generative QA using AgentPack. This acts as a smoke test / LLM judge to verify downstream generation behavior.</p>
-<p><div class="highlight"><pre><span></span><code>agentpack<span class="w"> </span>gen-eval<span class="w"> </span>./benchmarks/my_dataset<span class="w"> </span>--gen-model<span class="w"> </span>gemini-1.5-flash<span class="w"> </span>--judge-model<span class="w"> </span>gemini-1.5-pro<span class="w"> </span>--limit<span class="w"> </span><span class="m">10</span>
-</code></pre></div>
-- <code>--gen-model</code>: The LLM used for generation (default: <code>gemini-1.5-flash</code>).
-- <code>--judge-model</code>: The LLM used for judging the answer (default: <code>gemini-1.5-pro</code>).
-- <code>--limit</code>: Limit the number of queries for a quick smoke test.</p>
-<h3 id="agentpack-prep-benchmark"><code>agentpack prep-benchmark</code></h3>
-<p>Downloads and slices a public dataset into a benchmark format for testing AgentPack.</p>
-<p><div class="highlight"><pre><span></span><code>agentpack<span class="w"> </span>prep-benchmark<span class="w"> </span>--dataset<span class="w"> </span>financebench<span class="w"> </span>--sample-size<span class="w"> </span><span class="m">10</span>
-</code></pre></div>
-- <code>--dataset</code>: Dataset to slice (e.g., <code>financebench</code>, <code>tatqa</code>, <code>qasper</code>).
-- <code>--sample-size</code>: Number of documents to sample.</p>
+Then open <code>http://localhost:8000</code> in your browser.</p>
+<h2 id="key-features">Key Features</h2>
+<h3 id="holistic-corpus-explorer-map">Holistic Corpus Explorer Map</h3>
+<p>Powered by a WebGL 2D physics engine, the map renders thousands of chunks flawlessly. 
+- <strong>Dynamic Node Sizing:</strong> As you zoom in, the nodes adjust their size to keep the interface clean.
+- <strong>Hover Labels:</strong> Read the IDs and types of nodes just by hovering over them.</p>
+<h3 id="interactive-hybrid-search">Interactive Hybrid Search</h3>
+<p>The UI hooks directly into the AgentPack SQLite FTS5 + FastEmbed vector engine.
+- Type a query into the search bar.
+- The UI will instantly dim non-matching chunks.
+- Matching chunks will glow amber, and the UI will draw dashed <strong>hybrid trajectory paths</strong> between them to visualize the search path.</p>
+<h3 id="context-sidebar">Context Sidebar</h3>
+<p>When you click on a chunk, the right-hand panel instantly updates to show:
+- The raw Markdown/Text content of the chunk.
+- Token counts and source file metadata.
+- A live calculation of <strong>Semantic Neighbors</strong>, allowing you to click through and explore semantically similar chunks across entirely different documents.</p>
+<h3 id="onboarding">Onboarding</h3>
+<p>The UI comes with an interactive Shepherd.js onboarding tour to guide you through your first time exploring the corpus.</p>
 
 
 
