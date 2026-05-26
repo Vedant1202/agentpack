@@ -13,3 +13,12 @@ benchmarks/test_benchmark
 .env
 benchmarks/
 __pycache__/
+node_modules/
+.env.local
+.env.development.local
+.env.test.local
+.env.production.local
+corpus_visualization_example.html
+treemap_event_debug.txt
+.gitignore
+ideas.html

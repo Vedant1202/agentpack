@@ -144,5 +144,26 @@ def prep_benchmark(dataset: str = typer.Option("financebench", help="Dataset to 
         
     typer.secho("Preparation complete.", fg=typer.colors.GREEN)
 
+@app.command()
+def ui(pack_dir: str = typer.Argument(..., help="Path to compiled pack"), port: int = typer.Option(8000, help="Port to run the UI server on")):
+    """Launch a local web UI to inspect your compiled context pack."""
+    import os
+    import sys
+    from pathlib import Path
+    try:
+        import uvicorn
+        from fastapi import FastAPI
+    except ImportError:
+        typer.secho("UI dependencies not found. Please run: pip install agentpack[ui]", fg=typer.colors.RED)
+        raise typer.Exit(code=1)
+        
+    typer.echo(f"Starting AgentPack Corpus Intelligence for {pack_dir} on port {port}...")
+    
+    # Set the pack_dir in the environment so server.py can read it
+    os.environ["AGENTPACK_DIR"] = str(Path(pack_dir).resolve())
+    
+    # Run uvicorn
+    uvicorn.run("agentpack.ui.server:app", host="127.0.0.1", port=port, reload=False)
+
 if __name__ == "__main__":
     app()

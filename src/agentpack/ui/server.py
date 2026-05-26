@@ -1,0 +1,349 @@
+import os
+import json
+import yaml
+import sqlite3
+import numpy as np
+from pathlib import Path
+from typing import Optional
+from fastapi import FastAPI, HTTPException, Request
+from fastapi.middleware.cors import CORSMiddleware
+from fastapi.staticfiles import StaticFiles
+from pydantic import BaseModel
+import re
+
+app = FastAPI(title="AgentPack Corpus Intelligence API")
+
+# Setup CORS for local development
+app.add_middleware(
+    CORSMiddleware,
+    allow_origins=["*"],
+    allow_credentials=True,
+    allow_methods=["*"],
+    allow_headers=["*"],
+)
+
+PACK_DIR = os.environ.get("AGENTPACK_DIR", ".")
+
+def get_base_path():
+    return Path(PACK_DIR)
+
+@app.get("/api/manifest")
+def get_manifest():
+    manifest_path = get_base_path() / "manifest.yml"
+    if not manifest_path.exists():
+        raise HTTPException(status_code=404, detail="Manifest not found")
+    with open(manifest_path, "r", encoding="utf-8") as f:
+        return yaml.safe_load(f)
+
+def build_human_readable_title(source_id: str, citation: dict) -> str:
+    # Try to extract the real filename or a cleaner version of the source_id
+    title = citation.get('source_path', source_id)
+    if "/" in title:
+        title = title.split("/")[-1]
+        
+    section_path = citation.get('section_path', [])
+    if section_path:
+        # Join the last two sections if possible, or just the last
+        if len(section_path) > 1:
+            title += f" > {section_path[-2]} > {section_path[-1]}"
+        else:
+            title += f" > {section_path[-1]}"
+            
+    return title
+
+def resolve_source_file_path(base_path: Path, citation: dict) -> Optional[str]:
+    source_path = citation.get("source_path")
+    if not source_path:
+        return None
+
+    source = Path(source_path)
+    if source.is_absolute():
+        return str(source)
+
+    candidates = [
+        base_path / source,
+        base_path.parent / "corpus" / source,
+        base_path.parent / source,
+    ]
+    for candidate in candidates:
+        if candidate.exists():
+            return str(candidate.resolve())
+    return None
+
+@app.get("/api/chunks")
+def get_chunks():
+    base_path = get_base_path()
+    db_path = base_path / "indexes" / "lexical_index.db"
+    if not db_path.exists():
+        raise HTTPException(status_code=404, detail="Lexical index not found")
+        
+    conn = sqlite3.connect(db_path)
+    try:
+        cur = conn.cursor()
+        cur.execute("SELECT chunk_id, source_id, path, token_count, citation, content FROM chunks_fts")
+        chunks = []
+        for row in cur.fetchall():
+            chunk_id, source_id, path, token_count, citation_str, content = row
+            try:
+                citation = json.loads(citation_str)
+            except:
+                citation = {}
+                
+            human_readable = build_human_readable_title(source_id, citation)
+                
+            chunks.append({
+                "id": chunk_id,
+                "source": source_id,
+                "path": path,
+                "absolute_path": str((base_path / path).resolve()),
+                "source_file_path": resolve_source_file_path(base_path, citation),
+                "title": human_readable,
+                "tokens": token_count,
+                "citation": citation,
+                "content": content
+            })
+        return {"chunks": chunks}
+    finally:
+        conn.close()
+
+@app.get("/api/umap")
+def get_umap():
+    try:
+        import umap.umap_ as umap
+    except ImportError:
+        raise HTTPException(status_code=500, detail="umap-learn is not installed. Run pip install agentpack[ui]")
+        
+    vector_path = get_base_path() / "indexes" / "vector_index.npy"
+    meta_path = get_base_path() / "indexes" / "vector_meta.json"
+    
+    if not vector_path.exists() or not meta_path.exists():
+        raise HTTPException(status_code=404, detail="Vector index not found")
+        
+    embeddings = np.load(vector_path)
+    with open(meta_path, "r", encoding="utf-8") as f:
+        meta = json.load(f)
+        
+    # Compute UMAP
+    reducer = umap.UMAP(n_components=2, metric='cosine', random_state=42)
+    reduced = reducer.fit_transform(embeddings)
+    
+    points = []
+    for i, m in enumerate(meta):
+        points.append({
+            "id": m["chunk_id"],
+            "x": float(reduced[i][0]),
+            "y": float(reduced[i][1]),
+            "source": m.get("source_id", "Unknown"),
+            "tokens": m.get("token_count", 0)
+        })
+        
+    # Scale x/y to 0-100 for SVG plotting
+    if points:
+        xs = [p["x"] for p in points]
+        ys = [p["y"] for p in points]
+        min_x, max_x = min(xs), max(xs)
+        min_y, max_y = min(ys), max(ys)
+        
+        range_x = max_x - min_x if max_x != min_x else 1
+        range_y = max_y - min_y if max_y != min_y else 1
+        
+        for p in points:
+            # Scale to 10-90 to leave padding
+            p["x"] = 10 + ((p["x"] - min_x) / range_x) * 80
+            p["y"] = 10 + ((p["y"] - min_y) / range_y) * 80
+            
+    return {"points": points}
+
+class SearchQuery(BaseModel):
+    query: str
+    top_k: int = 10
+
+@app.post("/api/search")
+def search(req: SearchQuery):
+    db_path = get_base_path() / "indexes" / "lexical_index.db"
+    vector_path = get_base_path() / "indexes" / "vector_index.npy"
+    meta_path = get_base_path() / "indexes" / "vector_meta.json"
+    
+    results = {}
+    
+    # FTS Search
+    if db_path.exists():
+        conn = sqlite3.connect(db_path)
+        cur = conn.cursor()
+        clean_str = re.sub(r'[^a-zA-Z0-9\-\s]', ' ', req.query)
+        clean_query = " OR ".join([f'"{w}"' for w in clean_str.split() if w])
+        
+        if clean_query:
+            try:
+                cur.execute('''
+                    SELECT chunk_id, rank, content 
+                    FROM chunks_fts 
+                    WHERE chunks_fts MATCH ? 
+                    ORDER BY rank 
+                    LIMIT ?
+                ''', (clean_query, req.top_k))
+                
+                # BM25 rank is usually negative, smaller is better.
+                # Let's normalize it to a pseudo score 0-1 for visual UI.
+                rows = cur.fetchall()
+                if rows:
+                    ranks = [r[1] for r in rows]
+                    min_r = min(ranks)
+                    max_r = max(ranks) if max(ranks) != min_r else min_r + 1
+                    
+                    for r in rows:
+                        score = 1.0 - ((r[1] - min_r) / (max_r - min_r))
+                        results[r[0]] = {"fts": score, "vector": 0.0, "hybrid": score * 0.5, "content": r[2]}
+            except Exception as e:
+                print(f"FTS error: {e}")
+                pass
+        conn.close()
+        
+    # Vector Search
+    if vector_path.exists() and meta_path.exists():
+        try:
+            from fastembed import TextEmbedding
+            # Lightweight init, ideally we'd cache this in memory across requests
+            model = TextEmbedding(model_name="BAAI/bge-small-en-v1.5")
+            query_emb = list(model.embed([req.query]))[0]
+            
+            embeddings = np.load(vector_path)
+            with open(meta_path, "r", encoding="utf-8") as f:
+                meta = json.load(f)
+                
+            similarities = np.dot(embeddings, query_emb) / (np.linalg.norm(embeddings, axis=1) * np.linalg.norm(query_emb))
+            top_indices = np.argsort(similarities)[::-1][:req.top_k]
+            
+            for idx in top_indices:
+                chunk_id = meta[idx]["chunk_id"]
+                score = float(similarities[idx])
+                if chunk_id in results:
+                    results[chunk_id]["vector"] = score
+                    results[chunk_id]["hybrid"] = (results[chunk_id]["fts"] + score) / 2
+                else:
+                    results[chunk_id] = {"fts": 0.0, "vector": score, "hybrid": score * 0.5, "content": "Fetch from db..."}
+        except Exception as e:
+            print(f"Vector search error: {e}")
+            pass
+            
+    # Sort by hybrid score
+    sorted_results = []
+    for chunk_id, scores in sorted(results.items(), key=lambda x: x[1]["hybrid"], reverse=True):
+        sorted_results.append({
+            "id": chunk_id,
+            "fts": scores["fts"],
+            "vector": scores["vector"],
+            "hybrid": scores["hybrid"],
+            "content": scores["content"]
+        })
+        
+    return {"results": sorted_results}
+
+class NeighborQuery(BaseModel):
+    chunk_id: str
+    top_k: int = 5
+
+@app.post("/api/neighbors")
+def get_neighbors(req: NeighborQuery):
+    vector_path = get_base_path() / "indexes" / "vector_index.npy"
+    meta_path = get_base_path() / "indexes" / "vector_meta.json"
+    
+    if not vector_path.exists() or not meta_path.exists():
+        raise HTTPException(status_code=404, detail="Vector index not found")
+        
+    try:
+        embeddings = np.load(vector_path)
+        with open(meta_path, "r", encoding="utf-8") as f:
+            meta = json.load(f)
+            
+        # Find index of target chunk
+        target_idx = None
+        for i, m in enumerate(meta):
+            if m["chunk_id"] == req.chunk_id:
+                target_idx = i
+                break
+                
+        if target_idx is None:
+            raise HTTPException(status_code=404, detail="Chunk not found")
+            
+        target_emb = embeddings[target_idx]
+        similarities = np.dot(embeddings, target_emb) / (np.linalg.norm(embeddings, axis=1) * np.linalg.norm(target_emb))
+        
+        # Get top_k + 1 (since the first one will be the target itself)
+        top_indices = np.argsort(similarities)[::-1][:req.top_k + 1]
+        
+        neighbors = []
+        for idx in top_indices:
+            chunk_id = meta[idx]["chunk_id"]
+            if chunk_id != req.chunk_id:
+                neighbors.append({
+                    "id": chunk_id,
+                    "score": float(similarities[idx]),
+                    "source": meta[idx].get("source_id", "Unknown")
+                })
+                
+        return {"neighbors": neighbors[:req.top_k]}
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=str(e))
+
+class Feedback(BaseModel):
+    chunk_id: str
+    query: str
+    rating: int  # 1 for thumb up, -1 for thumb down, 2 for pinned
+
+@app.post("/api/feedback")
+def submit_feedback(fb: Feedback):
+    fb_path = get_base_path() / "eval_feedback.json"
+    data = []
+    if fb_path.exists():
+        try:
+            with open(fb_path, "r", encoding="utf-8") as f:
+                data = json.load(f)
+        except:
+            pass
+            
+    data.append({
+        "chunk_id": fb.chunk_id,
+        "query": fb.query,
+        "rating": fb.rating,
+        "timestamp": __import__("time").time()
+    })
+    
+    with open(fb_path, "w", encoding="utf-8") as f:
+        json.dump(data, f, indent=2)
+        
+    return {"status": "success"}
+
+from fastapi.responses import FileResponse
+import sys
+
+# Try to find the dist directory robustly
+possible_web_dirs = [
+    Path(__file__).parent / "web" / "dist", # Installed package or local if editable
+    Path(os.getcwd()) / "src" / "agentpack" / "ui" / "web" / "dist" # Local dev fallback
+]
+
+web_dir = None
+for pwd in possible_web_dirs:
+    if pwd.exists():
+        web_dir = pwd
+        break
+
+if web_dir:
+    app.mount("/assets", StaticFiles(directory=str(web_dir / "assets")), name="assets")
+    
+    @app.get("/")
+    def serve_index():
+        return FileResponse(str(web_dir / "index.html"))
+    
+    # Catch-all for React Router if needed, or other static files
+    @app.get("/{file_path:path}")
+    def serve_static(file_path: str):
+        target = web_dir / file_path
+        if target.exists() and target.is_file():
+            return FileResponse(str(target))
+        return FileResponse(str(web_dir / "index.html"))
+else:
+    @app.get("/")
+    def no_ui_fallback():
+        return {"detail": "UI assets not found. If developing locally, ensure you ran 'npm run build' in 'src/agentpack/ui/web'."}

@@ -32,6 +32,12 @@ dependencies = [
 agentpack = "agentpack.cli:app"
 
 [project.optional-dependencies]
+ui = [
+    "fastapi>=0.100.0",
+    "uvicorn>=0.23.0",
+    "umap-learn>=0.5.5",
+    "scikit-learn>=1.3.0"
+]
 docs = [
     "mkdocs-material>=9.0.0",
     "mkdocstrings[python]>=0.24.0"
