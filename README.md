@@ -31,11 +31,15 @@ Read the full scientific methodology and results in [BENCHMARK.md](https://githu
 
 ## Installation
 
-You can install AgentPack via pip or npm.
+You can install AgentPack via pip or npm. To use the new interactive Corpus Explorer UI, you must install the `[ui]` extra dependencies.
 
 **Option 1: Using pip (Python)**
 ```bash
+# Core only
 pip install agent-context-packager
+
+# With Corpus Explorer UI
+pip install "agent-context-packager[ui]"
 ```
 
 **Option 2: Using npm (Node.js/CLI binary)**
@@ -86,6 +90,14 @@ Benchmark AgentPack against naive chunking using our offline evaluation harness.
 ```bash
 agentpack eval ./benchmarks/my_dataset
 ```
+
+### 4. Visualize with the Corpus Explorer
+If you installed AgentPack with the `[ui]` extra, you can launch a local WebGL-powered 2D physics visualization of your compiled chunks. This allows you to visually debug chunk sizes, semantic similarities, and hybrid search trajectories.
+
+```bash
+agentpack ui ./agentpack-output --port 8000
+```
+**[🖼️ Read the full UI breakdown](https://github.com/Vedant1202/agentpack/blob/main/docs/corpus-explorer-ui.md)**
 
 ## Comprehensive CLI Documentation
 
