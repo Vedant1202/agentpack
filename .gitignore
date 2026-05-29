@@ -10,6 +10,11 @@ output/
 .DS_Store
 docs/test.txt
 benchmarks/test_benchmark
+benchmarks/financebench_sample/
+benchmarks/phase1-benchmarks/
+benchmarks/research_ops_gold_v1/
+benchmarks/corpus_explorer_mockup.html
+benchmarks/run_v2_eval.py
 .env
 __pycache__/
 node_modules/
