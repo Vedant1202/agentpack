@@ -6,6 +6,33 @@ import numpy as np
 from unittest.mock import patch, MagicMock
 from agentpack.retrieve import search_pack, search_hybrid, search_fts, search_vector, build_fts_index, build_vector_index
 
+def test_build_fts_query_filters_stop_words():
+    from agentpack.retrieve import _build_fts_query
+    result = _build_fts_query("what is 3M revenue")
+    assert '"3M"' in result
+    assert '"revenue"' in result
+    assert '"what"' not in result
+    assert '"is"' not in result
+    assert " OR " not in result  # AND query: no OR operator
+
+
+def test_build_fts_query_all_stop_words_fallback():
+    from agentpack.retrieve import _build_fts_query
+    result = _build_fts_query("the a of")
+    assert result != ""  # never returns empty
+    assert '"the"' in result  # unfiltered fallback
+
+
+def test_build_fts_query_no_stop_words():
+    from agentpack.retrieve import _build_fts_query
+    assert _build_fts_query("neural network") == '"neural" "network"'
+
+
+def test_build_fts_query_single_term():
+    from agentpack.retrieve import _build_fts_query
+    assert _build_fts_query("alpha") == '"alpha"'
+
+
 def test_search_pack_hybrid(tmp_path):
     """search_pack hybrid mode returns results with a real (tiny) corpus."""
     import yaml

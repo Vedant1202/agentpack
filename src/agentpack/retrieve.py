@@ -20,6 +20,32 @@ from agentpack.cache import cache_get, cache_set, make_key
 
 _EMBED_MODEL_ID = "BAAI/bge-small-en-v1.5"  # default fastembed model
 
+_FTS_STOP_WORDS = frozenset({
+    "a", "an", "the", "and", "or", "but", "in", "on", "at", "to", "for",
+    "of", "with", "by", "from", "is", "are", "was", "were", "be", "been",
+    "being", "have", "has", "had", "do", "does", "did", "will", "would",
+    "could", "should", "may", "might", "shall", "can", "this", "that",
+    "these", "those", "it", "its", "what", "which", "who", "how",
+    "when", "where", "why", "all", "any", "both", "each", "more",
+    "other", "some", "such", "no", "not", "only", "so", "than",
+    "too", "very", "just", "as", "up", "out", "about", "into", "over",
+    "after", "i", "we", "you", "he", "she", "they", "their", "our",
+    "your", "his", "her",
+})
+
+
+def _build_fts_query(query: str) -> str:
+    """AND query for FTS5: strip stop words, return space-separated quoted terms.
+
+    FTS5 treats space-separated quoted terms as AND. Falls back to the full
+    unfiltered term list when every term is a stop word (e.g. a bare 'the').
+    """
+    clean = re.sub(r'[^a-zA-Z0-9\-\s]', ' ', query)
+    all_terms = [w for w in clean.split() if w]
+    content_terms = [w for w in all_terms if w.lower() not in _FTS_STOP_WORDS]
+    terms = content_terms if content_terms else all_terms
+    return " ".join(f'"{w}"' for w in terms)
+
 # Module-level singleton: loading TextEmbedding downloads ONNX weights (~30 MB).
 # Shared across build_vector_index calls and query-time embedding.
 _embedding_model = None
