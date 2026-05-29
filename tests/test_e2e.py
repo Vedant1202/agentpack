@@ -1,15 +1,8 @@
 """
 End-to-end round-trip regression test.
 
-Phase 0: EXPECTED TO FAIL (xfail strict).
-  - citation.page is not preserved through the semantic PDF markdown round-trip.
-  - No table files are written from the PDF because table blocks aren't emitted.
-
-Phase 1 (Tasks 1.1, 1.2) will flip this to a passing test by:
-  - Iterating the Docling structured tree instead of doing a markdown round-trip.
-  - Emitting DocumentBlock(type="table") and writing them to tables/.
-
-To un-xfail: remove the @pytest.mark.xfail decorator once both 1.1 and 1.2 are done.
+Asserts that the pack→index→retrieve pipeline preserves page citations
+and that PDF table blocks are written to tables/.
 """
 import json
 import pytest
@@ -22,10 +15,6 @@ from agentpack.retrieve import search_fts
 FIXTURES = Path(__file__).parent / "fixtures"
 
 
-@pytest.mark.xfail(
-    strict=True,
-    reason="citation.page and PDF table extraction not yet implemented (Tasks 1.1, 1.2)",
-)
 def test_pack_retrieve_round_trip(tmp_path):
     """Pack the PDF+Markdown fixtures then retrieve and assert page + table citations."""
     pytest.importorskip("docling", reason="docling not installed")

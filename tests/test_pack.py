@@ -38,6 +38,6 @@ def test_write_pack(mock_txt_file, mock_md_file, mock_csv_file):
         assert "chunks" in manifest
         assert len(manifest["chunks"]) > 0
         
-        # Assert tables were written
-        tables = list((out_path / "tables").glob("*.csv"))
+        # Assert tables were written (stored as .md — content is markdown table format)
+        tables = list((out_path / "tables").glob("*.md"))
         assert len(tables) == 1

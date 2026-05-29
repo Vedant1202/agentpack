@@ -2,7 +2,7 @@ import typer
 from agentpack.pack import write_pack
 from agentpack.validate import validate_pack
 from agentpack.audit import audit_pack
-from agentpack.retrieve import search_pack
+from agentpack.retrieve import search_pack, build_fts_index, build_vector_index
 from agentpack.eval.runner import run_eval
 
 app = typer.Typer(help="AgentPack CLI", no_args_is_help=True)
@@ -18,7 +18,8 @@ def pack(
     include_hidden: bool = typer.Option(False, help="Include hidden directories"),
     verbose: bool = typer.Option(False, help="Enable detailed debug logging"),
     quiet: bool = typer.Option(False, help="Suppress all console output except errors"),
-    remove_empty_lines: bool = typer.Option(False, help="Remove blank lines from all text files")
+    remove_empty_lines: bool = typer.Option(False, help="Remove blank lines from all text files"),
+    fast_pdf: bool = typer.Option(False, help="Use legacy spatial PyMuPDF parser instead of semantic Docling parser")
 ):
     """Pack documents into an agent-friendly context pack."""
     if not quiet:
@@ -37,7 +38,8 @@ def pack(
         include_hidden=include_hidden,
         verbose=verbose,
         quiet=quiet,
-        remove_empty_lines=remove_empty_lines
+        remove_empty_lines=remove_empty_lines,
+        fast_pdf=fast_pdf
     )
     
     if not quiet:
@@ -98,6 +100,33 @@ def retrieve(
         typer.echo(f"   chunk: {res['path']}")
         typer.echo(f"   tokens: {res['token_count']}")
         typer.echo(f"   score: {res['score']:.2f}")
+
+@app.command(name="index")
+def index_cmd(
+    pack_dir: str,
+    quiet: bool = typer.Option(False, help="Suppress progress output"),
+):
+    """Build (or rebuild) FTS and vector indexes for a compiled pack."""
+    from pathlib import Path as _Path
+
+    base = _Path(pack_dir)
+    indexes = base / "indexes"
+    indexes.mkdir(exist_ok=True)
+
+    if not quiet:
+        typer.echo("Building FTS index…")
+    build_fts_index(base, indexes / "lexical_index.db")
+
+    if not quiet:
+        typer.echo("Building vector index…")
+    try:
+        build_vector_index(base, indexes / "vector_index.npy", indexes / "vector_meta.json")
+    except ImportError as e:
+        typer.secho(f"Vector index skipped: {e}", fg=typer.colors.YELLOW)
+
+    if not quiet:
+        typer.secho("Index build complete.", fg=typer.colors.GREEN)
+
 
 @app.command(name="eval")
 def evaluate(benchmark_dir: str):

@@ -56,25 +56,39 @@ def chunk_document(doc: SourceDocument, max_tokens: int = 800, overlap_percent: 
     for block in doc.blocks:
         if not block.text:
             continue
-            
-        block_tokens = len(encoder.encode(block.text))
-        
-        # Update metadata
+
+        # Update metadata before any splits so sub-blocks carry correct page/section
         if block.section_path:
             current_metadata["section"] = block.section_path[-1]
         if block.page:
             current_metadata["page"] = block.page
-            
         if block.row_range:
             current_metadata["row_range"] = list(block.row_range)
-            
-        # Very large blocks might exceed max_tokens, in a full implementation we'd split the block itself.
-        # For this MVP, we will just start a new chunk if adding this block pushes us over, unless we are empty.
-        if current_tokens + block_tokens > max_tokens and current_tokens > 0:
-            create_chunk()
-            
-        current_blocks.append({"text": block.text, "tokens": block_tokens, "type": block.type})
-        current_tokens += block_tokens
-        
+
+        tokens = encoder.encode(block.text)
+        block_tokens = len(tokens)
+
+        if block_tokens <= max_tokens:
+            # Normal path: block fits in a single chunk slot
+            if current_tokens + block_tokens > max_tokens and current_tokens > 0:
+                create_chunk()
+            current_blocks.append({"text": block.text, "tokens": block_tokens, "type": block.type})
+            current_tokens += block_tokens
+        else:
+            # Oversized block: split with overlap, preserving metadata on every sub-block
+            if current_tokens > 0:
+                create_chunk()
+
+            overlap = int(max_tokens * overlap_percent)
+            start = 0
+            while start < block_tokens:
+                end = min(start + max_tokens, block_tokens)
+                sub_tokens = tokens[start:end]
+                sub_text = encoder.decode(sub_tokens)
+                current_blocks.append({"text": sub_text, "tokens": len(sub_tokens), "type": block.type})
+                current_tokens = len(sub_tokens)
+                create_chunk()
+                start = end - overlap if end < block_tokens else end
+
     create_chunk()
     return chunks

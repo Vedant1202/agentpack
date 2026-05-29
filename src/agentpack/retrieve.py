@@ -1,3 +1,4 @@
+import hashlib
 import sqlite3
 import yaml
 import json
@@ -9,6 +10,34 @@ try:
     from fastembed import TextEmbedding
 except ImportError:
     TextEmbedding = None
+
+
+def _manifest_hash(pack_dir: Path) -> str:
+    """Stable hash of the pack's content: sorted chunk ids + source checksums."""
+    manifest_path = pack_dir / "manifest.yml"
+    if not manifest_path.exists():
+        return ""
+    with open(manifest_path, "r", encoding="utf-8") as f:
+        manifest = yaml.safe_load(f)
+    # Use chunk ids (ordering-stable) + source checksums as the content fingerprint
+    chunk_ids = sorted(c.get("id", "") for c in manifest.get("chunks", []))
+    src_checksums = sorted(s.get("checksum", "") for s in manifest.get("sources", []))
+    fingerprint = "|".join(chunk_ids) + "||" + "|".join(src_checksums)
+    return hashlib.sha256(fingerprint.encode()).hexdigest()
+
+
+def _fts_stored_hash(conn: sqlite3.Connection) -> str:
+    try:
+        row = conn.execute("SELECT value FROM _pack_meta WHERE key='content_hash'").fetchone()
+        return row[0] if row else ""
+    except sqlite3.OperationalError:
+        return ""
+
+
+def _fts_write_hash(conn: sqlite3.Connection, h: str):
+    conn.execute("CREATE TABLE IF NOT EXISTS _pack_meta (key TEXT PRIMARY KEY, value TEXT)")
+    conn.execute("INSERT OR REPLACE INTO _pack_meta (key, value) VALUES ('content_hash', ?)", (h,))
+    conn.commit()
 
 def build_fts_index(pack_dir: Path, db_path: Path):
     manifest_path = pack_dir / "manifest.yml"
@@ -50,6 +79,7 @@ def build_fts_index(pack_dir: Path, db_path: Path):
             )
             
     conn.commit()
+    _fts_write_hash(conn, _manifest_hash(pack_dir))
     return conn
 
 def build_vector_index(pack_dir: Path, vector_path: Path, meta_path: Path):
@@ -101,18 +131,25 @@ def build_vector_index(pack_dir: Path, vector_path: Path, meta_path: Path):
     np.save(vector_path, embeddings)
     with open(meta_path, "w", encoding="utf-8") as f:
         json.dump(metadata, f)
+    hash_path = vector_path.parent / "vector_index.hash"
+    hash_path.write_text(_manifest_hash(pack_dir))
 
 def search_fts(pack_dir: str, query: str, top_k: int = 5) -> List[Dict]:
     base_path = Path(pack_dir)
     indexes_dir = base_path / "indexes"
     indexes_dir.mkdir(exist_ok=True)
     db_path = indexes_dir / "lexical_index.db"
-    
-    if not db_path.exists():
-        conn = build_fts_index(base_path, db_path)
-    else:
+
+    current_hash = _manifest_hash(base_path)
+    if db_path.exists():
         conn = sqlite3.connect(db_path)
-        
+        if _fts_stored_hash(conn) != current_hash:
+            conn.close()
+            db_path.unlink()
+            conn = build_fts_index(base_path, db_path)
+    else:
+        conn = build_fts_index(base_path, db_path)
+
     cur = conn.cursor()
     
     clean_str = re.sub(r'[^a-zA-Z0-9\-\s]', ' ', query)
@@ -172,10 +209,18 @@ def search_vector(pack_dir: str, query: str, top_k: int = 5) -> List[Dict]:
     indexes_dir.mkdir(exist_ok=True)
     vector_path = indexes_dir / "vector_index.npy"
     meta_path = indexes_dir / "vector_meta.json"
-    
-    if not vector_path.exists() or not meta_path.exists():
+    hash_path = indexes_dir / "vector_index.hash"
+
+    current_hash = _manifest_hash(base_path)
+    stale = (
+        not vector_path.exists()
+        or not meta_path.exists()
+        or not hash_path.exists()
+        or hash_path.read_text().strip() != current_hash
+    )
+    if stale:
         build_vector_index(base_path, vector_path, meta_path)
-        
+
     if not vector_path.exists():
         return []
         

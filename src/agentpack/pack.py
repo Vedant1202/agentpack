@@ -1,10 +1,18 @@
 import os
 import yaml
 from datetime import datetime, timezone
+from importlib.metadata import version as _pkg_version, PackageNotFoundError
 from pathlib import Path
 from typing import List, Dict
 
 from agentpack.scanner import scan_directory
+
+
+def _get_pack_version() -> str:
+    try:
+        return _pkg_version("agent-context-packager")
+    except PackageNotFoundError:
+        return "dev"
 from agentpack.parsers.text_parser import TextParser
 from agentpack.parsers.markdown_parser import MarkdownParser
 from agentpack.parsers.csv_parser import CSVParser
@@ -12,7 +20,7 @@ from agentpack.parsers.pdf_parser import PDFParser
 from agentpack.chunker import chunk_document, Chunk
 from agentpack.models import SourceDocument
 
-def get_parser(suffix: str):
+def get_parser(suffix: str, fast_pdf: bool = False):
     suffix = suffix.lower()
     if suffix == ".txt":
         return TextParser()
@@ -21,7 +29,7 @@ def get_parser(suffix: str):
     elif suffix == ".csv":
         return CSVParser()
     elif suffix == ".pdf":
-        return PDFParser()
+        return PDFParser(fast_pdf=fast_pdf)
     return None
 
 def write_pack(
@@ -34,7 +42,8 @@ def write_pack(
     include_hidden: bool = False,
     verbose: bool = False,
     quiet: bool = False,
-    remove_empty_lines: bool = False
+    remove_empty_lines: bool = False,
+    fast_pdf: bool = False
 ):
     """
     Scans an input directory, parses supported files, chunks them, and generates a context pack.
@@ -76,10 +85,11 @@ def write_pack(
     
     sources = []
     all_chunks = []
+    all_tables = []
     
     for i, file_path in enumerate(files):
         source_id = f"src_{i:03d}"
-        parser = get_parser(file_path.suffix)
+        parser = get_parser(file_path.suffix, fast_pdf=fast_pdf)
         if not parser:
             continue
             
@@ -90,19 +100,22 @@ def write_pack(
             parser.remove_empty_lines = remove_empty_lines
             
         doc: SourceDocument = parser.parse(file_path, source_id)
-        
-        # Save table texts to tables dir if they are tables
-        # For MVP, CSV tables are blocks with type 'table'
+
         for block in doc.blocks:
             if block.type == "table":
-                # Write to tables dir
-                table_path = out_path / "tables" / f"{block.block_id}.csv"
+                table_path = out_path / "tables" / f"{block.block_id}.md"
                 with open(table_path, "w", encoding="utf-8") as f:
                     f.write(block.text)
-        
+                all_tables.append({
+                    "block_id": block.block_id,
+                    "source_id": source_id,
+                    "page": block.page,
+                    "path": f"tables/{block.block_id}.md",
+                })
+
         doc_chunks = chunk_document(doc)
         all_chunks.extend(doc_chunks)
-        
+
         sources.append({
             "id": source_id,
             "path": file_path.name,
@@ -130,12 +143,12 @@ def write_pack(
     manifest = {
         "pack": {
             "name": in_path.name,
-            "version": "0.1.0",
+            "version": _get_pack_version(),
             "generated_at": datetime.now(timezone.utc).isoformat()
         },
         "sources": sources,
         "chunks": chunks_meta,
-        "tables": [],
+        "tables": all_tables,
         "agent": {
             "instructions": [
                 "Use citations when answering.",

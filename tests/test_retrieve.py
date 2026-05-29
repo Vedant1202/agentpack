@@ -141,6 +141,58 @@ def test_search_hybrid(mock_embed_cls, mock_np_load, tmp_path):
 def test_retrieve_error_handling(mock_build):
     res = search_vector("fake_dir", "q")
     assert res == []
-    
+
     res = search_hybrid("fake_dir", "q")
     assert res == []
+
+
+def _make_pack(pack_dir, chunk_id, text):
+    """Helper: write a minimal pack with one chunk."""
+    import yaml
+    chunks_dir = pack_dir / "chunks"
+    chunks_dir.mkdir(exist_ok=True)
+    chunk_file = f"chunks/{chunk_id}.md"
+    (pack_dir / chunk_file).write_text(text)
+    manifest = {
+        "sources": [{"id": "s1", "checksum": chunk_id}],
+        "chunks": [{"id": chunk_id, "source_id": "s1", "path": chunk_file, "token_count": 5}],
+    }
+    with open(pack_dir / "manifest.yml", "w") as f:
+        yaml.dump(manifest, f)
+
+
+def test_fts_invalidated_on_repack(tmp_path):
+    """After re-packing with new content the FTS index must be rebuilt."""
+    pack_dir = tmp_path / "pack"
+    pack_dir.mkdir()
+    (pack_dir / "indexes").mkdir()
+
+    _make_pack(pack_dir, "chunk_v1", "first version content")
+    results_v1 = search_fts(str(pack_dir), "first version", top_k=5)
+    assert any(r["chunk_id"] == "chunk_v1" for r in results_v1), "v1 chunk not found"
+
+    # Simulate re-pack: swap in different chunk
+    _make_pack(pack_dir, "chunk_v2", "second version content")
+    results_v2 = search_fts(str(pack_dir), "second version", top_k=5)
+    assert any(r["chunk_id"] == "chunk_v2" for r in results_v2), (
+        "v2 chunk not found — index not invalidated after re-pack"
+    )
+    chunk_ids = [r["chunk_id"] for r in results_v2]
+    assert "chunk_v1" not in chunk_ids, "stale chunk_v1 still in index after re-pack"
+
+
+def test_fts_unchanged_pack_reuses_index(tmp_path):
+    """Unchanged pack must NOT rebuild the FTS index (no extra work)."""
+    import sqlite3 as _sqlite3
+    pack_dir = tmp_path / "pack"
+    pack_dir.mkdir()
+    (pack_dir / "indexes").mkdir()
+
+    _make_pack(pack_dir, "c1", "some content")
+    search_fts(str(pack_dir), "some", top_k=5)  # build
+
+    db_path = pack_dir / "indexes" / "lexical_index.db"
+    mtime_before = db_path.stat().st_mtime
+
+    search_fts(str(pack_dir), "content", top_k=5)  # should NOT rebuild
+    assert db_path.stat().st_mtime == mtime_before, "index was unnecessarily rebuilt"
