@@ -1,0 +1,47 @@
+Table of Contents
+that  do  not  comply  with  regulatory  standards,  or  otherwise  violate  environmental  laws,  regulations  or  permits,  or  other  health  and  safety  and  water  quality
+regulations, we could incur substantial fines, penalties or other sanctions or costs, as well as damage to our reputation. In the most serious cases, regulators could
+reduce requested rate increases or force us to discontinue operations and sell our operating assets to another utility or to a municipality. Given the nature of our
+business which, in part, involves providing water service for human consumption, any potential non-compliance with, or violation of, environmental, water quality
+and health and safety laws or regulations would likely pose a more significant risk to us than to a company not similarly involved in the water and wastewater
+industry.
+In addition, CERCLA authorizes the EPA to issue orders and bring enforcement actions to compel responsible parties to investigate and take remedial
+actions with respect to actual or threatened releases of hazardous substances, and can impose joint and several liability, without regard to fault, on responsible
+parties for the costs thereof. We are also required to obtain various environmental permits from regulatory agencies for our operations.
+We  incur  substantial  operating  and  capital  costs  on  an  ongoing  basis  to  comply  with  environmental,  water  quality  and  health  and  safety  laws  and
+regulations. These laws and regulations and their enforcement, have become more stringent over time, and new or stricter requirements could increase our costs.
+Although we may seek to recover ongoing compliance costs in our Regulated Businesses through customer rates, there can be no guarantee that the various state
+PUCs or similar regulatory bodies that govern our Regulated Businesses would approve rate increases that would enable us to recover such costs or that such costs
+will not materially and adversely affect our financial condition, results of operations, cash flows and liquidity.
+We  may  also  incur  liabilities  if,  under  environmental  laws  and  regulations,  we  are  required  to  investigate  and  clean  up  environmental  contamination,
+including potential releases of hazardous chemicals, such as chlorine, which we use to treat water, or at off-site locations where we have disposed of waste or
+caused an adverse environmental impact. The discovery of previously unknown conditions, or the imposition of cleanup obligations in the future, could result in
+significant costs and could adversely affect our financial condition, results of operations, cash flows and liquidity. Such remediation costs may not be covered by
+insurance and may make it difficult for us to secure insurance at acceptable rates in the future.
+Attention is being given to contaminants of emerging concern, including, without limitation, chemicals and other substances that currently do not have any
+regulatory standard in drinking water or have been recently created or discovered (including by means of scientific achievements in the analysis and detection of
+trace amounts of substances). Examples of sources of contaminants include, but are not limited to, newly created chemical compounds (including, for example,
+manufactured nanomaterials); human and veterinary products; perfluorinated and polyfluorinated compounds; bacteria, microbes, viruses (including the current
+novel coronavirus), amoebae and other pathogens; and residual by-products of disinfection. We rely upon governmental agencies to set appropriate regulatory
+standards to protect the public from these and other contaminants, and our role is to provide service that meets these standards, if any. In some of our states, PUCs
+may disapprove of cost recovery, in whole or in part, for implementation of treatment infrastructure for a contaminant in the absence of a regulatory standard.
+Furthermore,  given  the  rapid  pace  at  which  these  contaminants  are  being  created  and/or  discovered,  we  may  not  be  able  to  detect  and/or  mitigate  all  such
+substances in our drinking water system or supplies, which could have a material adverse impact on our financial condition, results of operations and reputation. In
+addition, we believe these contaminants may form the basis for additional or increased federal or state regulatory initiatives and requirements in the future, which
+could significantly increase the cost of our operations.
+Limitations on availability of water supplies or restrictions on our use of water supplies as a result of government regulation or action may adversely affect our
+access to sources of water, our ability to supply water to customers or the demand for our water services.
+Our ability to meet the existing and future demand of our customers depends on the availability of an adequate supply of water. As a general rule, sources of
+public water supply, including rivers, lakes, streams, groundwater aquifers and recycled water sources, are held in the public trust and are not generally owned by
+private interests. As a result, we typically do not own the water that we use in our operations, and the availability of our water supply is established through
+allocation rights (determined by legislation or court decisions) and passing-flow requirements set by governmental entities or by entering into water purchase
+agreements. These requirements, which can change from time to time, and vary by state or region, may adversely impact our water supply. Supply issues, such as
+drought, overuse of sources of water, the protection of threatened species or habitats, contamination or other factors may limit the availability of ground and
+surface water. If we are unable to secure available or alternative sources of water, our business, financial condition, results of operations and cash flows could be
+adversely affected.
+For example, in our Monterey County, California operations, we are seeking to augment our sources of water supply, principally to comply with an October
+2009 cease and desist order (the “2009 Order”), as amended by a July 2016 order (the “2016 Order”), of the SWRCB that requires our California subsidiary to
+significantly decrease its diversions from the Carmel River in accordance with a reduction schedule that terminates on December 31, 2021 (the “2021 Deadline”).
+See Item 3—Legal Proceedings—Alternative Water Supply in Lieu of Carmel River Diversions, which includes additional information regarding this matter. We
+are
+26

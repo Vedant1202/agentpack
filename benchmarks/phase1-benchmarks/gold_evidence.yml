@@ -1,0 +1,8 @@
+q1:
+  - file: apple_q1_earnings.md
+    section: Segment Performance
+q2:
+  - file: stock_data.csv
+q3:
+  - file: apple_q1_earnings.md
+    section: Segment Performance

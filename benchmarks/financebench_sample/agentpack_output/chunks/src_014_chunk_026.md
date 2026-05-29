@@ -1,0 +1,50 @@
+Table of Contents
+ITEM 1A.    RISK FACTORS
+We operate in a market and regulatory environment that involves significant risks, many of which are beyond our control. In addition to the other
+information included or incorporated by reference in this Annual Report on Form 10-K, the following material factors should be considered in evaluating our
+business and future prospects. Any of the following risks, either alone or taken together, could materially and adversely affect our business, financial position,
+results of operations, cash flows and liquidity.
+Risks Related to Our Industry and Business Operations
+Our Regulated Businesses are subject to extensive regulation by state PUCs and other regulatory agencies, which significantly affects our business,
+financial condition, results of operations and cash flows. Our Regulated Businesses also may be subject to fines, penalties and other sanctions for an
+inability to meet these regulatory requirements.
+Our Regulated Businesses provide water and wastewater services to our customers through subsidiaries that are subject to regulation by state PUCs. This
+regulation affects the rates we charge our customers and has a significant impact on our business and operations. Generally, the state PUCs authorize us to
+charge rates that they determine are sufficient to recover our prudently incurred operating expenses, including, but not limited to, operating and maintenance
+costs, depreciation, financing costs and taxes, and provide us with the opportunity to earn an appropriate rate of return on invested capital.
+Our ability to successfully implement our business plan and strategy depends on the rates authorized by the various state PUCs. We periodically file rate
+increase applications with state PUCs. The ensuing administrative process may be lengthy and costly. Our rate increase requests may or may not be approved,
+or may be partially approved, and any approval may not occur in a timely manner. Moreover, a PUC may not approve a rate request in an amount that is
+sufficient to:
+•
+cover our cost of operations, including: purchased water; chemicals; and fuel, power and other commodities used in our operations;
+•
+cover our operational labor and labor-related expenses, including without limitation costs and expenses associated with our pension and other
+post-employment benefits;
+•
+enable us to recover our investment; and
+•
+provide us with an opportunity to earn an appropriate rate of return on our investment.
+Approval by the PUCs is also required in connection with other aspects of our Regulated Businesses, which are required to have numerous permits,
+approvals and certificates from the PUCs that regulate their businesses and authorize acquisitions, dispositions, debt and/or equity financing, and, in certain
+cases, affiliated transactions. Some state PUCs are empowered to impose financial penalties, fines and other sanctions for non-compliance with applicable rules
+and regulations. Although we believe that each utility subsidiary has obtained or sought renewal of the material permits, approvals and certificates necessary
+for its existing operations, we are unable to predict the impact that future regulatory activities may have on our business.
+In any of these cases, our business, financial condition, results of operations, cash flows and liquidity may be adversely affected. Even if the rates
+approved are sufficient, we face the risk that we will not achieve the rates of return on our invested capital to the extent permitted by state PUCs. This could
+occur if certain conditions exist, including, but not limited to, (i) water usage is less than the level anticipated in establishing rates, (ii) customers increase their
+conservation efforts, (iii) we experience unusual or emergent situations, events or conditions (including with respect to the COVID-19 pandemic), or (iv) our
+investments or expenses prove to be higher than the levels estimated in establishing rates. It may be difficult to predict the outcome or impact of these events
+on us or the actions that may be taken by the PUCs or other governmental authorities in response thereto.
+Our operations and the quality of water we supply are subject to extensive and increasingly stringent environmental, water quality and health and safety
+laws and regulations, including with respect to contaminants of emerging concern, compliance with which could impact both our operating costs and
+capital expenditures, and violations of which could subject us to substantial liabilities and costs, as well as damage to our reputation.
+Our water and wastewater operations are subject to extensive federal, state and local laws and regulations. These requirements include, among others,
+CERCLA, the Clean Water Act, the Safe Drinking Water Act, the LCRR and other federal and state requirements. For example, state PUCs and environmental
+regulators set conditions and standards for the water and wastewater services we deliver. If we deliver water or wastewater services to our customers that do not
+comply with regulatory standards, or otherwise violate environmental laws, regulations or permits, or other health and safety and water quality regulations, we
+could incur substantial fines, penalties or other sanctions or costs, as well as damage to our reputation. In the most serious cases, regulators could reduce
+requested rate increases or force us to discontinue operations and sell our operating assets to another utility or to a municipality. Given the nature of our
+business which, in part, involves providing water service for human consumption, any potential non-compliance with, or violation of, environmental, water
+quality and health and safety laws or regulations would likely pose a more
+25

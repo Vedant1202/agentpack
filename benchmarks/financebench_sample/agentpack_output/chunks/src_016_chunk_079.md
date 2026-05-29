@@ -1,0 +1,221 @@
+82 | 2022 Annual Report
+Selected Financial Data
+2022
+2021
+2020
+2019
+2018
+Statement of Operations Data for the Years Ended December 31:
+(in millions, except per share amounts)
+Revenue
+$
+12,617 
+$
+11,141 
+$
+9,660 
+$
+10,189 
+$
+10,736 
+Income (loss) from continuing operations 
+(505)
+(955)
+149 
+477 
+1,349 
+Income (loss) from continuing operations attributable to The AES Corporation, net of tax
+(546)
+(413)
+43 
+302 
+985 
+Income from discontinued operations attributable to The AES Corporation, net of tax
+— 
+4 
+3 
+1 
+218 
+Net income (loss) attributable to The AES Corporation
+$
+(546)
+$
+(409)
+$
+46 
+$
+303 
+$
+1,203 
+Per Common Share Data
+ 
+ 
+ 
+ 
+ 
+Basic earnings (loss) per share:
+Income (loss) from continuing operations attributable to The AES Corporation common stockholders,
+net of tax
+$
+(0.82)
+$
+(0.62)
+$
+0.06 
+$
+0.46 
+$
+1.49 
+Income from discontinued operations attributable to The AES Corporation common stockholders, net
+of tax
+— 
+0.01 
+0.01 
+— 
+0.33 
+Net income (loss) attributable to The AES Corporation common stockholders
+$
+(0.82)
+$
+(0.61)
+$
+0.07 
+$
+0.46 
+$
+1.82 
+Diluted earnings (loss) per share:
+Income (loss) from continuing operations attributable to The AES Corporation common stockholders,
+net of tax
+$
+(0.82)
+$
+(0.62)
+$
+0.06 
+$
+0.45 
+$
+1.48 
+Income from discontinued operations attributable to The AES Corporation common stockholders, net
+of tax
+— 
+0.01 
+0.01 
+— 
+0.33 
+Net income (loss) attributable to The AES Corporation common stockholders
+$
+(0.82)
+$
+(0.61)
+$
+0.07 
+$
+0.45 
+$
+1.81 
+Dividends Declared Per Common Share
+$
+0.64 
+$
+0.61 
+$
+0.58 
+$
+0.55 
+$
+0.53 
+Cash Flow Data for the Years Ended December 31:
+Net cash provided by operating activities
+$
+2,715 
+$
+1,902 
+$
+2,755 
+$
+2,466 
+$
+2,343 
+Net cash used in investing activities
+(5,836)
+(3,051)
+(2,295)
+(2,721)
+(505)
+Net cash provided by (used in) financing activities
+3,758 
+797 
+(78)
+(86)
+(1,643)
+Total increase (decrease) in cash, cash equivalents and restricted cash
+603 
+(343)
+255 
+(431)
+215 
+Cash, cash equivalents and restricted cash, ending
+2,087 
+1,484 
+1,827 
+1,572 
+2,003 
+Balance Sheet Data at December 31:
+Total assets
+$
+38,363 
+$
+32,963 
+$
+34,603 
+$
+33,648 
+$
+32,521 
+Non-recourse debt (noncurrent)
+17,846 
+13,603 
+15,005 
+14,914 
+13,986 
+Recourse debt (noncurrent)
+3,894 
+3,729 
+3,446 
+3,391 
+3,650 
+Redeemable stock of subsidiaries
+1,321 
+1,257 
+872 
+888 
+879 
+Accumulated deficit
+(1,635)
+(1,089)
+(680)
+(692)
+(1,005)
+The AES Corporation stockholders' equity
+2,437 
+2,798 
+2,634 
+2,996 
+3,208 
+_____________________________
+Includes pre-tax losses on sales of business interests of $9 million, $1.7 billion, and $95 million for the years ended December 31, 2022, 2021, and 2020, respectively, and pre-tax gains of $28 million
+and $984 million for the years ended December 31, 2019, and 2018, respectively; pre-tax impairment expense of $1.5 billion, $1.6 billion, $864 million, $185 million, and $208 million for the years
+ended December 31, 2022, 2021, 2020, 2019, and 2018, respectively; other-than-temporary impairment of equity method investments of $175 million, $202 million, $92 million, and $147 million for the
+years ended December 31, 2022, 2020, 2019, and 2018, respectively; income tax benefit of $176 million related to the reversal of uncertain tax positions effectively settled upon the closure of the
+Company's 2017 U.S. tax return exam for the year ended December 31, 2021 and income tax expense of $194 million related to the one-time transition tax on foreign earnings and income tax benefit
+of $77 million related to the remeasurement of deferred tax assets and liabilities to the lower corporate tax rate for the year ended December 31, 2018; and net equity in losses of affiliates, primarily at
+Guacolda, of $123 million, and $172 million, for the years ended December 31, 2020 and 2019, respectively. See Note 24—Held-for-Sale and Dispositions, Note 22—Asset Impairment Expense, Note
+9 —Goodwill and Other Intangible Assets, Note 8—Investments in and Advances to Affiliates and Note 23—Income Taxes included in Item 8.—Financial Statements and Supplementary Data of this
+Form 10-K for further information.
+Includes gain on sale of $199 million related to Eletropaulo for the year ended December 31, 2018.
+(1)
+ (2)
+(1)
+(2)

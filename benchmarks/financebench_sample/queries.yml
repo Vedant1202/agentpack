@@ -1,0 +1,123 @@
+fb_0: What is the FY2018 capital expenditure amount (in USD millions) for 3M? Give
+  a response to the question by relying on the details shown in the cash flow statement.
+fb_15: What is the quantity of restructuring costs directly outlined in AES Corporation's
+  income statements for FY2022? If restructuring costs are not explicitly outlined
+  then state 0.
+fb_18: 'What is Amazon''s FY2017 days payable outstanding (DPO)? DPO is defined as:
+  365 * (average accounts payable between FY2016 and FY2017) / (FY2017 COGS + change
+  in inventory between FY2016 and FY2017). Round your answer to two decimal places.
+  Address the question by using the line items and information shown within the balance
+  sheet and the P&L statement.'
+fb_2: Is 3M a capital-intensive business based on FY2022 data?
+fb_20: By drawing conclusions from the information stated only in the income statement,
+  what is Amazon's FY2019 net income attributable to shareholders (in USD millions)?
+fb_21: What is Amcor's year end FY2020 net AR (in USD millions)? Address the question
+  by adopting the perspective of a financial analyst who can only use the details
+  shown within the balance sheet.
+fb_22: What was the key agenda of the AMCOR's 8k filing dated 1st July 2022?
+fb_23: Has AMCOR's quick ratio improved or declined between FY2023 and FY2022? If
+  the quick ratio is not something that a financial analyst would ask about a company
+  like this, then state that and explain why.
+fb_27: What is the nature & purpose of AMCOR's restructuring liability as oF Q2 of
+  FY2023 close?
+fb_28: What Was AMCOR's Adjusted Non GAAP EBITDA for FY 2023
+fb_30: Answer the following question as if you are an equity research analyst and
+  have lost internet connection so you do not have access to financial metric providers.
+  According to the details clearly outlined within the P&L statement and the statement
+  of cash flows, what is the FY2015 depreciation and amortization (D&A from cash flow
+  statement) % margin for AMD?
+fb_31: Does AMD have a reasonably healthy liquidity profile based on its quick ratio
+  for FY22? If the quick ratio is not relevant to measure liquidity, please state
+  that and explain why.
+fb_38: Which debt securities are registered to trade on a national securities exchange
+  under American Express' name as of 2022?
+fb_45: How much (in USD billions) did American Water Works pay out in cash dividends
+  for FY2020? Compute or extract the answer by primarily using the details outlined
+  in the statement of cash flows.
+fb_46: Basing your judgments off of the cash flow statement and the income statement,
+  what is American Water Works's FY2021 unadjusted operating income + depreciation
+  and amortization from the cash flow statement (unadjusted EBITDA) in USD millions?
+fb_47: Does American Water Works have positive working capital based on FY2022 data?
+  If working capital is not a useful or relevant metric for this company, then please
+  state that and explain why.
+fb_48: In agreement with the information outlined in the income statement, what is
+  the FY2015 - FY2017 3 year average net profit margin (as a %) for Best Buy? Answer
+  in units of percents and round to one decimal place.
+fb_49: What is the year end FY2019 total amount of inventories for Best Buy? Answer
+  in USD millions. Base your judgments on the information provided primarily in the
+  balance sheet.
+fb_5: Does 3M have a reasonably healthy liquidity profile based on its quick ratio
+  for Q2 of FY2023? If the quick ratio is not relevant to measure liquidity, please
+  state that and explain why.
+fb_50: Are Best Buy's gross margins historically consistent (not fluctuating more
+  than roughly 2% each year)? If gross margins are not a relevant metric for a company
+  like this, then please state that and explain why.
+fb_53: Was there any drop in Cash & Cash equivalents between FY 2023 and Q2 of FY2024?
+fb_56: Considering the data in the balance sheet, what is Block's (formerly known
+  as Square) FY2016 working capital ratio? Define working capital ratio as total current
+  assets divided by total current liabilities. Round your answer to two decimal places.
+fb_57: What is the FY2019 - FY2020 total revenue growth rate for Block (formerly known
+  as Square)? Answer in units of percents and round to one decimal place. Approach
+  the question asked by assuming the standpoint of an investment banking analyst who
+  only has access to the statement of income.
+fb_59: 'We need to calculate a financial metric by using information only provided
+  within the balance sheet. Please answer the following question: what is Boeing''s
+  year end FY2018 net property, plant, and equipment (in USD millions)?'
+fb_60: Are there any product categories / service categories that represent more than
+  20% of Boeing's revenue for FY2022?
+fb_67: 'What is the FY2017 return on assets (ROA) for Coca Cola? ROA is defined as:
+  FY2017 net income / (average total assets between FY2016 and FY2017). Round your
+  answer to two decimal places. Give a response to the question by relying on the
+  details shown in the balance sheet and the P&L statement.'
+fb_68: What is Coca Cola's FY2021 COGS % margin? Calculate what was asked by utilizing
+  the line items clearly shown in the income statement.
+fb_69: What is Coca Cola's FY2022 dividend payout ratio (using total cash dividends
+  paid and net income attributable to shareholders)? Round answer to two decimal places.
+  Answer the question asked by assuming you only have access to information clearly
+  displayed in the cash flow statement and the income statement.
+fb_70: 'Based on the information provided primarily in the balance sheet and the statement
+  of income, what is FY2020 days payable outstanding (DPO) for Corning? DPO is defined
+  as: 365 * (average accounts payable between FY2019 and FY2020) / (FY2020 COGS +
+  change in inventory between FY2019 and FY2020). Round your answer to two decimal
+  places.'
+fb_71: Taking into account the information outlined in the income statement, what
+  is the FY2019 - FY2021 3 year average unadjusted operating income % margin for Corning?
+  Answer in units of percents and round to one decimal place.
+fb_72: How much has the effective tax rate of Corning changed between FY2021 and FY2022?
+fb_74: Using only the information within the balance sheet, how much total assets
+  did Costco have at the end of FY2021? Answer in USD millions.
+fb_75: 'What is the FY2018 fixed asset turnover ratio for CVS Health? Fixed asset
+  turnover ratio is defined as: FY2018 revenue / (average PP&E between FY2017 and
+  FY2018). Round your answer to two decimal places. Calculate what was asked by utilizing
+  the line items clearly shown in the P&L statement and the balance sheet.'
+fb_76: Is CVS Health a capital-intensive business based on FY2022 data?
+fb_79: Does Foot Locker's new CEO have previous CEO experience in a similar company
+  to Footlocker?
+fb_8: 'What is the FY2019 fixed asset turnover ratio for Activision Blizzard? Fixed
+  asset turnover ratio is defined as: FY2019 revenue / (average PP&E between FY2018
+  and FY2019). Round your answer to two decimal places. Base your judgments on the
+  information provided primarily in the statement of income and the statement of financial
+  position.'
+fb_80: Were there any board member nominees who had substantially more votes against
+  joining than the other nominees?
+fb_81: 'What is the FY2019 cash conversion cycle (CCC) for General Mills? CCC is defined
+  as: DIO + DSO - DPO. DIO is defined as: 365 * (average inventory between FY2018
+  and FY2019) / (FY2019 COGS). DSO is defined as: 365 * (average accounts receivable
+  between FY2018 and FY2019) / (FY2019 Revenue). DPO is defined as: 365 * (average
+  accounts payable between FY2018 and FY2019) / (FY2019 COGS + change in inventory
+  between FY2018 and FY2019). Round your answer to two decimal places. Address the
+  question by using the line items and information shown within the income statement
+  and the balance sheet.'
+fb_82: By drawing conclusions from the information stated only in the statement of
+  financial position, what is General Mills's FY2020 working capital ratio? Define
+  working capital ratio as total current assets divided by total current liabilities.
+  Round your answer to two decimal places.
+fb_84: 'We want to calculate a financial metric. Please help us compute it by basing
+  your answers off of the cash flow statement and the income statement. Here''s the
+  question: what is the FY2022 retention ratio (using total cash dividends paid and
+  net income attributable to shareholders) for General Mills? Round answer to two
+  decimal places.'
+fb_94: Which of JPM's business segments had the lowest net revenue in 2021 Q1?
+fb_96: Are JPM's gross margins historically consistent (not fluctuating more than
+  roughly 2% each year)? If gross margins are not a relevant metric for a company
+  like this, then please state that and explain why.

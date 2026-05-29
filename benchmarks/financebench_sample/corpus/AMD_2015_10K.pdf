@@ -1,0 +1,1507 @@
+<!DOCTYPE html>
+<html lang="en">
+    <head>
+        <meta http-equiv="x-ua-compatible" content="ie=edge">
+        <meta charset="utf-8">
+                        <link rel="alternate" type="application/rss+xml" title="Advanced Micro Devices, Inc. - Recent News" href="https://ir.amd.com/news-events/press-releases/rss" />
+                
+        <title>SEC Filings :: Advanced Micro Devices, Inc. (AMD)</title>
+        
+        <link rel="canonical" href="https://ir.amd.com/financial-information/sec-filings/filter/annual-filings/content/0000002488-16-000111/0000002488-16-000111.pdf">
+<meta property="og:url" content="https://ir.amd.com/financial-information/sec-filings/filter/annual-filings/content/0000002488-16-000111/0000002488-16-000111.pdf">
+
+
+<meta property="og:site_name" content="Advanced Micro Devices, Inc.">
+<meta property="og:title" content="SEC Filings">
+<meta property="og:type" content="website">
+
+<meta property="og:image" content="https://d1io3yog0oux5.cloudfront.net/_3a6def5a328d14d7990e894d5269c4ad/amd/db/834/7308/social_image_resized.jpg">
+<meta name="twitter:card" content="summary_large_image">
+
+
+
+
+<script type="application/ld+json">
+	{"@context":"http:\/\/schema.org","@type":"Corporation","name":"Advanced Micro Devices, Inc.","address":{"@type":"PostalAddress","streetAddress":"2485 Augustine Drive ","addressLocality":"Santa Clara, CA","postalCode":"95054","addressCountry":""},"legalName":"Advanced Micro Devices, Inc.","description":"For 50 years AMD has driven innovation in high-performance computing, graphics and visualization technologies \u2015 the building blocks for gaming, immersive platforms and the data center. Hundreds of millions of consumers, leading Fortune 500 businesses and cutting-edge scientific research facilities around the world rely on AMD technology daily to improve how they live, work and play. AMD employees around the world are focused on building great products that push the boundaries of what is possible.","tickerSymbol":": AMD","url":"https:\/\/ir.amd.com","logo":"https:\/\/d1io3yog0oux5.cloudfront.net\/_3a6def5a328d14d7990e894d5269c4ad\/amd\/logo.png","image":"https:\/\/d1io3yog0oux5.cloudfront.net\/_3a6def5a328d14d7990e894d5269c4ad\/amd\/db\/834\/7308\/social_image_resized.jpg","sameAs":[]}</script>
+
+<!-- Elastic Search -->
+ 
+ 
+        <meta name="viewport" content="initial-scale=1.0, width=device-width">
+        
+                <link rel="preconnect" href="https://d1io3yog0oux5.cloudfront.net">
+        <link rel="preconnect" href="https://qmod.quotemedia.com">
+        
+                        <link href="https://d1io3yog0oux5.cloudfront.net/_3a6def5a328d14d7990e894d5269c4ad/amd/files/theme/css/ir.stockpr.css" rel="stylesheet" type="text/css" media="screen" />
+                <link rel="stylesheet" href="https://d1io3yog0oux5.cloudfront.net/_3a6def5a328d14d7990e894d5269c4ad/amd/files/theme/css/style.css">
+                        
+                <link rel="shortcut icon" href="https://d1io3yog0oux5.cloudfront.net/_3a6def5a328d14d7990e894d5269c4ad/amd/files/theme/images/favicons/favicon.ico">
+        <link rel="apple-touch-icon" sizes="180x180" href="https://d1io3yog0oux5.cloudfront.net/_3a6def5a328d14d7990e894d5269c4ad/amd/files/theme/images/favicons/apple-touch-icon.png">
+        <link rel="icon" type="image/png" href="https://d1io3yog0oux5.cloudfront.net/_3a6def5a328d14d7990e894d5269c4ad/amd/files/theme/images/favicons/favicon-32x32.png" sizes="32x32">
+        <link rel="icon" type="image/png" href="https://d1io3yog0oux5.cloudfront.net/_3a6def5a328d14d7990e894d5269c4ad/amd/files/theme/images/favicons/favicon-16x16.png" sizes="16x16">
+        <link rel="manifest" href="https://d1io3yog0oux5.cloudfront.net/_3a6def5a328d14d7990e894d5269c4ad/amd/files/theme/images/favicons/manifest.json">
+        <link rel="mask-icon" href="https://d1io3yog0oux5.cloudfront.net/_3a6def5a328d14d7990e894d5269c4ad/amd/files/theme/images/favicons/safari-pinned-tab.svg">
+        <meta name="theme-color" content="#ffffff">  
+    
+                
+<script type="text/plain" class="optanon-category-C0002">
+    (function(i,s,o,g,r,a,m){i['GoogleAnalyticsObject']=r;i[r]=i[r]||function(){
+    (i[r].q=i[r].q||[]).push(arguments)},i[r].l=1*new Date();a=s.createElement(o),
+    m=s.getElementsByTagName(o)[0];a.async=1;a.src=g;m.parentNode.insertBefore(a,m)
+    })(window,document,'script','https://www.google-analytics.com/analytics.js','ga');
+    
+    ga('create', '', 'ir.amd.com');
+    
+    (function() {
+        var opts = {};
+        var prefix = "/investors";
+        if (location.hostname.indexOf('stockpr.com') == 0) {
+            opts.cookiePath = location.pathname.substring(0, location.pathname.indexOf('/', 1) + 1)
+            opts.page = prefix + location.pathname.substring(location.pathname.indexOf('/', 1));
+        } else if (location.hostname.match(/^ir\./)) {
+            opts.page = prefix + location.pathname;
+        }
+        ga('send', 'pageview', opts);
+    })();
+    
+    /**
+        * Function that tracks a click on an outbound link in Analytics.
+        * This function takes a valid URL string as an argument, and uses that URL string
+        * as the event label. Setting the transport method to 'beacon' lets the hit be sent
+        * using 'navigator.sendBeacon' in browser that support it.
+        */
+        var trackOutboundLink = function(url,category) {
+            if (!category) category = 'outbound';
+           ga('send', 'event', category, 'click', url, {
+             'transport': 'beacon'
+           });
+        }
+        
+        // Add outbound link tracking in GA
+        jq('a').not('.fancybox').each(function(){
+            var href = jq(this).attr('href');
+            if (typeof href === "undefined") return;
+            if (href.indexOf('http') >= 0 
+                && ( href.indexOf(website_base_url) < 0 && href.indexOf(ir_base_url) < 0 && href.indexOf('eqcdn') < 0 && href.indexOf('amazonaws') < 0)) {
+                jq(this).attr('onclick', 'trackOutboundLink("' + href + '")');    
+            }else {
+                // It's not an outbound link, but if it's a link to a file, we want to track that.
+                if (href.match(/(\.pdf|\.jpg|\.png|\.gif|\.ppt|\.jpeg|\.mp3|\.mp4|\.wav|\.docx|\.doc|\.xsl|\.cslx)/g)) {
+                    jq(this).attr('onclick', 'trackOutboundLink("' + href + '", "documents-and-files")');
+                }
+            }
+        });
+</script>
+        <script type="text/plain" class="optanon-category-C0004">
+    _linkedin_partner_id = "78508";
+    window._linkedin_data_partner_ids = window._linkedin_data_partner_ids || [];
+    window._linkedin_data_partner_ids.push(_linkedin_partner_id);
+</script>
+<script type="text/plain" class="optanon-category-C0004">
+    (function(){var s = document.getElementsByTagName("script")[0];
+    var b = document.createElement("script");
+    b.type = "text/javascript";b.async = true;
+    b.src = "https://snap.licdn.com/li.lms-analytics/insight.min.js";
+    s.parentNode.insertBefore(b, s);})();
+</script>    </head>    <body class="pg-107632 page-type-sec-filings ir  has-sub-nav">
+        <div class="general-wrapper">
+            <nav id="header" class="affixed" aria-label="Main">
+    <div id="skipLinks">
+        <a href="#mainContent">Skip to main content</a>
+                <a class="sub-navigation-link" href="#sectionNav">Skip to section navigation</a>
+                <a href="#footer">Skip to footer</a>
+    </div>
+        <div class="logo-wrapper">
+        <div class="container">
+            <div class="d-flex justify-content-between">
+                <div class="logo">
+                    <a href="/">
+                        <img src="https://d1io3yog0oux5.cloudfront.net/_3a6def5a328d14d7990e894d5269c4ad/amd/db/867/8386/image.svg"
+                            width="110"
+                            height="26"
+                            alt="Advanced Micro Devices, Inc. IR Overview">
+                    </a>
+                                        <div class="ir-logo-text">Investor Relations</div>
+                                                        </div>
+            </div>
+        </div>
+    </div>
+    <div class="nav-wrapper">
+        <div class="container">
+            <div class="d-flex justify-content-between">
+                <button class="mobile-nav-trigger" id="showRight" aria-label="Expand main navigation" aria-expanded="false"
+                    aria-controls="mobile-nav">
+                    <span class="meat"></span>
+                    <span class="meat"></span>
+                    <span class="meat"></span>
+                </button>
+                <nav class="cbp-spmenu cbp-spmenu-vertical cbp-spmenu-right main-nav" id="mobile-nav" aria-label="Main Navigation">
+                    <ul class="main-menu">
+        <li class="" data-submenu-id="submenu-overview">
+        <a href="/" 
+        target="_self"
+                >IR Overview</a>
+            </li>
+        <li class="has-children" data-submenu-id="submenu-news-events">
+        <a href="/news-events" 
+        target="_self"
+                >News &amp; Events</a>
+                <ul id="submenu-news-events">
+                        <li class="">
+                <a href="/news-events/press-releases" 
+                target="_self"
+                                    >Press Releases</a>
+            </li>
+                        <li class="">
+                <a href="/news-events/ir-calendar" 
+                target="_self"
+                                    >IR Calendar</a>
+            </li>
+                        <li class="">
+                <a href="/news-events/financial-analyst-day" 
+                target="_self"
+                                    >Financial Analyst Day</a>
+            </li>
+                        <li class="">
+                <a href="/news-events/annual-meeting-of-stockholders" 
+                target="_self"
+                                    >Annual Meeting of Stockholders</a>
+            </li>
+                    </ul>
+            </li>
+        <li class="has-children" data-submenu-id="submenu-stock-data">
+        <a href="/stock-data" 
+        target="_self"
+                >Stock Data</a>
+                <ul id="submenu-stock-data">
+                        <li class="">
+                <a href="/stock-data/stock-data" 
+                target="_self"
+                                    >Stock Data</a>
+            </li>
+                        <li class="">
+                <a href="/stock-data/price-history" 
+                target="_self"
+                                    >Price History</a>
+            </li>
+                        <li class="">
+                <a href="/stock-data/stock-split-history" 
+                target="_self"
+                                    >Stock Split History</a>
+            </li>
+                        <li class="">
+                <a href="/stock-data/analyst-coverage" 
+                target="_self"
+                                    >Analyst Coverage</a>
+            </li>
+                        <li class="">
+                <a href="/stock-data/transfer-agent" 
+                target="_self"
+                                    >Transfer Agent</a>
+            </li>
+                    </ul>
+            </li>
+        <li class="has-children active" data-submenu-id="submenu-financial-information">
+        <a href="/financial-information" 
+        target="_self"
+        aria-current="true"        >Financial Information</a>
+                <ul id="submenu-financial-information">
+                        <li class="">
+                <a href="/financial-information/financial-results" 
+                target="_self"
+                                    >Financial Results</a>
+            </li>
+                        <li class="active active-landing">
+                <a href="/financial-information/sec-filings" 
+                target="_self"
+                aria-current="page"                    >SEC Filings</a>
+            </li>
+                    </ul>
+            </li>
+        <li class="has-children" data-submenu-id="submenu-governance">
+        <a href="/governance" 
+        target="_self"
+                >Governance</a>
+                <ul id="submenu-governance">
+                        <li class="">
+                <a href="/governance/board-of-directors" 
+                target="_self"
+                                    >Board of Directors</a>
+            </li>
+                        <li class="">
+                <a href="https://www.amd.com/en/corporate/leadership.html" 
+                target="_blank"
+                                    rel="noopener">Leadership</a>
+            </li>
+                        <li class="">
+                <a href="/governance/board-committees" 
+                target="_self"
+                                    >Board Committees</a>
+            </li>
+                        <li class="">
+                <a href="/governance/governance-documents" 
+                target="_self"
+                                    >Governance Documents</a>
+            </li>
+                        <li class="">
+                <a href="https://www.amd.com/en/corporate/corporate-responsibility.html" 
+                target="_blank"
+                                    rel="noopener">Corporate Responsibility</a>
+            </li>
+                    </ul>
+            </li>
+        <li class="has-children last-item" data-submenu-id="submenu-contacts-faq">
+        <a href="/contacts-faq" 
+        target="_self"
+                >Contacts &amp; FAQ</a>
+                <ul id="submenu-contacts-faq">
+                        <li class="">
+                <a href="/contacts-faq/contacts" 
+                target="_self"
+                                    >Contacts</a>
+            </li>
+                        <li class="">
+                <a href="/contacts-faq/email-alerts" 
+                target="_self"
+                                    >Email Alerts</a>
+            </li>
+                        <li class="">
+                <a href="/contacts-faq/faq" 
+                target="_self"
+                                    >FAQ</a>
+            </li>
+                    </ul>
+            </li>
+    </ul>                </nav>
+            </div>
+        </div>
+    </div>
+</nav>
+
+            <div class="eq-container">
+                <header class="page-banner overlay dark" style="background: url(https://d1io3yog0oux5.cloudfront.net/_3a6def5a328d14d7990e894d5269c4ad/amd/db/930/7847/image_resized.jpg);background-position: 50% 50%;background-repeat: no-repeat;background-size: cover;background-color: #333;">
+    	<div class="container">
+	    <div class="row justify-content-start text-left">
+	        <div class="col-lg-10">
+                            <h1>SEC Filings</h1>
+                                                                	    </div>
+        </div>
+    </div>
+    </header>                                <nav id="sectionNav" class="sub-navigation-wrapper" aria-label="Financial Information Section">
+    <div class="sub-navigation affixed">
+    	<div class="container">
+            <a class="visible-xs visible-sm mobile-sub-nav-trigger collapsed" role="button" data-toggle="collapse" data-target="#sub-navigation">
+                <div class="trigger-container">
+            		<div class="meat"></div>
+              		<div class="meat"></div>
+              		<div class="meat"></div>
+              	</div>
+            	Financial Information            </a>
+            <div class="collapse sb-nav clearfix"  id="sub-navigation">
+                <h3>Financial Information</h3>
+                <ul>
+                                        <li class="">
+                        <a href="/financial-information/financial-results"
+                            target="_self"
+                                                                                >Financial Results</a>
+                                            </li>
+                	                    <li class="active active-landing">
+                        <a href="/financial-information/sec-filings"
+                            target="_self"
+                                                        aria-current="page"                        >SEC Filings</a>
+                                            </li>
+                	                </ul>
+            </div>
+        </div>
+    </div>
+</nav>                                <div class="container">
+                    <div class="row justify-content-center">
+                        <div class="col-lg-12">
+                            <main id="mainContent" class="main-content has-tertiary-nav">
+                                <form action="https://ir.amd.com/financial-information/sec-filings" id="sec-filing-filter">
+<div class="row">
+    <div class="col-sm-6 col-lg-4">
+        <label for="form_type">Filing Type</label>
+        <select class="eq-select" name="form_type" id="form_type" aria-label="Filter by Filing Type">
+                <option value="">View All</option>
+                                <option value="10-K">10-K</option>
+                                <option value="10-K/A">10-K/A</option>
+                                <option value="10-K405">10-K405</option>
+                                <option value="10-K405/A">10-K405/A</option>
+                                <option value="10-Q">10-Q</option>
+                                <option value="10-Q/A">10-Q/A</option>
+                                <option value="13F-HR">13F-HR</option>
+                                <option value="144">144</option>
+                                <option value="15-12G">15-12G</option>
+                                <option value="15-15D">15-15D</option>
+                                <option value="25">25</option>
+                                <option value="3">3</option>
+                                <option value="3/A">3/A</option>
+                                <option value="305B2">305B2</option>
+                                <option value="4">4</option>
+                                <option value="4/A">4/A</option>
+                                <option value="424B2">424B2</option>
+                                <option value="424B3">424B3</option>
+                                <option value="424B5">424B5</option>
+                                <option value="425">425</option>
+                                <option value="5">5</option>
+                                <option value="5/A">5/A</option>
+                                <option value="8-A12B">8-A12B</option>
+                                <option value="8-K">8-K</option>
+                                <option value="8-K/A">8-K/A</option>
+                                <option value="ARS">ARS</option>
+                                <option value="AW">AW</option>
+                                <option value="CERTNAS">CERTNAS</option>
+                                <option value="CORRESP">CORRESP</option>
+                                <option value="CT ORDER">CT ORDER</option>
+                                <option value="DEF 14A">DEF 14A</option>
+                                <option value="DEFA14A">DEFA14A</option>
+                                <option value="DEFM14A">DEFM14A</option>
+                                <option value="DEFR14A">DEFR14A</option>
+                                <option value="EFFECT">EFFECT</option>
+                                <option value="FWP">FWP</option>
+                                <option value="IRANNOTICE">IRANNOTICE</option>
+                                <option value="NO ACT">NO ACT</option>
+                                <option value="POS AM">POS AM</option>
+                                <option value="POS EX">POS EX</option>
+                                <option value="PRE 14A">PRE 14A</option>
+                                <option value="PRER14A">PRER14A</option>
+                                <option value="S-3">S-3</option>
+                                <option value="S-3/A">S-3/A</option>
+                                <option value="S-3ASR">S-3ASR</option>
+                                <option value="S-4">S-4</option>
+                                <option value="S-4/A">S-4/A</option>
+                                <option value="S-4MEF">S-4MEF</option>
+                                <option value="S-8">S-8</option>
+                                <option value="S-8 POS">S-8 POS</option>
+                                <option value="SC 13D">SC 13D</option>
+                                <option value="SC 13D/A">SC 13D/A</option>
+                                <option value="SC 13G">SC 13G</option>
+                                <option value="SC 13G/A">SC 13G/A</option>
+                                <option value="SC TO-C">SC TO-C</option>
+                                <option value="SC TO-I">SC TO-I</option>
+                                <option value="SC TO-I/A">SC TO-I/A</option>
+                                <option value="SC TO-T">SC TO-T</option>
+                                <option value="SCHEDULE 13G">SCHEDULE 13G</option>
+                                <option value="SCHEDULE 13G/A">SCHEDULE 13G/A</option>
+                                <option value="SD">SD</option>
+                                <option value="SEC STAFF LETTER">SEC STAFF LETTER</option>
+                                <option value="UPLOAD">UPLOAD</option>
+                        </select>
+    </div>
+    <div class="col-sm-6 col-lg-4 mt-3 mt-sm-0">
+        <label for="year">Year</label>
+        <select class="eq-select" name="year" id="year" aria-label="Filter by Year">
+            <option value="">View All</option>
+                        <option >2026</option>
+                        <option >2025</option>
+                        <option >2024</option>
+                        <option >2023</option>
+                        <option >2022</option>
+                        <option >2021</option>
+                        <option >2020</option>
+                        <option >2019</option>
+                        <option >2018</option>
+                        <option >2017</option>
+                        <option >2016</option>
+                        <option >2015</option>
+                        <option >2014</option>
+                        <option >2013</option>
+                        <option >2012</option>
+                        <option >2011</option>
+                        <option >2010</option>
+                        <option >2009</option>
+                        <option >2008</option>
+                        <option >2007</option>
+                        <option >2006</option>
+                        <option >2005</option>
+                        <option >2004</option>
+                        <option >2003</option>
+                        <option >2002</option>
+                        <option >2001</option>
+                        <option >2000</option>
+                        <option >1999</option>
+                        <option >1998</option>
+                        <option >1997</option>
+                        <option >1996</option>
+                        <option >1995</option>
+                        <option >1994</option>
+                    </select>
+    </div>
+</div>
+</form>
+<table class="content-table spr-ir-sec-filings">
+    <caption class="sr-only">SEC Filings</caption>
+    <thead>
+        <tr>
+            <th class="spr-sec-date" scope="col">Date</th>
+            <th class="spr-sec-form" scope="col">Form</th>
+            <th class="spr-sec-desc" scope="col">Description</th>
+                        <th class="spr-sec-view-docs" scope="col">XBRL</th> 
+            <th class="spr-sec-pages" scope="col">Pages</th>
+        </tr>
+    </thead>
+    <tbody>
+                                    <tr>
+                  <td class="spr-sec-date">05/22/26</td>
+                  <td class="spr-sec-form">
+                    4   
+                  </td>
+                  <td class="spr-sec-desc">
+                    <a
+                        href="https://ir.amd.com/financial-information/sec-filings/content/0000002488-26-000100/wk-form4_1779486197.html"
+                        aria-label="Form 4: Statement of changes in beneficial ownership of securities published 05/22/26"
+                        class="doc-title"
+                        target="_blank" rel="noopener"
+                    >Form 4: Statement of changes in beneficial ownership of securities</a>
+                  </td>
+                                    <td class="spr-sec-view-docs">
+                                      </td>
+                  <td class="spr-sec-pages">2</td>
+                </tr>
+                            <tr>
+                  <td class="spr-sec-date">05/20/26</td>
+                  <td class="spr-sec-form">
+                    144   
+                  </td>
+                  <td class="spr-sec-desc">
+                    <a
+                        href="https://ir.amd.com/financial-information/sec-filings/content/0001950047-26-004852/primary_doc.html"
+                        aria-label="Form 144: Report of proposed sale of securities published 05/20/26"
+                        class="doc-title"
+                        target="_blank" rel="noopener"
+                    >Form 144: Report of proposed sale of securities</a>
+                  </td>
+                                    <td class="spr-sec-view-docs">
+                                      </td>
+                  <td class="spr-sec-pages">2</td>
+                </tr>
+                            <tr>
+                  <td class="spr-sec-date">05/19/26</td>
+                  <td class="spr-sec-form">
+                    4   
+                  </td>
+                  <td class="spr-sec-desc">
+                    <a
+                        href="https://ir.amd.com/financial-information/sec-filings/content/0000002488-26-000098/wk-form4_1779221586.html"
+                        aria-label="Form 4: Statement of changes in beneficial ownership of securities published 05/19/26"
+                        class="doc-title"
+                        target="_blank" rel="noopener"
+                    >Form 4: Statement of changes in beneficial ownership of securities</a>
+                  </td>
+                                    <td class="spr-sec-view-docs">
+                                      </td>
+                  <td class="spr-sec-pages">1</td>
+                </tr>
+                            <tr>
+                  <td class="spr-sec-date">05/15/26</td>
+                  <td class="spr-sec-form">
+                    4   
+                  </td>
+                  <td class="spr-sec-desc">
+                    <a
+                        href="https://ir.amd.com/financial-information/sec-filings/content/0000002488-26-000096/wk-form4_1778879141.html"
+                        aria-label="Form 4: Statement of changes in beneficial ownership of securities published 05/15/26"
+                        class="doc-title"
+                        target="_blank" rel="noopener"
+                    >Form 4: Statement of changes in beneficial ownership of securities</a>
+                  </td>
+                                    <td class="spr-sec-view-docs">
+                                      </td>
+                  <td class="spr-sec-pages">3</td>
+                </tr>
+                            <tr>
+                  <td class="spr-sec-date">05/15/26</td>
+                  <td class="spr-sec-form">
+                    4   
+                  </td>
+                  <td class="spr-sec-desc">
+                    <a
+                        href="https://ir.amd.com/financial-information/sec-filings/content/0000002488-26-000094/wk-form4_1778878661.html"
+                        aria-label="Form 4: Statement of changes in beneficial ownership of securities published 05/15/26"
+                        class="doc-title"
+                        target="_blank" rel="noopener"
+                    >Form 4: Statement of changes in beneficial ownership of securities</a>
+                  </td>
+                                    <td class="spr-sec-view-docs">
+                                      </td>
+                  <td class="spr-sec-pages">1</td>
+                </tr>
+                            <tr>
+                  <td class="spr-sec-date">05/15/26</td>
+                  <td class="spr-sec-form">
+                    4   
+                  </td>
+                  <td class="spr-sec-desc">
+                    <a
+                        href="https://ir.amd.com/financial-information/sec-filings/content/0000002488-26-000092/wk-form4_1778878523.html"
+                        aria-label="Form 4: Statement of changes in beneficial ownership of securities published 05/15/26"
+                        class="doc-title"
+                        target="_blank" rel="noopener"
+                    >Form 4: Statement of changes in beneficial ownership of securities</a>
+                  </td>
+                                    <td class="spr-sec-view-docs">
+                                      </td>
+                  <td class="spr-sec-pages">1</td>
+                </tr>
+                            <tr>
+                  <td class="spr-sec-date">05/15/26</td>
+                  <td class="spr-sec-form">
+                    4   
+                  </td>
+                  <td class="spr-sec-desc">
+                    <a
+                        href="https://ir.amd.com/financial-information/sec-filings/content/0000002488-26-000090/wk-form4_1778878435.html"
+                        aria-label="Form 4: Statement of changes in beneficial ownership of securities published 05/15/26"
+                        class="doc-title"
+                        target="_blank" rel="noopener"
+                    >Form 4: Statement of changes in beneficial ownership of securities</a>
+                  </td>
+                                    <td class="spr-sec-view-docs">
+                                      </td>
+                  <td class="spr-sec-pages">1</td>
+                </tr>
+                            <tr>
+                  <td class="spr-sec-date">05/15/26</td>
+                  <td class="spr-sec-form">
+                    4   
+                  </td>
+                  <td class="spr-sec-desc">
+                    <a
+                        href="https://ir.amd.com/financial-information/sec-filings/content/0000002488-26-000088/wk-form4_1778878356.html"
+                        aria-label="Form 4: Statement of changes in beneficial ownership of securities published 05/15/26"
+                        class="doc-title"
+                        target="_blank" rel="noopener"
+                    >Form 4: Statement of changes in beneficial ownership of securities</a>
+                  </td>
+                                    <td class="spr-sec-view-docs">
+                                      </td>
+                  <td class="spr-sec-pages">1</td>
+                </tr>
+                            <tr>
+                  <td class="spr-sec-date">05/15/26</td>
+                  <td class="spr-sec-form">
+                    4   
+                  </td>
+                  <td class="spr-sec-desc">
+                    <a
+                        href="https://ir.amd.com/financial-information/sec-filings/content/0000002488-26-000086/wk-form4_1778878294.html"
+                        aria-label="Form 4: Statement of changes in beneficial ownership of securities published 05/15/26"
+                        class="doc-title"
+                        target="_blank" rel="noopener"
+                    >Form 4: Statement of changes in beneficial ownership of securities</a>
+                  </td>
+                                    <td class="spr-sec-view-docs">
+                                      </td>
+                  <td class="spr-sec-pages">1</td>
+                </tr>
+                            <tr>
+                  <td class="spr-sec-date">05/15/26</td>
+                  <td class="spr-sec-form">
+                    4   
+                  </td>
+                  <td class="spr-sec-desc">
+                    <a
+                        href="https://ir.amd.com/financial-information/sec-filings/content/0000002488-26-000084/wk-form4_1778878215.html"
+                        aria-label="Form 4: Statement of changes in beneficial ownership of securities published 05/15/26"
+                        class="doc-title"
+                        target="_blank" rel="noopener"
+                    >Form 4: Statement of changes in beneficial ownership of securities</a>
+                  </td>
+                                    <td class="spr-sec-view-docs">
+                                      </td>
+                  <td class="spr-sec-pages">1</td>
+                </tr>
+                        </tbody>
+</table>
+<div class="rss-link">
+	<a href="https://ir.amd.com/financial-information/sec-filings/rss" class="link--icon" target="_blank" rel="noopener">
+		<span class="material-icons" aria-hidden="true">rss_feed</span> Filing RSS
+	</a>
+</div>
+
+<nav class="pagination-wrapper" aria-label="pagination">
+    <ul id="pagination--desktop" class="pagination mt-5">
+                
+
+                
+                            <li class="page-item active">
+                <a class="page-link"
+                    href="https://ir.amd.com/financial-information/sec-filings?page=1"
+                    aria-current="page"                ><span class="sr-only">Page </span>1</a>
+            </li>
+                                <li class="page-item">
+                <a class="page-link"
+                    href="https://ir.amd.com/financial-information/sec-filings?page=2"
+                                    ><span class="sr-only">Page </span>2</a>
+            </li>
+                                <li class="page-item">
+                <a class="page-link"
+                    href="https://ir.amd.com/financial-information/sec-filings?page=3"
+                                    ><span class="sr-only">Page </span>3</a>
+            </li>
+                                <li class="page-item">
+                <a class="page-link"
+                    href="https://ir.amd.com/financial-information/sec-filings?page=4"
+                                    ><span class="sr-only">Page </span>4</a>
+            </li>
+                                <li class="page-item">
+                <a class="page-link"
+                    href="https://ir.amd.com/financial-information/sec-filings?page=5"
+                                    ><span class="sr-only">Page </span>5</a>
+            </li>
+                                <li class="page-item">
+                <a class="page-link"
+                    href="https://ir.amd.com/financial-information/sec-filings?page=6"
+                                    ><span class="sr-only">Page </span>6</a>
+            </li>
+                                <li class="page-item">
+                <a class="page-link"
+                    href="https://ir.amd.com/financial-information/sec-filings?page=7"
+                                    ><span class="sr-only">Page </span>7</a>
+            </li>
+                                <li class="page-item">
+                <a class="page-link"
+                    href="https://ir.amd.com/financial-information/sec-filings?page=8"
+                                    ><span class="sr-only">Page </span>8</a>
+            </li>
+                                <li class="page-item">
+                <a class="page-link"
+                    href="https://ir.amd.com/financial-information/sec-filings?page=9"
+                                    ><span class="sr-only">Page </span>9</a>
+            </li>
+                                <li class="page-item">
+                <a class="page-link"
+                    href="https://ir.amd.com/financial-information/sec-filings?page=10"
+                                    ><span class="sr-only">Page </span>10</a>
+            </li>
+                            
+                                <li class="page-item disabled"><span class="page-link" role="img" aria-label="Ellipsis placeholder for pages 11 through 325" >&hellip;</span></li>
+                        <li class="page-item last-interactive-item">
+                <a class="page-link"
+                    href="https://ir.amd.com/financial-information/sec-filings?page=326"
+                ><span class="sr-only">Page </span>326</a>
+            </li>
+                
+                    <li class="page-item page-item--next">
+                <a class="page-link"
+                    href="https://ir.amd.com/financial-information/sec-filings?page=2"
+                ><span class="sr-only">Next Page</span><span class="material-icons" aria-hidden="true">arrow_forward</span></a>
+            </li>
+            </ul>
+    <div id="pagination--mobile" class="mt-3 d-md-none">
+                    <label for="pagination--mobile-select">Select a page</label>
+            <select class="eq-select" id="pagination--mobile-select" aria-label="Select Page">
+                                    <option value="https://ir.amd.com/financial-information/sec-filings?page=1" 
+                        selected                    >Page 1</option>
+                                    <option value="https://ir.amd.com/financial-information/sec-filings?page=2" 
+                                            >Page 2</option>
+                                    <option value="https://ir.amd.com/financial-information/sec-filings?page=3" 
+                                            >Page 3</option>
+                                    <option value="https://ir.amd.com/financial-information/sec-filings?page=4" 
+                                            >Page 4</option>
+                                    <option value="https://ir.amd.com/financial-information/sec-filings?page=5" 
+                                            >Page 5</option>
+                                    <option value="https://ir.amd.com/financial-information/sec-filings?page=6" 
+                                            >Page 6</option>
+                                    <option value="https://ir.amd.com/financial-information/sec-filings?page=7" 
+                                            >Page 7</option>
+                                    <option value="https://ir.amd.com/financial-information/sec-filings?page=8" 
+                                            >Page 8</option>
+                                    <option value="https://ir.amd.com/financial-information/sec-filings?page=9" 
+                                            >Page 9</option>
+                                    <option value="https://ir.amd.com/financial-information/sec-filings?page=10" 
+                                            >Page 10</option>
+                                    <option value="https://ir.amd.com/financial-information/sec-filings?page=11" 
+                                            >Page 11</option>
+                                    <option value="https://ir.amd.com/financial-information/sec-filings?page=12" 
+                                            >Page 12</option>
+                                    <option value="https://ir.amd.com/financial-information/sec-filings?page=13" 
+                                            >Page 13</option>
+                                    <option value="https://ir.amd.com/financial-information/sec-filings?page=14" 
+                                            >Page 14</option>
+                                    <option value="https://ir.amd.com/financial-information/sec-filings?page=15" 
+                                            >Page 15</option>
+                                    <option value="https://ir.amd.com/financial-information/sec-filings?page=16" 
+                                            >Page 16</option>
+                                    <option value="https://ir.amd.com/financial-information/sec-filings?page=17" 
+                                            >Page 17</option>
+                                    <option value="https://ir.amd.com/financial-information/sec-filings?page=18" 
+                                            >Page 18</option>
+                                    <option value="https://ir.amd.com/financial-information/sec-filings?page=19" 
+                                            >Page 19</option>
+                                    <option value="https://ir.amd.com/financial-information/sec-filings?page=20" 
+                                            >Page 20</option>
+                                    <option value="https://ir.amd.com/financial-information/sec-filings?page=21" 
+                                            >Page 21</option>
+                                    <option value="https://ir.amd.com/financial-information/sec-filings?page=22" 
+                                            >Page 22</option>
+                                    <option value="https://ir.amd.com/financial-information/sec-filings?page=23" 
+                                            >Page 23</option>
+                                    <option value="https://ir.amd.com/financial-information/sec-filings?page=24" 
+                                            >Page 24</option>
+                                    <option value="https://ir.amd.com/financial-information/sec-filings?page=25" 
+                                            >Page 25</option>
+                                    <option value="https://ir.amd.com/financial-information/sec-filings?page=26" 
+                                            >Page 26</option>
+                                    <option value="https://ir.amd.com/financial-information/sec-filings?page=27" 
+                                            >Page 27</option>
+                                    <option value="https://ir.amd.com/financial-information/sec-filings?page=28" 
+                                            >Page 28</option>
+                                    <option value="https://ir.amd.com/financial-information/sec-filings?page=29" 
+                                            >Page 29</option>
+                                    <option value="https://ir.amd.com/financial-information/sec-filings?page=30" 
+                                            >Page 30</option>
+                                    <option value="https://ir.amd.com/financial-information/sec-filings?page=31" 
+                                            >Page 31</option>
+                                    <option value="https://ir.amd.com/financial-information/sec-filings?page=32" 
+                                            >Page 32</option>
+                                    <option value="https://ir.amd.com/financial-information/sec-filings?page=33" 
+                                            >Page 33</option>
+                                    <option value="https://ir.amd.com/financial-information/sec-filings?page=34" 
+                                            >Page 34</option>
+                                    <option value="https://ir.amd.com/financial-information/sec-filings?page=35" 
+                                            >Page 35</option>
+                                    <option value="https://ir.amd.com/financial-information/sec-filings?page=36" 
+                                            >Page 36</option>
+                                    <option value="https://ir.amd.com/financial-information/sec-filings?page=37" 
+                                            >Page 37</option>
+                                    <option value="https://ir.amd.com/financial-information/sec-filings?page=38" 
+                                            >Page 38</option>
+                                    <option value="https://ir.amd.com/financial-information/sec-filings?page=39" 
+                                            >Page 39</option>
+                                    <option value="https://ir.amd.com/financial-information/sec-filings?page=40" 
+                                            >Page 40</option>
+                                    <option value="https://ir.amd.com/financial-information/sec-filings?page=41" 
+                                            >Page 41</option>
+                                    <option value="https://ir.amd.com/financial-information/sec-filings?page=42" 
+                                            >Page 42</option>
+                                    <option value="https://ir.amd.com/financial-information/sec-filings?page=43" 
+                                            >Page 43</option>
+                                    <option value="https://ir.amd.com/financial-information/sec-filings?page=44" 
+                                            >Page 44</option>
+                                    <option value="https://ir.amd.com/financial-information/sec-filings?page=45" 
+                                            >Page 45</option>
+                                    <option value="https://ir.amd.com/financial-information/sec-filings?page=46" 
+                                            >Page 46</option>
+                                    <option value="https://ir.amd.com/financial-information/sec-filings?page=47" 
+                                            >Page 47</option>
+                                    <option value="https://ir.amd.com/financial-information/sec-filings?page=48" 
+                                            >Page 48</option>
+                                    <option value="https://ir.amd.com/financial-information/sec-filings?page=49" 
+                                            >Page 49</option>
+                                    <option value="https://ir.amd.com/financial-information/sec-filings?page=50" 
+                                            >Page 50</option>
+                                    <option value="https://ir.amd.com/financial-information/sec-filings?page=51" 
+                                            >Page 51</option>
+                                    <option value="https://ir.amd.com/financial-information/sec-filings?page=52" 
+                                            >Page 52</option>
+                                    <option value="https://ir.amd.com/financial-information/sec-filings?page=53" 
+                                            >Page 53</option>
+                                    <option value="https://ir.amd.com/financial-information/sec-filings?page=54" 
+                                            >Page 54</option>
+                                    <option value="https://ir.amd.com/financial-information/sec-filings?page=55" 
+                                            >Page 55</option>
+                                    <option value="https://ir.amd.com/financial-information/sec-filings?page=56" 
+                                            >Page 56</option>
+                                    <option value="https://ir.amd.com/financial-information/sec-filings?page=57" 
+                                            >Page 57</option>
+                                    <option value="https://ir.amd.com/financial-information/sec-filings?page=58" 
+                                            >Page 58</option>
+                                    <option value="https://ir.amd.com/financial-information/sec-filings?page=59" 
+                                            >Page 59</option>
+                                    <option value="https://ir.amd.com/financial-information/sec-filings?page=60" 
+                                            >Page 60</option>
+                                    <option value="https://ir.amd.com/financial-information/sec-filings?page=61" 
+                                            >Page 61</option>
+                                    <option value="https://ir.amd.com/financial-information/sec-filings?page=62" 
+                                            >Page 62</option>
+                                    <option value="https://ir.amd.com/financial-information/sec-filings?page=63" 
+                                            >Page 63</option>
+                                    <option value="https://ir.amd.com/financial-information/sec-filings?page=64" 
+                                            >Page 64</option>
+                                    <option value="https://ir.amd.com/financial-information/sec-filings?page=65" 
+                                            >Page 65</option>
+                                    <option value="https://ir.amd.com/financial-information/sec-filings?page=66" 
+                                            >Page 66</option>
+                                    <option value="https://ir.amd.com/financial-information/sec-filings?page=67" 
+                                            >Page 67</option>
+                                    <option value="https://ir.amd.com/financial-information/sec-filings?page=68" 
+                                            >Page 68</option>
+                                    <option value="https://ir.amd.com/financial-information/sec-filings?page=69" 
+                                            >Page 69</option>
+                                    <option value="https://ir.amd.com/financial-information/sec-filings?page=70" 
+                                            >Page 70</option>
+                                    <option value="https://ir.amd.com/financial-information/sec-filings?page=71" 
+                                            >Page 71</option>
+                                    <option value="https://ir.amd.com/financial-information/sec-filings?page=72" 
+                                            >Page 72</option>
+                                    <option value="https://ir.amd.com/financial-information/sec-filings?page=73" 
+                                            >Page 73</option>
+                                    <option value="https://ir.amd.com/financial-information/sec-filings?page=74" 
+                                            >Page 74</option>
+                                    <option value="https://ir.amd.com/financial-information/sec-filings?page=75" 
+                                            >Page 75</option>
+                                    <option value="https://ir.amd.com/financial-information/sec-filings?page=76" 
+                                            >Page 76</option>
+                                    <option value="https://ir.amd.com/financial-information/sec-filings?page=77" 
+                                            >Page 77</option>
+                                    <option value="https://ir.amd.com/financial-information/sec-filings?page=78" 
+                                            >Page 78</option>
+                                    <option value="https://ir.amd.com/financial-information/sec-filings?page=79" 
+                                            >Page 79</option>
+                                    <option value="https://ir.amd.com/financial-information/sec-filings?page=80" 
+                                            >Page 80</option>
+                                    <option value="https://ir.amd.com/financial-information/sec-filings?page=81" 
+                                            >Page 81</option>
+                                    <option value="https://ir.amd.com/financial-information/sec-filings?page=82" 
+                                            >Page 82</option>
+                                    <option value="https://ir.amd.com/financial-information/sec-filings?page=83" 
+                                            >Page 83</option>
+                                    <option value="https://ir.amd.com/financial-information/sec-filings?page=84" 
+                                            >Page 84</option>
+                                    <option value="https://ir.amd.com/financial-information/sec-filings?page=85" 
+                                            >Page 85</option>
+                                    <option value="https://ir.amd.com/financial-information/sec-filings?page=86" 
+                                            >Page 86</option>
+                                    <option value="https://ir.amd.com/financial-information/sec-filings?page=87" 
+                                            >Page 87</option>
+                                    <option value="https://ir.amd.com/financial-information/sec-filings?page=88" 
+                                            >Page 88</option>
+                                    <option value="https://ir.amd.com/financial-information/sec-filings?page=89" 
+                                            >Page 89</option>
+                                    <option value="https://ir.amd.com/financial-information/sec-filings?page=90" 
+                                            >Page 90</option>
+                                    <option value="https://ir.amd.com/financial-information/sec-filings?page=91" 
+                                            >Page 91</option>
+                                    <option value="https://ir.amd.com/financial-information/sec-filings?page=92" 
+                                            >Page 92</option>
+                                    <option value="https://ir.amd.com/financial-information/sec-filings?page=93" 
+                                            >Page 93</option>
+                                    <option value="https://ir.amd.com/financial-information/sec-filings?page=94" 
+                                            >Page 94</option>
+                                    <option value="https://ir.amd.com/financial-information/sec-filings?page=95" 
+                                            >Page 95</option>
+                                    <option value="https://ir.amd.com/financial-information/sec-filings?page=96" 
+                                            >Page 96</option>
+                                    <option value="https://ir.amd.com/financial-information/sec-filings?page=97" 
+                                            >Page 97</option>
+                                    <option value="https://ir.amd.com/financial-information/sec-filings?page=98" 
+                                            >Page 98</option>
+                                    <option value="https://ir.amd.com/financial-information/sec-filings?page=99" 
+                                            >Page 99</option>
+                                    <option value="https://ir.amd.com/financial-information/sec-filings?page=100" 
+                                            >Page 100</option>
+                                    <option value="https://ir.amd.com/financial-information/sec-filings?page=101" 
+                                            >Page 101</option>
+                                    <option value="https://ir.amd.com/financial-information/sec-filings?page=102" 
+                                            >Page 102</option>
+                                    <option value="https://ir.amd.com/financial-information/sec-filings?page=103" 
+                                            >Page 103</option>
+                                    <option value="https://ir.amd.com/financial-information/sec-filings?page=104" 
+                                            >Page 104</option>
+                                    <option value="https://ir.amd.com/financial-information/sec-filings?page=105" 
+                                            >Page 105</option>
+                                    <option value="https://ir.amd.com/financial-information/sec-filings?page=106" 
+                                            >Page 106</option>
+                                    <option value="https://ir.amd.com/financial-information/sec-filings?page=107" 
+                                            >Page 107</option>
+                                    <option value="https://ir.amd.com/financial-information/sec-filings?page=108" 
+                                            >Page 108</option>
+                                    <option value="https://ir.amd.com/financial-information/sec-filings?page=109" 
+                                            >Page 109</option>
+                                    <option value="https://ir.amd.com/financial-information/sec-filings?page=110" 
+                                            >Page 110</option>
+                                    <option value="https://ir.amd.com/financial-information/sec-filings?page=111" 
+                                            >Page 111</option>
+                                    <option value="https://ir.amd.com/financial-information/sec-filings?page=112" 
+                                            >Page 112</option>
+                                    <option value="https://ir.amd.com/financial-information/sec-filings?page=113" 
+                                            >Page 113</option>
+                                    <option value="https://ir.amd.com/financial-information/sec-filings?page=114" 
+                                            >Page 114</option>
+                                    <option value="https://ir.amd.com/financial-information/sec-filings?page=115" 
+                                            >Page 115</option>
+                                    <option value="https://ir.amd.com/financial-information/sec-filings?page=116" 
+                                            >Page 116</option>
+                                    <option value="https://ir.amd.com/financial-information/sec-filings?page=117" 
+                                            >Page 117</option>
+                                    <option value="https://ir.amd.com/financial-information/sec-filings?page=118" 
+                                            >Page 118</option>
+                                    <option value="https://ir.amd.com/financial-information/sec-filings?page=119" 
+                                            >Page 119</option>
+                                    <option value="https://ir.amd.com/financial-information/sec-filings?page=120" 
+                                            >Page 120</option>
+                                    <option value="https://ir.amd.com/financial-information/sec-filings?page=121" 
+                                            >Page 121</option>
+                                    <option value="https://ir.amd.com/financial-information/sec-filings?page=122" 
+                                            >Page 122</option>
+                                    <option value="https://ir.amd.com/financial-information/sec-filings?page=123" 
+                                            >Page 123</option>
+                                    <option value="https://ir.amd.com/financial-information/sec-filings?page=124" 
+                                            >Page 124</option>
+                                    <option value="https://ir.amd.com/financial-information/sec-filings?page=125" 
+                                            >Page 125</option>
+                                    <option value="https://ir.amd.com/financial-information/sec-filings?page=126" 
+                                            >Page 126</option>
+                                    <option value="https://ir.amd.com/financial-information/sec-filings?page=127" 
+                                            >Page 127</option>
+                                    <option value="https://ir.amd.com/financial-information/sec-filings?page=128" 
+                                            >Page 128</option>
+                                    <option value="https://ir.amd.com/financial-information/sec-filings?page=129" 
+                                            >Page 129</option>
+                                    <option value="https://ir.amd.com/financial-information/sec-filings?page=130" 
+                                            >Page 130</option>
+                                    <option value="https://ir.amd.com/financial-information/sec-filings?page=131" 
+                                            >Page 131</option>
+                                    <option value="https://ir.amd.com/financial-information/sec-filings?page=132" 
+                                            >Page 132</option>
+                                    <option value="https://ir.amd.com/financial-information/sec-filings?page=133" 
+                                            >Page 133</option>
+                                    <option value="https://ir.amd.com/financial-information/sec-filings?page=134" 
+                                            >Page 134</option>
+                                    <option value="https://ir.amd.com/financial-information/sec-filings?page=135" 
+                                            >Page 135</option>
+                                    <option value="https://ir.amd.com/financial-information/sec-filings?page=136" 
+                                            >Page 136</option>
+                                    <option value="https://ir.amd.com/financial-information/sec-filings?page=137" 
+                                            >Page 137</option>
+                                    <option value="https://ir.amd.com/financial-information/sec-filings?page=138" 
+                                            >Page 138</option>
+                                    <option value="https://ir.amd.com/financial-information/sec-filings?page=139" 
+                                            >Page 139</option>
+                                    <option value="https://ir.amd.com/financial-information/sec-filings?page=140" 
+                                            >Page 140</option>
+                                    <option value="https://ir.amd.com/financial-information/sec-filings?page=141" 
+                                            >Page 141</option>
+                                    <option value="https://ir.amd.com/financial-information/sec-filings?page=142" 
+                                            >Page 142</option>
+                                    <option value="https://ir.amd.com/financial-information/sec-filings?page=143" 
+                                            >Page 143</option>
+                                    <option value="https://ir.amd.com/financial-information/sec-filings?page=144" 
+                                            >Page 144</option>
+                                    <option value="https://ir.amd.com/financial-information/sec-filings?page=145" 
+                                            >Page 145</option>
+                                    <option value="https://ir.amd.com/financial-information/sec-filings?page=146" 
+                                            >Page 146</option>
+                                    <option value="https://ir.amd.com/financial-information/sec-filings?page=147" 
+                                            >Page 147</option>
+                                    <option value="https://ir.amd.com/financial-information/sec-filings?page=148" 
+                                            >Page 148</option>
+                                    <option value="https://ir.amd.com/financial-information/sec-filings?page=149" 
+                                            >Page 149</option>
+                                    <option value="https://ir.amd.com/financial-information/sec-filings?page=150" 
+                                            >Page 150</option>
+                                    <option value="https://ir.amd.com/financial-information/sec-filings?page=151" 
+                                            >Page 151</option>
+                                    <option value="https://ir.amd.com/financial-information/sec-filings?page=152" 
+                                            >Page 152</option>
+                                    <option value="https://ir.amd.com/financial-information/sec-filings?page=153" 
+                                            >Page 153</option>
+                                    <option value="https://ir.amd.com/financial-information/sec-filings?page=154" 
+                                            >Page 154</option>
+                                    <option value="https://ir.amd.com/financial-information/sec-filings?page=155" 
+                                            >Page 155</option>
+                                    <option value="https://ir.amd.com/financial-information/sec-filings?page=156" 
+                                            >Page 156</option>
+                                    <option value="https://ir.amd.com/financial-information/sec-filings?page=157" 
+                                            >Page 157</option>
+                                    <option value="https://ir.amd.com/financial-information/sec-filings?page=158" 
+                                            >Page 158</option>
+                                    <option value="https://ir.amd.com/financial-information/sec-filings?page=159" 
+                                            >Page 159</option>
+                                    <option value="https://ir.amd.com/financial-information/sec-filings?page=160" 
+                                            >Page 160</option>
+                                    <option value="https://ir.amd.com/financial-information/sec-filings?page=161" 
+                                            >Page 161</option>
+                                    <option value="https://ir.amd.com/financial-information/sec-filings?page=162" 
+                                            >Page 162</option>
+                                    <option value="https://ir.amd.com/financial-information/sec-filings?page=163" 
+                                            >Page 163</option>
+                                    <option value="https://ir.amd.com/financial-information/sec-filings?page=164" 
+                                            >Page 164</option>
+                                    <option value="https://ir.amd.com/financial-information/sec-filings?page=165" 
+                                            >Page 165</option>
+                                    <option value="https://ir.amd.com/financial-information/sec-filings?page=166" 
+                                            >Page 166</option>
+                                    <option value="https://ir.amd.com/financial-information/sec-filings?page=167" 
+                                            >Page 167</option>
+                                    <option value="https://ir.amd.com/financial-information/sec-filings?page=168" 
+                                            >Page 168</option>
+                                    <option value="https://ir.amd.com/financial-information/sec-filings?page=169" 
+                                            >Page 169</option>
+                                    <option value="https://ir.amd.com/financial-information/sec-filings?page=170" 
+                                            >Page 170</option>
+                                    <option value="https://ir.amd.com/financial-information/sec-filings?page=171" 
+                                            >Page 171</option>
+                                    <option value="https://ir.amd.com/financial-information/sec-filings?page=172" 
+                                            >Page 172</option>
+                                    <option value="https://ir.amd.com/financial-information/sec-filings?page=173" 
+                                            >Page 173</option>
+                                    <option value="https://ir.amd.com/financial-information/sec-filings?page=174" 
+                                            >Page 174</option>
+                                    <option value="https://ir.amd.com/financial-information/sec-filings?page=175" 
+                                            >Page 175</option>
+                                    <option value="https://ir.amd.com/financial-information/sec-filings?page=176" 
+                                            >Page 176</option>
+                                    <option value="https://ir.amd.com/financial-information/sec-filings?page=177" 
+                                            >Page 177</option>
+                                    <option value="https://ir.amd.com/financial-information/sec-filings?page=178" 
+                                            >Page 178</option>
+                                    <option value="https://ir.amd.com/financial-information/sec-filings?page=179" 
+                                            >Page 179</option>
+                                    <option value="https://ir.amd.com/financial-information/sec-filings?page=180" 
+                                            >Page 180</option>
+                                    <option value="https://ir.amd.com/financial-information/sec-filings?page=181" 
+                                            >Page 181</option>
+                                    <option value="https://ir.amd.com/financial-information/sec-filings?page=182" 
+                                            >Page 182</option>
+                                    <option value="https://ir.amd.com/financial-information/sec-filings?page=183" 
+                                            >Page 183</option>
+                                    <option value="https://ir.amd.com/financial-information/sec-filings?page=184" 
+                                            >Page 184</option>
+                                    <option value="https://ir.amd.com/financial-information/sec-filings?page=185" 
+                                            >Page 185</option>
+                                    <option value="https://ir.amd.com/financial-information/sec-filings?page=186" 
+                                            >Page 186</option>
+                                    <option value="https://ir.amd.com/financial-information/sec-filings?page=187" 
+                                            >Page 187</option>
+                                    <option value="https://ir.amd.com/financial-information/sec-filings?page=188" 
+                                            >Page 188</option>
+                                    <option value="https://ir.amd.com/financial-information/sec-filings?page=189" 
+                                            >Page 189</option>
+                                    <option value="https://ir.amd.com/financial-information/sec-filings?page=190" 
+                                            >Page 190</option>
+                                    <option value="https://ir.amd.com/financial-information/sec-filings?page=191" 
+                                            >Page 191</option>
+                                    <option value="https://ir.amd.com/financial-information/sec-filings?page=192" 
+                                            >Page 192</option>
+                                    <option value="https://ir.amd.com/financial-information/sec-filings?page=193" 
+                                            >Page 193</option>
+                                    <option value="https://ir.amd.com/financial-information/sec-filings?page=194" 
+                                            >Page 194</option>
+                                    <option value="https://ir.amd.com/financial-information/sec-filings?page=195" 
+                                            >Page 195</option>
+                                    <option value="https://ir.amd.com/financial-information/sec-filings?page=196" 
+                                            >Page 196</option>
+                                    <option value="https://ir.amd.com/financial-information/sec-filings?page=197" 
+                                            >Page 197</option>
+                                    <option value="https://ir.amd.com/financial-information/sec-filings?page=198" 
+                                            >Page 198</option>
+                                    <option value="https://ir.amd.com/financial-information/sec-filings?page=199" 
+                                            >Page 199</option>
+                                    <option value="https://ir.amd.com/financial-information/sec-filings?page=200" 
+                                            >Page 200</option>
+                                    <option value="https://ir.amd.com/financial-information/sec-filings?page=201" 
+                                            >Page 201</option>
+                                    <option value="https://ir.amd.com/financial-information/sec-filings?page=202" 
+                                            >Page 202</option>
+                                    <option value="https://ir.amd.com/financial-information/sec-filings?page=203" 
+                                            >Page 203</option>
+                                    <option value="https://ir.amd.com/financial-information/sec-filings?page=204" 
+                                            >Page 204</option>
+                                    <option value="https://ir.amd.com/financial-information/sec-filings?page=205" 
+                                            >Page 205</option>
+                                    <option value="https://ir.amd.com/financial-information/sec-filings?page=206" 
+                                            >Page 206</option>
+                                    <option value="https://ir.amd.com/financial-information/sec-filings?page=207" 
+                                            >Page 207</option>
+                                    <option value="https://ir.amd.com/financial-information/sec-filings?page=208" 
+                                            >Page 208</option>
+                                    <option value="https://ir.amd.com/financial-information/sec-filings?page=209" 
+                                            >Page 209</option>
+                                    <option value="https://ir.amd.com/financial-information/sec-filings?page=210" 
+                                            >Page 210</option>
+                                    <option value="https://ir.amd.com/financial-information/sec-filings?page=211" 
+                                            >Page 211</option>
+                                    <option value="https://ir.amd.com/financial-information/sec-filings?page=212" 
+                                            >Page 212</option>
+                                    <option value="https://ir.amd.com/financial-information/sec-filings?page=213" 
+                                            >Page 213</option>
+                                    <option value="https://ir.amd.com/financial-information/sec-filings?page=214" 
+                                            >Page 214</option>
+                                    <option value="https://ir.amd.com/financial-information/sec-filings?page=215" 
+                                            >Page 215</option>
+                                    <option value="https://ir.amd.com/financial-information/sec-filings?page=216" 
+                                            >Page 216</option>
+                                    <option value="https://ir.amd.com/financial-information/sec-filings?page=217" 
+                                            >Page 217</option>
+                                    <option value="https://ir.amd.com/financial-information/sec-filings?page=218" 
+                                            >Page 218</option>
+                                    <option value="https://ir.amd.com/financial-information/sec-filings?page=219" 
+                                            >Page 219</option>
+                                    <option value="https://ir.amd.com/financial-information/sec-filings?page=220" 
+                                            >Page 220</option>
+                                    <option value="https://ir.amd.com/financial-information/sec-filings?page=221" 
+                                            >Page 221</option>
+                                    <option value="https://ir.amd.com/financial-information/sec-filings?page=222" 
+                                            >Page 222</option>
+                                    <option value="https://ir.amd.com/financial-information/sec-filings?page=223" 
+                                            >Page 223</option>
+                                    <option value="https://ir.amd.com/financial-information/sec-filings?page=224" 
+                                            >Page 224</option>
+                                    <option value="https://ir.amd.com/financial-information/sec-filings?page=225" 
+                                            >Page 225</option>
+                                    <option value="https://ir.amd.com/financial-information/sec-filings?page=226" 
+                                            >Page 226</option>
+                                    <option value="https://ir.amd.com/financial-information/sec-filings?page=227" 
+                                            >Page 227</option>
+                                    <option value="https://ir.amd.com/financial-information/sec-filings?page=228" 
+                                            >Page 228</option>
+                                    <option value="https://ir.amd.com/financial-information/sec-filings?page=229" 
+                                            >Page 229</option>
+                                    <option value="https://ir.amd.com/financial-information/sec-filings?page=230" 
+                                            >Page 230</option>
+                                    <option value="https://ir.amd.com/financial-information/sec-filings?page=231" 
+                                            >Page 231</option>
+                                    <option value="https://ir.amd.com/financial-information/sec-filings?page=232" 
+                                            >Page 232</option>
+                                    <option value="https://ir.amd.com/financial-information/sec-filings?page=233" 
+                                            >Page 233</option>
+                                    <option value="https://ir.amd.com/financial-information/sec-filings?page=234" 
+                                            >Page 234</option>
+                                    <option value="https://ir.amd.com/financial-information/sec-filings?page=235" 
+                                            >Page 235</option>
+                                    <option value="https://ir.amd.com/financial-information/sec-filings?page=236" 
+                                            >Page 236</option>
+                                    <option value="https://ir.amd.com/financial-information/sec-filings?page=237" 
+                                            >Page 237</option>
+                                    <option value="https://ir.amd.com/financial-information/sec-filings?page=238" 
+                                            >Page 238</option>
+                                    <option value="https://ir.amd.com/financial-information/sec-filings?page=239" 
+                                            >Page 239</option>
+                                    <option value="https://ir.amd.com/financial-information/sec-filings?page=240" 
+                                            >Page 240</option>
+                                    <option value="https://ir.amd.com/financial-information/sec-filings?page=241" 
+                                            >Page 241</option>
+                                    <option value="https://ir.amd.com/financial-information/sec-filings?page=242" 
+                                            >Page 242</option>
+                                    <option value="https://ir.amd.com/financial-information/sec-filings?page=243" 
+                                            >Page 243</option>
+                                    <option value="https://ir.amd.com/financial-information/sec-filings?page=244" 
+                                            >Page 244</option>
+                                    <option value="https://ir.amd.com/financial-information/sec-filings?page=245" 
+                                            >Page 245</option>
+                                    <option value="https://ir.amd.com/financial-information/sec-filings?page=246" 
+                                            >Page 246</option>
+                                    <option value="https://ir.amd.com/financial-information/sec-filings?page=247" 
+                                            >Page 247</option>
+                                    <option value="https://ir.amd.com/financial-information/sec-filings?page=248" 
+                                            >Page 248</option>
+                                    <option value="https://ir.amd.com/financial-information/sec-filings?page=249" 
+                                            >Page 249</option>
+                                    <option value="https://ir.amd.com/financial-information/sec-filings?page=250" 
+                                            >Page 250</option>
+                                    <option value="https://ir.amd.com/financial-information/sec-filings?page=251" 
+                                            >Page 251</option>
+                                    <option value="https://ir.amd.com/financial-information/sec-filings?page=252" 
+                                            >Page 252</option>
+                                    <option value="https://ir.amd.com/financial-information/sec-filings?page=253" 
+                                            >Page 253</option>
+                                    <option value="https://ir.amd.com/financial-information/sec-filings?page=254" 
+                                            >Page 254</option>
+                                    <option value="https://ir.amd.com/financial-information/sec-filings?page=255" 
+                                            >Page 255</option>
+                                    <option value="https://ir.amd.com/financial-information/sec-filings?page=256" 
+                                            >Page 256</option>
+                                    <option value="https://ir.amd.com/financial-information/sec-filings?page=257" 
+                                            >Page 257</option>
+                                    <option value="https://ir.amd.com/financial-information/sec-filings?page=258" 
+                                            >Page 258</option>
+                                    <option value="https://ir.amd.com/financial-information/sec-filings?page=259" 
+                                            >Page 259</option>
+                                    <option value="https://ir.amd.com/financial-information/sec-filings?page=260" 
+                                            >Page 260</option>
+                                    <option value="https://ir.amd.com/financial-information/sec-filings?page=261" 
+                                            >Page 261</option>
+                                    <option value="https://ir.amd.com/financial-information/sec-filings?page=262" 
+                                            >Page 262</option>
+                                    <option value="https://ir.amd.com/financial-information/sec-filings?page=263" 
+                                            >Page 263</option>
+                                    <option value="https://ir.amd.com/financial-information/sec-filings?page=264" 
+                                            >Page 264</option>
+                                    <option value="https://ir.amd.com/financial-information/sec-filings?page=265" 
+                                            >Page 265</option>
+                                    <option value="https://ir.amd.com/financial-information/sec-filings?page=266" 
+                                            >Page 266</option>
+                                    <option value="https://ir.amd.com/financial-information/sec-filings?page=267" 
+                                            >Page 267</option>
+                                    <option value="https://ir.amd.com/financial-information/sec-filings?page=268" 
+                                            >Page 268</option>
+                                    <option value="https://ir.amd.com/financial-information/sec-filings?page=269" 
+                                            >Page 269</option>
+                                    <option value="https://ir.amd.com/financial-information/sec-filings?page=270" 
+                                            >Page 270</option>
+                                    <option value="https://ir.amd.com/financial-information/sec-filings?page=271" 
+                                            >Page 271</option>
+                                    <option value="https://ir.amd.com/financial-information/sec-filings?page=272" 
+                                            >Page 272</option>
+                                    <option value="https://ir.amd.com/financial-information/sec-filings?page=273" 
+                                            >Page 273</option>
+                                    <option value="https://ir.amd.com/financial-information/sec-filings?page=274" 
+                                            >Page 274</option>
+                                    <option value="https://ir.amd.com/financial-information/sec-filings?page=275" 
+                                            >Page 275</option>
+                                    <option value="https://ir.amd.com/financial-information/sec-filings?page=276" 
+                                            >Page 276</option>
+                                    <option value="https://ir.amd.com/financial-information/sec-filings?page=277" 
+                                            >Page 277</option>
+                                    <option value="https://ir.amd.com/financial-information/sec-filings?page=278" 
+                                            >Page 278</option>
+                                    <option value="https://ir.amd.com/financial-information/sec-filings?page=279" 
+                                            >Page 279</option>
+                                    <option value="https://ir.amd.com/financial-information/sec-filings?page=280" 
+                                            >Page 280</option>
+                                    <option value="https://ir.amd.com/financial-information/sec-filings?page=281" 
+                                            >Page 281</option>
+                                    <option value="https://ir.amd.com/financial-information/sec-filings?page=282" 
+                                            >Page 282</option>
+                                    <option value="https://ir.amd.com/financial-information/sec-filings?page=283" 
+                                            >Page 283</option>
+                                    <option value="https://ir.amd.com/financial-information/sec-filings?page=284" 
+                                            >Page 284</option>
+                                    <option value="https://ir.amd.com/financial-information/sec-filings?page=285" 
+                                            >Page 285</option>
+                                    <option value="https://ir.amd.com/financial-information/sec-filings?page=286" 
+                                            >Page 286</option>
+                                    <option value="https://ir.amd.com/financial-information/sec-filings?page=287" 
+                                            >Page 287</option>
+                                    <option value="https://ir.amd.com/financial-information/sec-filings?page=288" 
+                                            >Page 288</option>
+                                    <option value="https://ir.amd.com/financial-information/sec-filings?page=289" 
+                                            >Page 289</option>
+                                    <option value="https://ir.amd.com/financial-information/sec-filings?page=290" 
+                                            >Page 290</option>
+                                    <option value="https://ir.amd.com/financial-information/sec-filings?page=291" 
+                                            >Page 291</option>
+                                    <option value="https://ir.amd.com/financial-information/sec-filings?page=292" 
+                                            >Page 292</option>
+                                    <option value="https://ir.amd.com/financial-information/sec-filings?page=293" 
+                                            >Page 293</option>
+                                    <option value="https://ir.amd.com/financial-information/sec-filings?page=294" 
+                                            >Page 294</option>
+                                    <option value="https://ir.amd.com/financial-information/sec-filings?page=295" 
+                                            >Page 295</option>
+                                    <option value="https://ir.amd.com/financial-information/sec-filings?page=296" 
+                                            >Page 296</option>
+                                    <option value="https://ir.amd.com/financial-information/sec-filings?page=297" 
+                                            >Page 297</option>
+                                    <option value="https://ir.amd.com/financial-information/sec-filings?page=298" 
+                                            >Page 298</option>
+                                    <option value="https://ir.amd.com/financial-information/sec-filings?page=299" 
+                                            >Page 299</option>
+                                    <option value="https://ir.amd.com/financial-information/sec-filings?page=300" 
+                                            >Page 300</option>
+                                    <option value="https://ir.amd.com/financial-information/sec-filings?page=301" 
+                                            >Page 301</option>
+                                    <option value="https://ir.amd.com/financial-information/sec-filings?page=302" 
+                                            >Page 302</option>
+                                    <option value="https://ir.amd.com/financial-information/sec-filings?page=303" 
+                                            >Page 303</option>
+                                    <option value="https://ir.amd.com/financial-information/sec-filings?page=304" 
+                                            >Page 304</option>
+                                    <option value="https://ir.amd.com/financial-information/sec-filings?page=305" 
+                                            >Page 305</option>
+                                    <option value="https://ir.amd.com/financial-information/sec-filings?page=306" 
+                                            >Page 306</option>
+                                    <option value="https://ir.amd.com/financial-information/sec-filings?page=307" 
+                                            >Page 307</option>
+                                    <option value="https://ir.amd.com/financial-information/sec-filings?page=308" 
+                                            >Page 308</option>
+                                    <option value="https://ir.amd.com/financial-information/sec-filings?page=309" 
+                                            >Page 309</option>
+                                    <option value="https://ir.amd.com/financial-information/sec-filings?page=310" 
+                                            >Page 310</option>
+                                    <option value="https://ir.amd.com/financial-information/sec-filings?page=311" 
+                                            >Page 311</option>
+                                    <option value="https://ir.amd.com/financial-information/sec-filings?page=312" 
+                                            >Page 312</option>
+                                    <option value="https://ir.amd.com/financial-information/sec-filings?page=313" 
+                                            >Page 313</option>
+                                    <option value="https://ir.amd.com/financial-information/sec-filings?page=314" 
+                                            >Page 314</option>
+                                    <option value="https://ir.amd.com/financial-information/sec-filings?page=315" 
+                                            >Page 315</option>
+                                    <option value="https://ir.amd.com/financial-information/sec-filings?page=316" 
+                                            >Page 316</option>
+                                    <option value="https://ir.amd.com/financial-information/sec-filings?page=317" 
+                                            >Page 317</option>
+                                    <option value="https://ir.amd.com/financial-information/sec-filings?page=318" 
+                                            >Page 318</option>
+                                    <option value="https://ir.amd.com/financial-information/sec-filings?page=319" 
+                                            >Page 319</option>
+                                    <option value="https://ir.amd.com/financial-information/sec-filings?page=320" 
+                                            >Page 320</option>
+                                    <option value="https://ir.amd.com/financial-information/sec-filings?page=321" 
+                                            >Page 321</option>
+                                    <option value="https://ir.amd.com/financial-information/sec-filings?page=322" 
+                                            >Page 322</option>
+                                    <option value="https://ir.amd.com/financial-information/sec-filings?page=323" 
+                                            >Page 323</option>
+                                    <option value="https://ir.amd.com/financial-information/sec-filings?page=324" 
+                                            >Page 324</option>
+                                    <option value="https://ir.amd.com/financial-information/sec-filings?page=325" 
+                                            >Page 325</option>
+                                    <option value="https://ir.amd.com/financial-information/sec-filings?page=326" 
+                                            >Page 326</option>
+                            </select>
+            </div>
+</nav>
+<div class="clear"></div>                                                            </main>
+                        </div>    
+                    </div>
+                </div><!-- //container-->
+            </div>
+            <footer id="footer" >
+    <div class="footer-main">
+    	<div class="container">
+    	    <div class="row">
+    	        <div class="col-md-6">
+    	            <div class="logo-wrapper">
+            	        <a href="/">
+                            <img src="https://d1io3yog0oux5.cloudfront.net/_3a6def5a328d14d7990e894d5269c4ad/amd/db/867/8386/image.svg"
+                                class="footer-logo"
+                                width="182"
+                                height="44"
+                                alt="Advanced Micro Devices, Inc. IR Overview">
+                        </a>
+                		<div class="ir-logo-text">Investor Relations</div>
+            		</div>
+    	        </div>
+    	        <div class="col-md-6">
+                                <div class="col-lg-auto">
+                    <nav id="social-navigation" class="footer-social">
+                        <ul>
+                                                    <li
+                                                        >
+                                <a href="https://www.linkedin.com/company/amd/" target="_blank" rel="noopener" class="">
+                                                                    <img class="icon-img-link" src="https://d1io3yog0oux5.cloudfront.net/_3a6def5a328d14d7990e894d5269c4ad/amd/db/836/9074/icon/icon-linkedin.svg" alt="Visit us on LinkedIn" />
+                                                                </a>
+                                                	    		                            </li>
+                                                    <li
+                            class="dropdown--menu"                            >
+                                <a href="https://x.com/amd" target="_blank" rel="noopener" class="">
+                                                                    <img class="icon-img-link" src="https://d1io3yog0oux5.cloudfront.net/_3a6def5a328d14d7990e894d5269c4ad/amd/db/836/9076/icon/X_logo_2023_original.svg" alt="Visit us on X" />
+                                                                </a>
+                                                				<ul class="dropdown-menu dropdown-menu-end">
+                					<li>
+                						<div class="dropdown-pointer"></div>
+                					</li>
+                					<li>
+                                        <ul class="dropdown-menu-content">
+                                            <li>
+                                                <a class="dropdown-item" href="https://x.com/AMD" target="_blank">AMD</a>
+                                            </li>
+                                            <li>
+                                                <a class="dropdown-item" href="https://x.com/AIatAMD" target="_blank">AI</a>
+                                            </li>
+                                            <li>
+                                                <a class="dropdown-item" href="https://x.com/AMDServer" target="_blank">Server</a>
+                                            </li>
+                                            <li>
+                                                <a class="dropdown-item" href="https://x.com/AMDRyzen" target="_blank">Ryzen</a>
+                                            </li>
+                                            <li>
+                                                <a class="dropdown-item" href="https://x.com/AMDRadeon" target="_blank">Radeon</a>
+                                            </li>
+                                            <li>
+                                                <a class="dropdown-item" href="https://x.com/AMDEmbedded" target="_blank">Embedded</a>
+                                            </li>
+                                            <li>
+                                                <a class="dropdown-item" href="https://x.com/AMDGaming" target="_blank">Gaming</a>
+                                            </li>
+                                        </ul>
+                                    </li>
+                    			</ul>
+                    			                	    		                            </li>
+                                                    <li
+                                                        >
+                                <a href="https://www.instagram.com/amd" target="_blank" rel="noopener" class="">
+                                                                    <img class="icon-img-link" src="https://d1io3yog0oux5.cloudfront.net/_3a6def5a328d14d7990e894d5269c4ad/amd/db/836/9073/icon/icon-instagram.svg" alt="Visit us on Instagram" />
+                                                                </a>
+                                                	    		                            </li>
+                                                    <li
+                            class="dropdown--menu"                            >
+                                <a href="https://www.youtube.com/user/amd?reload=9&amp;sub_confirmation=1" target="_blank" rel="noopener" class="">
+                                                                    <img class="icon-img-link" src="https://d1io3yog0oux5.cloudfront.net/_3a6def5a328d14d7990e894d5269c4ad/amd/db/836/9077/icon/icon-youtube.svg" alt="Visit us on YouTube" />
+                                                                </a>
+                                                	    		                    			<ul class="dropdown-menu dropdown-menu-end">
+                                    <li>
+                                        <div class="dropdown-pointer"></div>
+                                    </li>
+                                    <li>
+                    					<ul class="dropdown-menu-content">
+                    						<li>
+                    					   		<a class="dropdown-item" href="https://www.youtube.com/user/amd" target="_blank">AMD</a>
+                                            </li>
+                    						<li>
+                    					   		<a class="dropdown-item" href="https://www.youtube.com/@AMDDevCentral" target="_blank">Developers</a>
+                                            </li>
+                    						<li>
+                    						    <a class="dropdown-item" href="https://www.youtube.com/@Gaming-AMD" target="_blank">Gaming</a>
+                                            </li>
+                    					</ul>
+                					</li>
+                				</ul>
+                				                            </li>
+                                                    <li
+                                                        >
+                                <a href="https://www.facebook.com/amd" target="_blank" rel="noopener" class="">
+                                                                    <img class="icon-img-link" src="https://d1io3yog0oux5.cloudfront.net/_3a6def5a328d14d7990e894d5269c4ad/amd/db/836/9072/icon/icon-facebook.svg" alt="Visit us on Facebook" />
+                                                                </a>
+                                                	    		                            </li>
+                                                    <li
+                                                        >
+                                <a href="https://www.amd.com/en/corporate/subscriptions" target="_blank" rel="noopener" class="">
+                                                                    <img class="icon-img-link" src="https://d1io3yog0oux5.cloudfront.net/_3a6def5a328d14d7990e894d5269c4ad/amd/db/836/9078/icon/footer-email.svg" alt="Visit us on Subscriptions" />
+                                                                </a>
+                                                	    		                            </li>
+                                                </ul>
+                    </nav>
+                </div>
+                    	        </div>
+    	    </div>
+	    </div>
+	    	    <div class="container-fluid">
+    	    <div class="row justify-content-center">
+                <div class="col-lg-auto">
+                    <div class="footer-links">
+            			<a href="https://www.amd.com/en/legal/copyright.html" target="_blank" rel="noopener">Terms and Conditions</a>
+<a href="https://www.amd.com/en/corporate/privacy" target="_blank" rel="noopener">Privacy</a>
+<a href="https://www.amd.com/en/corporate/trademarks" target="_blank" rel="noopener">Trademarks</a>
+<a href="https://www.amd.com/content/dam/amd/en/documents/corporate/cr/supply-chain-transparency.pdf" target="_blank" rel="noopener">Supply Chain Transparency</a>
+<a href="https://www.amd.com/en/corporate/competition" target="_blank" rel="noopener">Fair &amp; Open Competition</a>
+<a href="https://www.amd.com/system/files/documents/amd-uk-tax-strategy.pdf" target="_blank" rel="noopener">UK Tax Strategy</a>
+<a href="/accessibility-statement">Accessibility Statement</a>
+<a href="https://www.amd.com/en/corporate/cookies" target="_blank" rel="noopener">Cookies Policy</a>
+                        <a class="ot-sdk-show-settings" id="ot-sdk-btn">Cookies Settings</a>
+                    </div>
+                </div>
+    	        <div class="col-12 center">
+                    <p class="copyright">&copy; <time datetime="2026">2026</time> Advanced Micro Devices, Inc. </p>                            
+    	        </div>
+	        </div>
+    	</div>
+	</div>
+</footer>
+<script id="companyVars" type="application/json">
+{
+    "asset_url": "https:\/\/d1io3yog0oux5.cloudfront.net\/_3a6def5a328d14d7990e894d5269c4ad\/amd",
+    "website_base_url": "https:\/\/ir.amd.com",
+    "ir_base_url": "",
+    "hCaptchaSiteKey": "778a5748-d323-4b73-a06c-9625642de8bc",
+    "isQmod": false,
+    "autorefresh": false,
+    "userSnapEnabled" : false}
+</script>
+
+
+<script src="https://d1io3yog0oux5.cloudfront.net/_3a6def5a328d14d7990e894d5269c4ad/amd/files/theme/js/_js/all.js"></script>
+
+<script type="text/javascript" async="" src="https://download.amd.com/js/analytics/analyticsinit.js"></script>
+
+<noscript>
+    <img height="1" width="1" style="display:none;" alt="" src="https://dc.ads.linkedin.com/collect/?pid=78508&fmt=gif" />
+</noscript>        </div><!-- //general-wrapper-->
+    </body>
+</html>

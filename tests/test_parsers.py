@@ -67,7 +67,7 @@ def test_csv_parser(mock_csv_file):
     assert "San Francisco" in doc.blocks[0].text
 
 @patch("agentpack.parsers.pdf_parser.fitz")
-def test_pdf_parser(mock_fitz, mock_pdf_file):
+def test_pdf_parser_fast(mock_fitz, mock_pdf_file):
     # Setup mock fitz Document
     mock_doc = MagicMock()
     mock_doc.page_count = 2
@@ -86,7 +86,7 @@ def test_pdf_parser(mock_fitz, mock_pdf_file):
     
     mock_fitz.open.return_value = mock_doc
     
-    parser = PDFParser()
+    parser = PDFParser(fast_pdf=True)
     doc = parser.parse(mock_pdf_file, "src_pdf")
     
     assert doc.type == "pdf"
@@ -95,3 +95,19 @@ def test_pdf_parser(mock_fitz, mock_pdf_file):
     assert doc.blocks[0].page == 1
     assert doc.blocks[1].text == "Page 2 content."
     assert doc.blocks[1].page == 2
+
+def test_pdf_parser_semantic(sample_pdf_path):
+    """Real Docling parse on the committed fixture — no mocks."""
+    pytest.importorskip("docling", reason="docling not installed")
+
+    parser = PDFParser(fast_pdf=False)
+    doc = parser.parse(sample_pdf_path, "src_pdf")
+
+    assert doc.type == "pdf"
+    assert len(doc.blocks) >= 1, "expected at least one block from Docling"
+    headings = [b for b in doc.blocks if b.type == "heading"]
+    paragraphs = [b for b in doc.blocks if b.type == "paragraph"]
+    assert headings, "expected at least one heading block"
+    assert paragraphs, "expected at least one paragraph block"
+    heading_texts = [b.text for b in headings]
+    assert any("AgentPack" in t or "Introduction" in t for t in heading_texts)
