@@ -19,6 +19,7 @@ except ImportError:
 from agentpack.cache import cache_get, cache_set, make_key
 
 _EMBED_MODEL_ID = "BAAI/bge-small-en-v1.5"  # default fastembed model
+_FTS_QUERY_VERSION = "and-v1"  # bump when query construction changes to invalidate L5 cache
 
 _FTS_STOP_WORDS = frozenset({
     "a", "an", "the", "and", "or", "but", "in", "on", "at", "to", "for",
@@ -427,6 +428,7 @@ def search_pack(
         str(section_filter),
         str(page_filter),
         pack_hash,
+        _FTS_QUERY_VERSION,
     )
     cached = cache_get(cache_dir, q_cache_key)
     if cached is not None:
