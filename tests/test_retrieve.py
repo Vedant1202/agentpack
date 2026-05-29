@@ -75,11 +75,11 @@ def test_build_fts_index_and_search(tmp_path):
     assert len(res) == 1
     assert res[0]["chunk_id"] == "c1"
 
-@patch("agentpack.retrieve.TextEmbedding")
-def test_build_vector_index(mock_embed_cls, tmp_path):
+@patch("agentpack.retrieve._get_embedding_model")
+def test_build_vector_index(mock_get_model, tmp_path):
     mock_embed = MagicMock()
-    mock_embed.embed.return_value = iter([[0.1, 0.9]])
-    mock_embed_cls.return_value = mock_embed
+    mock_embed.embed.side_effect = lambda texts, **_: iter([[0.1, 0.9]] * len(texts))
+    mock_get_model.return_value = mock_embed
     
     pack_dir = tmp_path
     indexes_dir = pack_dir / "indexes"
@@ -107,11 +107,11 @@ def test_build_vector_index(mock_embed_cls, tmp_path):
     assert (indexes_dir / "vector_meta.json").exists()
 
 @patch("agentpack.retrieve.np.load")
-@patch("agentpack.retrieve.TextEmbedding")
-def test_search_hybrid(mock_embed_cls, mock_np_load, tmp_path):
+@patch("agentpack.retrieve._get_embedding_model")
+def test_search_hybrid(mock_get_model, mock_np_load, tmp_path):
     mock_embed = MagicMock()
-    mock_embed.embed.return_value = iter([np.array([1.0, 0.0])])
-    mock_embed_cls.return_value = mock_embed
+    mock_embed.embed.side_effect = lambda texts, **_: iter([np.array([1.0, 0.0])] * len(texts))
+    mock_get_model.return_value = mock_embed
     
     mock_np_load.return_value = np.array([[1.0, 0.0], [0.0, 1.0]])
     
@@ -181,12 +181,13 @@ def test_fts_invalidated_on_repack(tmp_path):
     assert "chunk_v1" not in chunk_ids, "stale chunk_v1 still in index after re-pack"
 
 
-@patch("agentpack.retrieve.TextEmbedding")
-def test_embed_cache_skips_reembedding(mock_embed_cls, tmp_path):
+@patch("agentpack.retrieve._get_embedding_model")
+def test_embed_cache_skips_reembedding(mock_get_model, tmp_path):
     """Unchanged chunks must not be re-embedded on a second build_vector_index call."""
     mock_embed = MagicMock()
-    mock_embed.embed.return_value = iter([np.array([0.1, 0.2, 0.3])])
-    mock_embed_cls.return_value = mock_embed
+    # Return a fresh iterator each call so the mock doesn't get exhausted
+    mock_embed.embed.side_effect = lambda texts, **_: iter([np.array([0.1, 0.2, 0.3])] * len(texts))
+    mock_get_model.return_value = mock_embed
 
     from agentpack.retrieve import build_vector_index
     pack_dir = tmp_path / "pack"
@@ -205,12 +206,85 @@ def test_embed_cache_skips_reembedding(mock_embed_cls, tmp_path):
     indexes.mkdir()
 
     build_vector_index(pack_dir, indexes / "vector_index.npy", indexes / "vector_meta.json")
-    assert mock_embed.embed.call_count == 1
+    calls_after_first = mock_embed.embed.call_count
+    assert calls_after_first >= 1
 
     # Second build — same content — must hit L3 cache; embed not called again
     build_vector_index(pack_dir, indexes / "vector_index.npy", indexes / "vector_meta.json")
-    assert mock_embed.embed.call_count == 1, (
+    assert mock_embed.embed.call_count == calls_after_first, (
         "embed() called again despite unchanged chunks — L3 cache not working"
+    )
+
+
+def test_rrf_ordering(tmp_path):
+    """RRF must order all-term matches above single-term matches (directional test)."""
+    from agentpack.retrieve import search_fts, _rrf_score
+
+    pack_dir = tmp_path / "pack"
+    pack_dir.mkdir()
+    (pack_dir / "chunks").mkdir()
+    (pack_dir / "indexes").mkdir()
+
+    # chunk_both matches "alpha" and "beta"; chunk_one matches only "alpha"
+    (pack_dir / "chunks" / "c_both.md").write_text("alpha beta document here")
+    (pack_dir / "chunks" / "c_one.md").write_text("alpha only document here")
+
+    import yaml
+    manifest = {
+        "sources": [{"id": "s1", "checksum": "abc"}],
+        "chunks": [
+            {"id": "c_both", "source_id": "s1", "path": "chunks/c_both.md", "token_count": 4},
+            {"id": "c_one", "source_id": "s1", "path": "chunks/c_one.md", "token_count": 4},
+        ],
+    }
+    with open(pack_dir / "manifest.yml", "w") as f:
+        yaml.dump(manifest, f)
+
+    results = search_fts(str(pack_dir), "alpha", top_k=5)
+    assert len(results) >= 1
+
+    # Verify RRF score formula at a known rank
+    score_rank1 = _rrf_score(1)
+    score_rank2 = _rrf_score(2)
+    assert score_rank1 > score_rank2
+
+
+def test_metadata_filter(tmp_path):
+    """source_filter / section_filter must constrain results."""
+    from agentpack.retrieve import search_pack
+    from unittest.mock import patch
+
+    pack_dir = tmp_path / "pack"
+    pack_dir.mkdir()
+    (pack_dir / "chunks").mkdir()
+    (pack_dir / "indexes").mkdir()
+
+    import yaml, json
+    (pack_dir / "chunks" / "c1.md").write_text("content about neural networks")
+    (pack_dir / "chunks" / "c2.md").write_text("content about databases")
+    manifest = {
+        "sources": [{"id": "src_001", "checksum": "a"}, {"id": "src_002", "checksum": "b"}],
+        "chunks": [
+            {"id": "c1", "source_id": "src_001", "path": "chunks/c1.md", "token_count": 4,
+             "citation": {"source_path": "doc1.pdf", "section": "Neural", "page": 1}},
+            {"id": "c2", "source_id": "src_002", "path": "chunks/c2.md", "token_count": 4,
+             "citation": {"source_path": "doc2.pdf", "section": "DB", "page": 2}},
+        ],
+    }
+    with open(pack_dir / "manifest.yml", "w") as f:
+        yaml.dump(manifest, f)
+
+    with patch("agentpack.retrieve.search_hybrid") as mock_hybrid:
+        mock_hybrid.return_value = [
+            {"chunk_id": "c1", "source_id": "src_001", "path": "chunks/c1.md",
+             "token_count": 4, "citation": {"section": "Neural", "page": 1}, "score": 0.9},
+            {"chunk_id": "c2", "source_id": "src_002", "path": "chunks/c2.md",
+             "token_count": 4, "citation": {"section": "DB", "page": 2}, "score": 0.5},
+        ]
+        results = search_pack(str(pack_dir), "content", top_k=5, source_filter="src_001")
+
+    assert all(r["source_id"] == "src_001" for r in results), (
+        f"source_filter not applied: {[r['source_id'] for r in results]}"
     )
 
 

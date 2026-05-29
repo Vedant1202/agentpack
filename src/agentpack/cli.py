@@ -19,17 +19,22 @@ def pack(
     verbose: bool = typer.Option(False, help="Enable detailed debug logging"),
     quiet: bool = typer.Option(False, help="Suppress all console output except errors"),
     remove_empty_lines: bool = typer.Option(False, help="Remove blank lines from all text files"),
-    fast_pdf: bool = typer.Option(False, help="Use legacy spatial PyMuPDF parser instead of semantic Docling parser")
+    fast: bool = typer.Option(False, "--fast", help="Fast mode: PyMuPDF parser + sqlite-vec backend"),
+    fast_pdf: bool = typer.Option(False, "--fast-pdf", hidden=True, help="[Deprecated] Use --fast instead"),
 ):
     """Pack documents into an agent-friendly context pack."""
+    if fast_pdf and not fast:
+        typer.secho("Warning: --fast-pdf is deprecated; use --fast instead.", fg=typer.colors.YELLOW)
+        fast = True
+
     if not quiet:
         typer.echo(f"Packing {input_dir} into {out}...")
-        
+
     include_patterns = include.split(",") if include else None
     exclude_patterns = exclude.split(",") if exclude else None
 
     write_pack(
-        input_dir=input_dir, 
+        input_dir=input_dir,
         output_dir=out,
         include_patterns=include_patterns,
         exclude_patterns=exclude_patterns,
@@ -39,7 +44,7 @@ def pack(
         verbose=verbose,
         quiet=quiet,
         remove_empty_lines=remove_empty_lines,
-        fast_pdf=fast_pdf
+        fast_pdf=fast,
     )
     
     if not quiet:
@@ -72,14 +77,20 @@ def audit(pack_dir: str):
 
 @app.command()
 def retrieve(
-    pack_dir: str, 
-    query: str, 
+    pack_dir: str,
+    query: str,
     top_k: int = typer.Option(5, help="Number of results to return"),
-    mode: str = typer.Option("hybrid", help="Search mode: hybrid, vector, or fts")
+    mode: str = typer.Option("hybrid", help="Search mode: hybrid, vector, or fts"),
+    source: str = typer.Option(None, help="Filter results to this source_id (substring match)"),
+    section: str = typer.Option(None, help="Filter results to this section name (substring match)"),
+    page: int = typer.Option(None, help="Filter results to this page number"),
 ):
     """Retrieves top-k evidence chunks from a pack."""
     typer.echo(f"Searching for '{query}' in {pack_dir} using {mode} mode...")
-    results = search_pack(pack_dir, query, top_k, mode=mode)
+    results = search_pack(
+        pack_dir, query, top_k, mode=mode,
+        source_filter=source, section_filter=section, page_filter=page,
+    )
     
     if not results:
         typer.secho("No results found.", fg=typer.colors.YELLOW)

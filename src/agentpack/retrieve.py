@@ -11,9 +11,25 @@ try:
 except ImportError:
     TextEmbedding = None
 
+try:
+    import hnswlib as _hnswlib
+except ImportError:
+    _hnswlib = None
+
 from agentpack.cache import cache_get, cache_set, make_key
 
 _EMBED_MODEL_ID = "BAAI/bge-small-en-v1.5"  # default fastembed model
+
+# Module-level singleton: loading TextEmbedding downloads ONNX weights (~30 MB).
+# Shared across build_vector_index calls and query-time embedding.
+_embedding_model = None
+
+
+def _get_embedding_model():
+    global _embedding_model
+    if _embedding_model is None and TextEmbedding is not None:
+        _embedding_model = TextEmbedding()
+    return _embedding_model
 
 
 def _manifest_hash(pack_dir: Path) -> str:
@@ -98,7 +114,7 @@ def build_vector_index(pack_dir: Path, vector_path: Path, meta_path: Path):
     if not chunks:
         return
 
-    embedding_model = TextEmbedding()
+    embedding_model = _get_embedding_model()
     cache_dir = pack_dir / ".cache"
 
     texts = []
@@ -154,11 +170,25 @@ def build_vector_index(pack_dir: Path, vector_path: Path, meta_path: Path):
             emb_key = make_key(text_hash, _EMBED_MODEL_ID)
             cache_set(cache_dir, emb_key, emb)
 
-    embeddings = np.array(embeddings_list)
-    
+    raw = np.array(embeddings_list, dtype=np.float32)
+    # Pre-normalize at build time so query similarity is a plain dot product (faster).
+    norms = np.linalg.norm(raw, axis=1, keepdims=True)
+    norms[norms == 0] = 1.0
+    embeddings = raw / norms
+
     np.save(vector_path, embeddings)
     with open(meta_path, "w", encoding="utf-8") as f:
         json.dump(metadata, f)
+
+    # Build HNSW index if hnswlib is available (default ANN backend).
+    hnsw_path = vector_path.parent / "hnsw_index.bin"
+    if _hnswlib is not None and len(embeddings) > 0:
+        dim = embeddings.shape[1]
+        index = _hnswlib.Index(space="ip", dim=dim)  # inner-product on normalised vectors = cosine
+        index.init_index(max_elements=len(embeddings), ef_construction=200, M=16)
+        index.add_items(embeddings, list(range(len(embeddings))))
+        index.save_index(str(hnsw_path))
+
     hash_path = vector_path.parent / "vector_index.hash"
     hash_path.write_text(_manifest_hash(pack_dir))
 
@@ -256,70 +286,139 @@ def search_vector(pack_dir: str, query: str, top_k: int = 5) -> List[Dict]:
     with open(meta_path, "r", encoding="utf-8") as f:
         metadata = json.load(f)
         
-    embedding_model = TextEmbedding()
-    query_emb = list(embedding_model.embed([query]))[0]
-    
-    similarities = np.dot(embeddings, query_emb) / (np.linalg.norm(embeddings, axis=1) * np.linalg.norm(query_emb))
-    
-    # get top k, handling case where there are fewer chunks than top_k
-    k = min(top_k, len(similarities))
+    embedding_model = _get_embedding_model()
+    raw_q = np.array(list(embedding_model.embed([query]))[0], dtype=np.float32)
+    q_norm = np.linalg.norm(raw_q)
+    query_emb = raw_q / q_norm if q_norm > 0 else raw_q
+
+    k = min(top_k, len(embeddings))
     if k == 0:
         return []
-    top_indices = np.argsort(similarities)[::-1][:k]
-    
+
+    hnsw_path = indexes_dir / "hnsw_index.bin"
+    if _hnswlib is not None and hnsw_path.exists():
+        # HNSW ANN search (default backend)
+        dim = embeddings.shape[1]
+        index = _hnswlib.Index(space="ip", dim=dim)
+        index.load_index(str(hnsw_path), max_elements=len(embeddings))
+        index.set_ef(max(k * 2, 50))
+        labels, distances = index.knn_query(query_emb, k=k)
+        top_indices = labels[0]
+        scores = 1.0 - distances[0]  # hnswlib ip returns 1-cosine for normalized vecs
+    else:
+        # Brute-force fallback
+        similarities = np.dot(embeddings, query_emb)
+        top_indices = np.argsort(similarities)[::-1][:k]
+        scores = [float(similarities[i]) for i in top_indices]
+
     results = []
-    for idx in top_indices:
-        meta = metadata[idx]
-        score = float(similarities[idx])
+    for idx, score in zip(top_indices, scores):
+        meta = metadata[int(idx)]
         results.append({
             "chunk_id": meta["chunk_id"],
             "source_id": meta["source_id"],
             "path": meta["path"],
             "token_count": meta["token_count"],
             "citation": meta["citation"],
-            "score": score,
-            "norm_score": score
+            "score": float(score),
+            "norm_score": float(score),
         })
-        
+
     return results
 
+def _rrf_score(rank: int, k: int = 60) -> float:
+    """Reciprocal Rank Fusion score: 1 / (k + rank), 1-indexed."""
+    return 1.0 / (k + rank)
+
+
 def search_hybrid(pack_dir: str, query: str, top_k: int = 5, alpha: float = 0.5) -> List[Dict]:
-    fts_results = search_fts(pack_dir, query, top_k=top_k*2)
-    vec_results = search_vector(pack_dir, query, top_k=top_k*2)
-    
-    combined = {}
-    
-    for r in fts_results:
-        combined[r["chunk_id"]] = {"fts_score": r["norm_score"], "vec_score": 0.0, "meta": r}
-        
-    for r in vec_results:
-        if r["chunk_id"] in combined:
-            combined[r["chunk_id"]]["vec_score"] = r["norm_score"]
-        else:
-            combined[r["chunk_id"]] = {"fts_score": 0.0, "vec_score": r["norm_score"], "meta": r}
-            
+    fts_results = search_fts(pack_dir, query, top_k=top_k * 2)
+    vec_results = search_vector(pack_dir, query, top_k=top_k * 2)
+
+    # RRF fusion: combine ranks from both sources instead of normalised scores.
+    rrf: Dict[str, float] = {}
+    metas: Dict[str, dict] = {}
+
+    for rank, r in enumerate(fts_results, start=1):
+        cid = r["chunk_id"]
+        rrf[cid] = rrf.get(cid, 0.0) + _rrf_score(rank)
+        metas[cid] = r
+
+    for rank, r in enumerate(vec_results, start=1):
+        cid = r["chunk_id"]
+        rrf[cid] = rrf.get(cid, 0.0) + _rrf_score(rank)
+        if cid not in metas:
+            metas[cid] = r
+
     final_results = []
-    for chunk_id, data in combined.items():
-        hybrid_score = (alpha * data["vec_score"]) + ((1 - alpha) * data["fts_score"])
-        meta = data["meta"]
-        meta["score"] = hybrid_score
+    for cid, score in rrf.items():
+        meta = dict(metas[cid])
+        meta["score"] = score
         final_results.append(meta)
-        
+
     final_results.sort(key=lambda x: x["score"], reverse=True)
     return final_results[:top_k]
 
-def search_pack(pack_dir: str, query: str, top_k: int = 5, mode: str = "hybrid") -> List[Dict]:
+def _matches_filters(
+    result: dict,
+    source_filter: str = None,
+    section_filter: str = None,
+    page_filter: int = None,
+) -> bool:
+    citation = result.get("citation", {})
+    if source_filter and source_filter.lower() not in result.get("source_id", "").lower():
+        return False
+    if section_filter:
+        section = citation.get("section", "")
+        if section_filter.lower() not in section.lower():
+            return False
+    if page_filter is not None:
+        if citation.get("page") != page_filter:
+            return False
+    return True
+
+
+def search_pack(
+    pack_dir: str,
+    query: str,
+    top_k: int = 5,
+    mode: str = "hybrid",
+    source_filter: str = None,
+    section_filter: str = None,
+    page_filter: int = None,
+) -> List[Dict]:
+    base = Path(pack_dir)
+    cache_dir = base / ".cache"
+    pack_hash = _manifest_hash(base)
+    q_cache_key = make_key(
+        hashlib.sha256(query.encode()).hexdigest(),
+        mode,
+        str(top_k),
+        str(source_filter),
+        str(section_filter),
+        str(page_filter),
+        pack_hash,
+    )
+    cached = cache_get(cache_dir, q_cache_key)
+    if cached is not None:
+        return cached
+
+    fetch_k = top_k * 4 if any([source_filter, section_filter, page_filter]) else top_k
     if mode == "fts":
-        results = search_fts(pack_dir, query, top_k)
+        results = search_fts(pack_dir, query, fetch_k)
     elif mode == "vector":
-        results = search_vector(pack_dir, query, top_k)
+        results = search_vector(pack_dir, query, fetch_k)
     else:
-        results = search_hybrid(pack_dir, query, top_k)
+        results = search_hybrid(pack_dir, query, fetch_k)
+
+    if source_filter or section_filter or page_filter is not None:
+        results = [
+            r for r in results
+            if _matches_filters(r, source_filter, section_filter, page_filter)
+        ][:top_k]
         
     # Attach actual text content for LLM generation
-    import sqlite3
-    from pathlib import Path
-    db_path = Path(pack_dir) / "indexes" / "lexical_index.db"
+    db_path = base / "indexes" / "lexical_index.db"
     if db_path.exists():
         conn = sqlite3.connect(db_path)
         cur = conn.cursor()
@@ -329,5 +428,6 @@ def search_pack(pack_dir: str, query: str, top_k: int = 5, mode: str = "hybrid")
             if row:
                 r["content"] = row[0]
         conn.close()
-        
+
+    cache_set(cache_dir, q_cache_key, results)
     return results
