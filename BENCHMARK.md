@@ -1,5 +1,10 @@
 # AgentPack Benchmark: Context Pipeline Evaluation
 
+> **Note (v0.3.0):** The results below were produced with the v0.2.0 pipeline (PyMuPDF parse +
+> FastEmbed vector-only retrieval, min-max hybrid scoring). The v0.3.0 overhaul introduced
+> Docling semantic parsing, HNSW vector search, and RRF hybrid fusion. A re-run of this benchmark
+> with the updated pipeline is pending; results are expected to improve on Context Relevance (was 0.74).
+
 ## Abstract
 This benchmark evaluates **AgentPack**, an offline document-to-agent-context compiler, against standard RAG baselines. The core hypothesis of AgentPack is not that it acts as a superior reasoning model, but rather that **AgentPack improves the context pipeline for document-grounded agents**. By taking messy, unstructured files (PDFs, CSVs, Markdown) and compiling them into clean, semantically meaningful chunks with citations, AgentPack reduces context bloat and delivers high-signal context to downstream LLMs. This benchmark proves that given the exact same LLM, AgentPack drastically reduces context token cost and improves context relevance compared to raw document stuffing and naive chunking.
 
