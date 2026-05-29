@@ -264,10 +264,16 @@ def search_fts(pack_dir: str, query: str, top_k: int = 5) -> List[Dict]:
 def search_vector(pack_dir: str, query: str, top_k: int = 5) -> List[Dict]:
     base_path = Path(pack_dir)
     indexes_dir = base_path / "indexes"
-    indexes_dir.mkdir(exist_ok=True)
+    try:
+        indexes_dir.mkdir(parents=True, exist_ok=True)
+    except OSError:
+        return []
     vector_path = indexes_dir / "vector_index.npy"
     meta_path = indexes_dir / "vector_meta.json"
     hash_path = indexes_dir / "vector_index.hash"
+
+    if not (base_path / "manifest.yml").exists():
+        return []
 
     current_hash = _manifest_hash(base_path)
     stale = (

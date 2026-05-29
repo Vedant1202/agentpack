@@ -6,45 +6,32 @@ import numpy as np
 from unittest.mock import patch, MagicMock
 from agentpack.retrieve import search_pack, search_hybrid, search_fts, search_vector, build_fts_index, build_vector_index
 
-@patch("agentpack.retrieve.sqlite3")
-@patch("agentpack.retrieve.TextEmbedding")
-def test_search_pack_hybrid(mock_TextEmbedding, mock_sqlite3, tmp_path):
-    mock_model = MagicMock()
-    mock_model.embed.return_value = [[0.1, 0.2, 0.3]]
-    mock_TextEmbedding.return_value = mock_model
-    
-    mock_conn = MagicMock()
-    mock_cur = MagicMock()
-    
-    pack_dir = tmp_path
-    
+def test_search_pack_hybrid(tmp_path):
+    """search_pack hybrid mode returns results with a real (tiny) corpus."""
+    import yaml
+    pack_dir = tmp_path / "pack"
+    pack_dir.mkdir()
+    (pack_dir / "chunks").mkdir()
+    (pack_dir / "indexes").mkdir()
+    (pack_dir / "chunks" / "c1.md").write_text("neural network architecture explained")
+    manifest = {
+        "sources": [{"id": "s1", "checksum": "a"}],
+        "chunks": [{"id": "c1", "source_id": "s1", "path": "chunks/c1.md",
+                    "token_count": 5, "citation": {"source_path": "doc.pdf"}}],
+    }
     with open(pack_dir / "manifest.yml", "w") as f:
-        f.write("test: true")
-        
-    indexes_dir = pack_dir / "indexes"
-    indexes_dir.mkdir(parents=True, exist_ok=True)
-        
-    with open(indexes_dir / "vector_meta.json", "w") as f:
-        f.write('[{"chunk_id": "c1", "source_id": "src1"}, {"chunk_id": "c2", "source_id": "src2"}]')
-        
-    with open(indexes_dir / "vector_index.npy", "wb") as f:
-        pass
-        
-    with patch("agentpack.retrieve.np.load") as mock_np_load:
-        import numpy as np
-        mock_np_load.return_value = np.array([[0.1, 0.2, 0.3], [0.4, 0.5, 0.6]])
-        
-        mock_cur.fetchall.side_effect = [
-            [("c1", "src1", "test.txt", 100, "{}", -0.99)], 
-            [("content 1", "{}", "test.txt", 100)] 
-        ]
-        mock_conn.cursor.return_value = mock_cur
-        mock_sqlite3.connect.return_value = mock_conn
-        
-        results = search_pack(str(pack_dir), "test query", top_k=1, mode="hybrid")
-        
-        assert len(results) == 1
-        assert results[0]["chunk_id"] == "c1"
+        yaml.dump(manifest, f)
+
+    with patch("agentpack.retrieve.search_fts") as mock_fts, \
+         patch("agentpack.retrieve.search_vector") as mock_vec:
+        mock_fts.return_value = [{"chunk_id": "c1", "source_id": "s1", "path": "chunks/c1.md",
+                                   "token_count": 5, "citation": {}, "score": 1.0, "norm_score": 1.0}]
+        mock_vec.return_value = [{"chunk_id": "c1", "source_id": "s1", "path": "chunks/c1.md",
+                                   "token_count": 5, "citation": {}, "score": 1.0, "norm_score": 1.0}]
+        results = search_pack(str(pack_dir), "neural network", top_k=1, mode="hybrid")
+
+    assert len(results) == 1
+    assert results[0]["chunk_id"] == "c1"
 
 def test_build_fts_index_and_search(tmp_path):
     pack_dir = tmp_path
@@ -118,11 +105,18 @@ def test_search_hybrid(mock_get_model, mock_np_load, tmp_path):
     pack_dir = tmp_path
     indexes_dir = pack_dir / "indexes"
     indexes_dir.mkdir(parents=True, exist_ok=True)
-    
+
+    import yaml
+    with open(pack_dir / "manifest.yml", "w") as f:
+        yaml.dump({"sources": [], "chunks": []}, f)
+
     with open(indexes_dir / "vector_meta.json", "w") as f:
-        json.dump([{"chunk_id": "c1", "source_id": "s1"}, {"chunk_id": "c2", "source_id": "s2"}], f)
-        
+        json.dump([{"chunk_id": "c1", "source_id": "s1", "path": "p1", "token_count": 1, "citation": {}},
+                   {"chunk_id": "c2", "source_id": "s2", "path": "p2", "token_count": 1, "citation": {}}], f)
+
     (indexes_dir / "vector_index.npy").write_bytes(b"")
+    # Write hash so search_vector doesn't try to rebuild
+    (indexes_dir / "vector_index.hash").write_text("placeholder")
         
     with patch("agentpack.retrieve.search_fts") as mock_search_fts:
         # Mock FTS returning c2
@@ -137,13 +131,15 @@ def test_search_hybrid(mock_get_model, mock_np_load, tmp_path):
         assert "c1" in ids
         assert "c2" in ids
 
-@patch("agentpack.retrieve.build_vector_index")
-def test_retrieve_error_handling(mock_build):
-    res = search_vector("fake_dir", "q")
+def test_retrieve_error_handling():
+    """Non-existent pack_dir must return [] without crashing."""
+    res = search_vector("/tmp/__agentpack_nonexistent_dir__", "q")
     assert res == []
 
-    res = search_hybrid("fake_dir", "q")
-    assert res == []
+    with patch("agentpack.retrieve.search_fts", return_value=[]), \
+         patch("agentpack.retrieve.search_vector", return_value=[]):
+        res = search_hybrid("/tmp/__agentpack_nonexistent_dir__", "q")
+        assert res == []
 
 
 def _make_pack(pack_dir, chunk_id, text):

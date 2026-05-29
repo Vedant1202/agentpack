@@ -40,7 +40,7 @@ def test_metrics_calculate_citation_precision():
 
 # --- BENCHMARKS TESTS ---
 
-@patch("agentpack.eval.benchmarks.load_dataset")
+@patch("datasets.load_dataset")
 @patch("agentpack.eval.benchmarks.requests")
 def test_slice_financebench(mock_requests, mock_load_dataset, tmp_path):
     mock_ds = [
@@ -63,25 +63,25 @@ def test_slice_financebench(mock_requests, mock_load_dataset, tmp_path):
 # We will skip generation.py and runner.py tests as they likely use other unavailable classes.
 # But let's add a basic test for runner.py if we can mock it simply.
 @patch("agentpack.eval.runner.search_pack")
-@patch("agentpack.eval.generation.run_generation_eval")
-def test_run_eval(mock_gen_eval, mock_search, tmp_path):
+@patch("agentpack.eval.runner.write_pack")
+def test_run_eval(mock_write_pack, mock_search, tmp_path):
     from agentpack.eval.runner import run_eval
-    mock_search.return_value = [{"citation": {"source_path": "docA.pdf"}}]
-    
-    ds_dir = tmp_path / "dataset"
-    ds_dir.mkdir()
-    
-    with open(ds_dir / "queries.yml", "w") as f:
+
+    mock_search.return_value = [{"citation": {"source_path": "docA.pdf"}, "path": "c1.md", "token_count": 10}]
+
+    bench_dir = tmp_path / "benchmark"
+    bench_dir.mkdir()
+    (bench_dir / "corpus").mkdir()
+    (bench_dir / "corpus" / "docA.txt").write_text("some content")
+
+    with open(bench_dir / "queries.yml", "w") as f:
         yaml.dump({"q1": "What is foo?"}, f)
-        
-    with open(ds_dir / "gold_evidence.yml", "w") as f:
+
+    with open(bench_dir / "gold_evidence.yml", "w") as f:
         yaml.dump({"q1": [{"file": "docA.pdf"}]}, f)
-        
-    results_dir = run_eval(
-        pack_dir="fake_pack",
-        dataset_dir=str(ds_dir),
-        model="gemini-2.5-flash"
-    )
-    
-    assert results_dir is not None
-    assert Path(results_dir).exists()
+
+    report = run_eval(str(bench_dir))
+
+    assert report is not None
+    assert not report.startswith("Error")
+    assert (bench_dir / "retrieval_report.md").exists()
