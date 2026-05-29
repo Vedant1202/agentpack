@@ -311,6 +311,58 @@ def test_metadata_filter(tmp_path):
     )
 
 
+def test_fts_and_precision(tmp_path):
+    """AND query must exclude chunks that match only some query terms."""
+    import yaml
+    pack_dir = tmp_path / "pack"
+    pack_dir.mkdir()
+    (pack_dir / "chunks").mkdir()
+    (pack_dir / "indexes").mkdir()
+
+    # c_all has both "3M" and "revenue"; c_partial has "3M" but not "revenue"
+    (pack_dir / "chunks" / "c_all.md").write_text("3M annual revenue 2022 financial results")
+    (pack_dir / "chunks" / "c_partial.md").write_text("3M annual report results 2022")
+
+    manifest = {
+        "sources": [{"id": "s1", "checksum": "x"}],
+        "chunks": [
+            {"id": "c_all", "source_id": "s1", "path": "chunks/c_all.md", "token_count": 5},
+            {"id": "c_partial", "source_id": "s1", "path": "chunks/c_partial.md", "token_count": 4},
+        ],
+    }
+    with open(pack_dir / "manifest.yml", "w") as f:
+        yaml.dump(manifest, f)
+
+    # "what is 3M revenue" → stop words filtered → "3M" AND "revenue"
+    # c_all matches both; c_partial matches "3M" only → excluded by AND
+    results = search_fts(str(pack_dir), "what is 3M revenue", top_k=5)
+    chunk_ids = [r["chunk_id"] for r in results]
+    assert "c_all" in chunk_ids, "c_all (all terms present) must be returned"
+    assert "c_partial" not in chunk_ids, "c_partial (missing 'revenue') must be excluded by AND"
+
+
+def test_fts_or_fallback_on_no_and_results(tmp_path):
+    """When AND matches nothing, OR fallback must still return results."""
+    import yaml
+    pack_dir = tmp_path / "pack"
+    pack_dir.mkdir()
+    (pack_dir / "chunks").mkdir()
+    (pack_dir / "indexes").mkdir()
+
+    (pack_dir / "chunks" / "c1.md").write_text("alpha only document here")
+    manifest = {
+        "sources": [{"id": "s1", "checksum": "y"}],
+        "chunks": [{"id": "c1", "source_id": "s1", "path": "chunks/c1.md", "token_count": 4}],
+    }
+    with open(pack_dir / "manifest.yml", "w") as f:
+        yaml.dump(manifest, f)
+
+    # "alpha beta": AND requires both; only "alpha" exists → AND returns 0 → OR fallback
+    results = search_fts(str(pack_dir), "alpha beta", top_k=5)
+    assert len(results) == 1
+    assert results[0]["chunk_id"] == "c1"
+
+
 def test_fts_unchanged_pack_reuses_index(tmp_path):
     """Unchanged pack must NOT rebuild the FTS index (no extra work)."""
     import sqlite3 as _sqlite3
