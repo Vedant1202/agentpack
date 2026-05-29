@@ -3,6 +3,7 @@ from agentpack.pack import write_pack
 from agentpack.validate import validate_pack
 from agentpack.audit import audit_pack
 from agentpack.retrieve import search_pack, build_fts_index, build_vector_index
+from agentpack.config import load_config
 from agentpack.eval.runner import run_eval
 
 app = typer.Typer(help="AgentPack CLI", no_args_is_help=True)
@@ -27,11 +28,18 @@ def pack(
         typer.secho("Warning: --fast-pdf is deprecated; use --fast instead.", fg=typer.colors.YELLOW)
         fast = True
 
+    # Load agentpack.toml from input_dir; CLI flags take precedence over config values.
+    cfg = load_config(input_dir)
+    effective_fast = fast or cfg["fast"]
+    effective_remove_empty = remove_empty_lines or cfg["remove_empty_lines"]
+    effective_include = include or (",".join(cfg["include"]) if cfg["include"] else None)
+    effective_exclude = exclude or (",".join(cfg["exclude"]) if cfg["exclude"] else None)
+
     if not quiet:
         typer.echo(f"Packing {input_dir} into {out}...")
 
-    include_patterns = include.split(",") if include else None
-    exclude_patterns = exclude.split(",") if exclude else None
+    include_patterns = effective_include.split(",") if effective_include else None
+    exclude_patterns = effective_exclude.split(",") if effective_exclude else None
 
     write_pack(
         input_dir=input_dir,
@@ -43,8 +51,8 @@ def pack(
         include_hidden=include_hidden,
         verbose=verbose,
         quiet=quiet,
-        remove_empty_lines=remove_empty_lines,
-        fast_pdf=fast,
+        remove_empty_lines=effective_remove_empty,
+        fast_pdf=effective_fast,
     )
     
     if not quiet:

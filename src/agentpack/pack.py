@@ -12,6 +12,7 @@ from agentpack.parsers.text_parser import TextParser
 from agentpack.parsers.markdown_parser import MarkdownParser
 from agentpack.parsers.csv_parser import CSVParser
 from agentpack.parsers.pdf_parser import PDFParser
+from agentpack.parsers.docling_parser import DoclingParser
 from agentpack.chunker import chunk_document, Chunk
 from agentpack.models import SourceDocument
 from agentpack.cache import cache_get, cache_set, make_key
@@ -63,6 +64,8 @@ def get_parser(suffix: str, fast_pdf: bool = False):
         return CSVParser()
     elif suffix == ".pdf":
         return PDFParser(fast_pdf=fast_pdf)
+    elif suffix in {".docx", ".pptx", ".xlsx", ".html", ".htm"}:
+        return DoclingParser()
     return None
 
 def write_pack(
