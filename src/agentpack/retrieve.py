@@ -235,34 +235,31 @@ def search_fts(pack_dir: str, query: str, top_k: int = 5) -> List[Dict]:
         conn = build_fts_index(base_path, db_path)
 
     cur = conn.cursor()
-    
-    clean_str = re.sub(r'[^a-zA-Z0-9\-\s]', ' ', query)
-    clean_query = " OR ".join([f'"{w}"' for w in clean_str.split() if w])
-    if not clean_query:
+
+    and_query = _build_fts_query(query)
+    if not and_query:
         return []
-        
-    try:
-        cur.execute('''
-            SELECT chunk_id, source_id, path, token_count, citation, rank 
-            FROM chunks_fts 
-            WHERE chunks_fts MATCH ? 
-            ORDER BY rank 
-            LIMIT ?
-        ''', (clean_query, top_k))
-    except sqlite3.OperationalError:
+
+    def _run(q):
         try:
-            cur.execute('''
-                SELECT chunk_id, source_id, path, token_count, citation, rank 
-                FROM chunks_fts 
-                WHERE chunks_fts MATCH ? 
-                ORDER BY rank 
-                LIMIT ?
-            ''', (query, top_k))
+            cur.execute(
+                "SELECT chunk_id, source_id, path, token_count, citation, rank "
+                "FROM chunks_fts WHERE chunks_fts MATCH ? ORDER BY rank LIMIT ?",
+                (q, top_k),
+            )
+            return cur.fetchall()
         except sqlite3.OperationalError:
             return []
-            
+
+    rows = _run(and_query)
+    if not rows:
+        # AND matched nothing — fall back to OR to preserve recall
+        clean_str = re.sub(r'[^a-zA-Z0-9\-\s]', ' ', query)
+        or_query = " OR ".join(f'"{w}"' for w in clean_str.split() if w)
+        rows = _run(or_query) if or_query else []
+
     results = []
-    for row in cur.fetchall():
+    for row in rows:
         chunk_id, source_id, path, token_count, citation_str, rank = row
         results.append({
             "chunk_id": chunk_id,
