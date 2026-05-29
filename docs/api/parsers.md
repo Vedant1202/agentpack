@@ -6,6 +6,9 @@
 ## PDF Parser
 ::: agentpack.parsers.pdf_parser
 
+## Docling Parser
+::: agentpack.parsers.docling_parser
+
 ## Markdown Parser
 ::: agentpack.parsers.markdown_parser
 

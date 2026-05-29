@@ -4,10 +4,7 @@ from agentpack.models import SourceDocument, DocumentBlock, ExtractionWarning
 from agentpack.parsers.base import Parser
 
 class MarkdownParser(Parser):
-    def parse(self, file_path: Path, source_id: str) -> SourceDocument:
-        with open(file_path, "r", encoding="utf-8", errors="replace") as f:
-            content = f.read()
-
+    def parse_string(self, content: str, file_path: Path, source_id: str) -> SourceDocument:
         if getattr(self, "remove_empty_lines", False):
             content = "\n".join([line for line in content.split("\n") if line.strip()])
 
@@ -80,3 +77,8 @@ class MarkdownParser(Parser):
             blocks=blocks,
             warnings=warnings
         )
+
+    def parse(self, file_path: Path, source_id: str) -> SourceDocument:
+        with open(file_path, "r", encoding="utf-8", errors="replace") as f:
+            content = f.read()
+        return self.parse_string(content, file_path, source_id)

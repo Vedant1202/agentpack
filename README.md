@@ -70,7 +70,7 @@ detect-secrets scan > .secrets.baseline
 ```
 
 ### 2. Compile a Pack
-Point AgentPack at any folder containing your documents (`.txt`, `.md`, `.csv`, `.pdf`).
+Point AgentPack at any folder containing your documents (`.txt`, `.md`, `.csv`, `.pdf`, `.docx`, `.pptx`, `.xlsx`, `.html`).
 
 ```bash
 agentpack pack ./my_docs --out ./agentpack-output
@@ -81,12 +81,31 @@ agentpack pack ./my_docs --out ./agentpack-output
 - `--ignore "tests/,drafts/"`: Exclude specific directories or files.
 - `--remove-empty-lines`: Compress text files to save LLM tokens.
 - `--no-gitignore`: Ignore `.gitignore` rules and pack everything.
+- `--fast`: Fast mode (PyMuPDF for PDFs; skips Docling). Best for quick iteration on small corpora.
 
-### 2. Retrieve
-AgentPack comes with a built-in hybrid search engine (SQLite FTS5 + FastEmbed vector search) to test your chunks instantly.
+Settings can also be stored in an `agentpack.toml` file in your input directory:
+
+```toml
+[pack]
+chunk_max_tokens = 800
+exclude = ["drafts/", "*.log"]
+```
+
+### 2b. Pre-build Indexes (optional)
+Run this after packing to avoid paying the index-build cost on the first query:
+
+```bash
+agentpack index ./agentpack-output
+```
+
+### 3. Retrieve
+AgentPack comes with a built-in hybrid search engine (SQLite FTS5 + HNSW vector search, fused with RRF) to test your chunks instantly.
 
 ```bash
 agentpack retrieve ./agentpack-output "eligibility criteria" --top-k 5
+
+# Narrow results with metadata filters
+agentpack retrieve ./agentpack-output "revenue" --source "annual_report" --page 12
 ```
 
 ### 3. Deterministic Eval
@@ -117,7 +136,8 @@ AgentPack provides a rich CLI for auditing, validating, and testing your context
 - **TXT**: Paragraph-aware splitting.
 - **Markdown**: Semantic heading-aware section path tracking.
 - **CSV**: Uses Pandas & Tabulate to convert tabular data into Markdown tables.
-- **PDF**: Accurate page-by-page PyMuPDF extraction.
+- **PDF**: Docling structured-tree parse (default) — preserves page numbers, sections, and tables. PyMuPDF spatial extraction with `--fast`.
+- **DOCX / PPTX / XLSX / HTML**: Docling semantic parse — same structured-tree path as PDF.
 
 ## Architecture Overview
 
@@ -132,11 +152,11 @@ flowchart LR
 For a deep dive into how AgentPack parses, chunks, and indexes data, see [Architecture & Internals](https://github.com/Vedant1202/agentpack/blob/main/docs/architecture.md).
 
 ## Current Limitations & Roadmap
-AgentPack is currently focused on text-based semantic extraction. The following features are on the roadmap but **not yet implemented**:
-- **Image Understanding / Vision**: AgentPack does not currently run OCR or vision models on images embedded within PDFs or Markdown files. Images are currently ignored during the parsing phase.
-- **Complex Table Structures**: While basic CSVs are supported, highly nested or merged-cell tables within PDFs are not perfectly reconstructed yet.
-- **Web Crawling**: You currently need to provide local files. Direct URL scraping is planned.
-- **Cloud Vector DB Integration**: Retrieval currently runs locally using SQLite FTS5 and FastEmbed. Connectors for Pinecone, Weaviate, or Qdrant are planned.
+- **Image Understanding / Vision**: OCR and vision models on embedded images are not yet supported. Images are ignored during parsing.
+- **Complex Nested Tables**: Highly merged-cell tables in PDFs may not perfectly reconstruct.
+- **Web Crawling**: Local files only; URL scraping is planned.
+- **Cloud Vector DB Integration**: Retrieval runs locally (SQLite FTS5 + HNSW). Connectors for Pinecone, Weaviate, or Qdrant are planned.
+- **Cross-Encoder Reranking**: A secondary rerank pass is on the roadmap (deferred to v0.4).
 
 ---
 *Built with ❤️ for Agents.*
