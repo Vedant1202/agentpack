@@ -181,6 +181,39 @@ def test_fts_invalidated_on_repack(tmp_path):
     assert "chunk_v1" not in chunk_ids, "stale chunk_v1 still in index after re-pack"
 
 
+@patch("agentpack.retrieve.TextEmbedding")
+def test_embed_cache_skips_reembedding(mock_embed_cls, tmp_path):
+    """Unchanged chunks must not be re-embedded on a second build_vector_index call."""
+    mock_embed = MagicMock()
+    mock_embed.embed.return_value = iter([np.array([0.1, 0.2, 0.3])])
+    mock_embed_cls.return_value = mock_embed
+
+    from agentpack.retrieve import build_vector_index
+    pack_dir = tmp_path / "pack"
+    pack_dir.mkdir()
+    (pack_dir / "chunks").mkdir()
+    (pack_dir / "chunks" / "c1.md").write_text("unique content for embedding test")
+    import yaml
+    manifest = {
+        "sources": [{"id": "s1", "checksum": "abc"}],
+        "chunks": [{"id": "c1", "source_id": "s1", "path": "chunks/c1.md", "token_count": 5}],
+    }
+    with open(pack_dir / "manifest.yml", "w") as f:
+        yaml.dump(manifest, f)
+
+    indexes = pack_dir / "indexes"
+    indexes.mkdir()
+
+    build_vector_index(pack_dir, indexes / "vector_index.npy", indexes / "vector_meta.json")
+    assert mock_embed.embed.call_count == 1
+
+    # Second build — same content — must hit L3 cache; embed not called again
+    build_vector_index(pack_dir, indexes / "vector_index.npy", indexes / "vector_meta.json")
+    assert mock_embed.embed.call_count == 1, (
+        "embed() called again despite unchanged chunks — L3 cache not working"
+    )
+
+
 def test_fts_unchanged_pack_reuses_index(tmp_path):
     """Unchanged pack must NOT rebuild the FTS index (no extra work)."""
     import sqlite3 as _sqlite3

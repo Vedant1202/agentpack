@@ -1,7 +1,9 @@
 import os
 import yaml
+import shutil
 import tempfile
 from pathlib import Path
+from unittest.mock import patch, MagicMock
 from agentpack.pack import write_pack
 
 def test_write_pack(mock_txt_file, mock_md_file, mock_csv_file):
@@ -41,3 +43,43 @@ def test_write_pack(mock_txt_file, mock_md_file, mock_csv_file):
         # Assert tables were written (stored as .md — content is markdown table format)
         tables = list((out_path / "tables").glob("*.md"))
         assert len(tables) == 1
+
+
+def test_pack_version_in_manifest(tmp_path):
+    """manifest.pack.version must equal the installed package version, not '0.1.0'."""
+    from importlib.metadata import version as pkg_version
+    in_dir = tmp_path / "corpus"
+    in_dir.mkdir()
+    (in_dir / "doc.txt").write_text("hello world")
+    out_dir = tmp_path / "out"
+    write_pack(str(in_dir), str(out_dir), quiet=True)
+    with open(out_dir / "manifest.yml") as f:
+        manifest = yaml.safe_load(f)
+    assert manifest["pack"]["version"] == pkg_version("agent-context-packager")
+
+
+def test_incremental_pack_skips_unchanged(tmp_path):
+    """Re-packing an unchanged file must hit L1 cache (parser.parse not called twice)."""
+    in_dir = tmp_path / "corpus"
+    in_dir.mkdir()
+    (in_dir / "doc.txt").write_text("hello world unchanged")
+    out_dir = tmp_path / "out"
+
+    call_count = [0]
+    real_parse = None
+
+    from agentpack.parsers.text_parser import TextParser
+
+    original_parse = TextParser.parse
+
+    def counting_parse(self, *args, **kwargs):
+        call_count[0] += 1
+        return original_parse(self, *args, **kwargs)
+
+    with patch.object(TextParser, "parse", counting_parse):
+        write_pack(str(in_dir), str(out_dir), quiet=True)  # first pack
+        write_pack(str(in_dir), str(out_dir), quiet=True)  # second pack (unchanged)
+
+    assert call_count[0] == 1, (
+        f"parser.parse called {call_count[0]} times; expected 1 (cache hit on second pack)"
+    )

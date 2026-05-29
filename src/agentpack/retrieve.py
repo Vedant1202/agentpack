@@ -11,6 +11,10 @@ try:
 except ImportError:
     TextEmbedding = None
 
+from agentpack.cache import cache_get, cache_set, make_key
+
+_EMBED_MODEL_ID = "BAAI/bge-small-en-v1.5"  # default fastembed model
+
 
 def _manifest_hash(pack_dir: Path) -> str:
     """Stable hash of the pack's content: sorted chunk ids + source checksums."""
@@ -93,40 +97,64 @@ def build_vector_index(pack_dir: Path, vector_path: Path, meta_path: Path):
     chunks = manifest.get("chunks", [])
     if not chunks:
         return
-        
+
     embedding_model = TextEmbedding()
-    
+    cache_dir = pack_dir / ".cache"
+
     texts = []
     metadata = []
-    
+    embeddings_list = []
+
     for chunk in chunks:
         chunk_file = pack_dir / chunk.get("path")
-        if chunk_file.exists():
-            with open(chunk_file, "r", encoding="utf-8") as f:
-                content = f.read()
-            texts.append(content)
-            metadata.append({
-                "chunk_id": chunk.get("id"),
-                "source_id": chunk.get("source_id"),
-                "path": chunk.get("path"),
-                "token_count": chunk.get("token_count", 0),
-                "citation": chunk.get("citation", {})
-            })
-            
+        if not chunk_file.exists():
+            continue
+        with open(chunk_file, "r", encoding="utf-8") as f:
+            content = f.read()
+        texts.append(content)
+        metadata.append({
+            "chunk_id": chunk.get("id"),
+            "source_id": chunk.get("source_id"),
+            "path": chunk.get("path"),
+            "token_count": chunk.get("token_count", 0),
+            "citation": chunk.get("citation", {})
+        })
+
+        # L3 embedding cache: key = sha256(chunk_text) + model_id
+        text_hash = hashlib.sha256(content.encode()).hexdigest()
+        emb_key = make_key(text_hash, _EMBED_MODEL_ID)
+        cached_emb = cache_get(cache_dir, emb_key)
+        if cached_emb is not None:
+            embeddings_list.append(cached_emb)
+        else:
+            embeddings_list.append(None)  # placeholder — will batch-embed below
+
     if not texts:
         return
 
-    # Embed in batches with tqdm progress
-    try:
-        from tqdm import tqdm
-        embeddings = []
-        # Use a small batch size to prevent freezing on low-RAM machines and update progress bar frequently
-        for emb in tqdm(embedding_model.embed(texts, batch_size=16), total=len(texts), desc="Generating FastEmbed Vectors"):
-            embeddings.append(emb)
-        embeddings = np.array(embeddings)
-    except ImportError:
-        embeddings_iter = embedding_model.embed(texts, batch_size=16)
-        embeddings = np.array(list(embeddings_iter))
+    # Batch-embed only the cache misses
+    miss_indices = [i for i, e in enumerate(embeddings_list) if e is None]
+    if miss_indices:
+        miss_texts = [texts[i] for i in miss_indices]
+        try:
+            from tqdm import tqdm
+            miss_embs = list(tqdm(
+                embedding_model.embed(miss_texts, batch_size=16),
+                total=len(miss_texts),
+                desc="Generating FastEmbed Vectors",
+            ))
+        except ImportError:
+            miss_embs = list(embedding_model.embed(miss_texts, batch_size=16))
+
+        for j, idx in enumerate(miss_indices):
+            emb = miss_embs[j]
+            embeddings_list[idx] = emb
+            # store in cache for next run
+            text_hash = hashlib.sha256(texts[idx].encode()).hexdigest()
+            emb_key = make_key(text_hash, _EMBED_MODEL_ID)
+            cache_set(cache_dir, emb_key, emb)
+
+    embeddings = np.array(embeddings_list)
     
     np.save(vector_path, embeddings)
     with open(meta_path, "w", encoding="utf-8") as f:

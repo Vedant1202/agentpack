@@ -1,11 +1,20 @@
+import hashlib
 import os
 import yaml
+from concurrent.futures import ThreadPoolExecutor, as_completed
 from datetime import datetime, timezone
 from importlib.metadata import version as _pkg_version, PackageNotFoundError
 from pathlib import Path
-from typing import List, Dict
+from typing import List, Dict, Optional
 
 from agentpack.scanner import scan_directory
+from agentpack.parsers.text_parser import TextParser
+from agentpack.parsers.markdown_parser import MarkdownParser
+from agentpack.parsers.csv_parser import CSVParser
+from agentpack.parsers.pdf_parser import PDFParser
+from agentpack.chunker import chunk_document, Chunk
+from agentpack.models import SourceDocument
+from agentpack.cache import cache_get, cache_set, make_key
 
 
 def _get_pack_version() -> str:
@@ -13,12 +22,36 @@ def _get_pack_version() -> str:
         return _pkg_version("agent-context-packager")
     except PackageNotFoundError:
         return "dev"
-from agentpack.parsers.text_parser import TextParser
-from agentpack.parsers.markdown_parser import MarkdownParser
-from agentpack.parsers.csv_parser import CSVParser
-from agentpack.parsers.pdf_parser import PDFParser
-from agentpack.chunker import chunk_document, Chunk
-from agentpack.models import SourceDocument
+
+
+def _parser_cache_version() -> str:
+    """Version string for L1 parse cache keys — bump when parse output schema changes."""
+    return f"parser_v{_get_pack_version()}"
+
+def _parse_one(
+    file_path: Path,
+    source_id: str,
+    fast_pdf: bool,
+    remove_empty_lines: bool,
+    cache_dir: Path,
+) -> Optional["SourceDocument"]:
+    """Parse one file, respecting the L1 parse cache. Returns None if unsupported."""
+    parser = get_parser(file_path.suffix, fast_pdf=fast_pdf)
+    if parser is None:
+        return None
+    if hasattr(parser, "remove_empty_lines"):
+        parser.remove_empty_lines = remove_empty_lines
+    with open(file_path, "rb") as _f:
+        file_hash = hashlib.sha256(_f.read()).hexdigest()
+    cache_key = make_key(file_hash, _parser_cache_version(), str(fast_pdf))
+    doc = cache_get(cache_dir, cache_key)
+    if doc is None:
+        doc = parser.parse(file_path, source_id)
+        cache_set(cache_dir, cache_key, doc)
+    else:
+        doc.source_id = source_id
+    return doc
+
 
 def get_parser(suffix: str, fast_pdf: bool = False):
     suffix = suffix.lower()
@@ -86,20 +119,35 @@ def write_pack(
     sources = []
     all_chunks = []
     all_tables = []
-    
-    for i, file_path in enumerate(files):
-        source_id = f"src_{i:03d}"
-        parser = get_parser(file_path.suffix, fast_pdf=fast_pdf)
-        if not parser:
+    cache_dir = out_path / ".cache"
+
+    # Dispatch parallel parses; results keyed by index to preserve manifest order.
+    indexed_files = [(i, fp) for i, fp in enumerate(files)
+                     if get_parser(fp.suffix, fast_pdf=fast_pdf) is not None]
+    docs_by_index: dict = {}
+
+    max_workers = min(4, len(indexed_files)) if indexed_files else 1
+    with ThreadPoolExecutor(max_workers=max_workers) as pool:
+        futures = {
+            pool.submit(
+                _parse_one, fp, f"src_{i:03d}", fast_pdf, remove_empty_lines, cache_dir
+            ): i
+            for i, fp in indexed_files
+        }
+        for future in as_completed(futures):
+            idx = futures[future]
+            doc = future.result()
+            if doc is not None:
+                docs_by_index[idx] = doc
+
+    for i, file_path in indexed_files:
+        doc = docs_by_index.get(i)
+        if doc is None:
             continue
-            
+        source_id = f"src_{i:03d}"
+
         if verbose and not quiet:
-            print(f"Parsing: {file_path}")
-            
-        if hasattr(parser, 'remove_empty_lines'):
-            parser.remove_empty_lines = remove_empty_lines
-            
-        doc: SourceDocument = parser.parse(file_path, source_id)
+            print(f"Parsed: {file_path}")
 
         for block in doc.blocks:
             if block.type == "table":
