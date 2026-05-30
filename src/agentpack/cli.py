@@ -148,10 +148,35 @@ def index_cmd(
 
 
 @app.command(name="eval")
-def evaluate(benchmark_dir: str):
+def evaluate(
+    benchmark_dir: str,
+    include_llm_baselines: bool = typer.Option(
+        False, "--include-llm-baselines",
+        help="Also run Contextual Retrieval + HyDE (these call an LLM and incur API cost)",
+    ),
+    llm_model: str = typer.Option(
+        "gemini-3.1-flash-lite", help="Model used by the LLM-in-retrieval baselines",
+    ),
+    skip_raw_file: bool = typer.Option(
+        False, "--skip-raw-file",
+        help="Exclude the Raw File baseline (entire-document BM25; very high token count)",
+    ),
+    verbose: bool = typer.Option(
+        False, "--verbose", "-v",
+        help="Detailed per-phase + per-query logs and an animated spinner for long steps",
+    ),
+):
     """Runs a deterministic evaluation benchmark."""
     typer.echo(f"Running evaluation on {benchmark_dir}...")
-    report = run_eval(benchmark_dir)
+    if include_llm_baselines:
+        typer.echo(f"Including LLM-in-retrieval baselines (Contextual Retrieval, HyDE) using {llm_model}.")
+    report = run_eval(
+        benchmark_dir,
+        include_llm_baselines=include_llm_baselines,
+        llm_model=llm_model,
+        verbose=verbose,
+        skip_raw_file=skip_raw_file,
+    )
     if report.startswith("Error:"):
         typer.secho(report, fg=typer.colors.RED)
         raise typer.Exit(code=1)
@@ -160,12 +185,36 @@ def evaluate(benchmark_dir: str):
         typer.secho("\nEvaluation complete.", fg=typer.colors.GREEN)
 
 @app.command(name="gen-eval")
-def gen_eval(benchmark_dir: str, gen_model: str = "gemini-1.5-flash", judge_model: str = "gemini-1.5-pro", limit: int = typer.Option(None, help="Limit number of queries for a smoke test")):
+def gen_eval(
+    benchmark_dir: str,
+    gen_model: str = typer.Option("gemini-3.1-flash-lite", help="Model used for answer generation"),
+    judge_model: str = typer.Option("gemini-3.5-flash", help="Model used for LLM-as-judge scoring"),
+    limit: int = typer.Option(None, help="Limit number of queries (smoke test)"),
+    no_baselines: bool = typer.Option(False, "--no-baselines", help="Skip all baselines (AgentPack modes only)"),
+    include_llm_baselines: bool = typer.Option(
+        False, "--include-llm-baselines",
+        help="Also run Contextual Retrieval + HyDE baselines (extra API cost)",
+    ),
+    skip_raw_file: bool = typer.Option(
+        False, "--skip-raw-file",
+        help="Exclude the Raw File baseline (entire-document BM25; very high token count)",
+    ),
+    verbose: bool = typer.Option(
+        False, "--verbose", "-v",
+        help="Detailed per-phase + per-query logs (scores, answer previews) alongside the progress bar",
+    ),
+):
     """Evaluate Generative QA using AgentPack"""
     from agentpack.eval.generation import run_generation_eval
-    
+
     typer.echo(f"Running generative evaluation on {benchmark_dir}...")
-    report = run_generation_eval(benchmark_dir, gen_model, judge_model, limit)
+    if no_baselines:
+        typer.echo("Baselines skipped — running AgentPack (Vector) and AgentPack (Hybrid) only.")
+    report = run_generation_eval(
+        benchmark_dir, gen_model, judge_model, limit,
+        skip_baselines=no_baselines, include_llm_baselines=include_llm_baselines,
+        verbose=verbose, skip_raw_file=skip_raw_file,
+    )
     if report.startswith("Error"):
         typer.secho(report, fg=typer.colors.RED)
     else:
@@ -173,15 +222,21 @@ def gen_eval(benchmark_dir: str, gen_model: str = "gemini-1.5-flash", judge_mode
         typer.secho("Generation evaluation complete.", fg=typer.colors.GREEN)
 
 @app.command(name="prep-benchmark")
-def prep_benchmark(dataset: str = typer.Option("financebench", help="Dataset to slice"), sample_size: int = typer.Option(10, help="Number of documents to sample")):
+def prep_benchmark(
+    dataset: str = typer.Option("financebench", help="Dataset to slice"),
+    sample_size: int = typer.Option(10, help="Number of documents to sample"),
+    data_dir: str = typer.Option(None, "--data-dir", help="Path to locally-downloaded DocBench data/ dir (docbench only)"),
+):
     """Downloads and slices a public dataset into a benchmark format."""
-    from agentpack.eval.benchmarks import slice_financebench, slice_tatqa, slice_qasper
-    
+    from agentpack.eval.benchmarks import slice_financebench, slice_tatqa, slice_qasper, slice_docbench
+
     out_dir = f"benchmarks/{dataset}_sample"
     typer.echo(f"Preparing {dataset} into {out_dir} with {sample_size} samples...")
-    
+
     if dataset == "financebench":
         slice_financebench(out_dir, sample_size=sample_size)
+    elif dataset == "docbench":
+        slice_docbench(out_dir, sample_size=sample_size, data_dir=data_dir)
     elif dataset == "tatqa":
         slice_tatqa(out_dir, sample_size=sample_size)
     elif dataset == "qasper":
