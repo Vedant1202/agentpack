@@ -9,6 +9,8 @@
 
 Instead of forcing AI agents to parse messy, disparate file formats (PDFs, CSVs, Markdown, text) at runtime, AgentPack is an offline **document-to-agent-context compiler**. It takes unstructured knowledge bases, turns them into clean semantic chunks with citations, retrieves the right evidence, and sends only high-signal context to the model.
 
+> **Why AgentPack:** across 9 retrieval strategies on 2 corpora, it delivers the most consistent retrieval quality of any method tested — 0.83 Hit@3 on both homogeneous and heterogeneous document sets — while keeping context ~100× smaller than raw document stuffing. See the [full benchmark results](https://github.com/Vedant1202/agentpack/blob/main/BENCHMARK.md).
+
 ## The Benchmark
 **Given the same LLM, AgentPack provides better context than raw document stuffing or naive RAG.**
 
@@ -16,8 +18,8 @@ I benchmarked AgentPack against standard RAG baselines on 42 complex financial q
 
 **Benchmark Highlights:**
 * **161x Reduction in Token Cost:** Cut context token usage from 424k to 2.6k, saving ~$0.10 per query.
-* **2x Context Relevance:** Vastly outperformed naive chunking in retrieving semantically complete financial tables.
-* **"Lost in the Middle" Prevention:** Outperformed raw document stuffing in correctness by preventing the LLM from drowning in noise.
+* **Highest Correctness of Any Strategy:** AgentPack (Vector) scored 3.95/5 judge-graded correctness on FinanceBench — the top of all 9 retrieval strategies tested.
+* **~1.7x Context Relevance:** Retrieved context graded ~1.7x more relevant than naive chunking (3.14 vs 1.83) by preserving semantically complete financial tables.
 
 AgentPack is best treated as an offline document-to-agent-context compiler. It reduces context bloat, but a strong reasoning model is still required to solve complex queries.
 
@@ -25,9 +27,9 @@ AgentPack is best treated as an offline document-to-agent-context compiler. It r
 |--------|----------------------|
 | **Token reduction** | ~161x reduction (99% smaller) compared to raw document stuffing |
 | **Context per query** | Averages ~2.6k high-signal tokens per retrieval (vs 400k+ for raw files) |
-| **Context Relevance** | ~2x more relevant than naive chunking; preserves tabular and semantic boundaries |
+| **Context Relevance** | ~1.7x more relevant than naive chunking (3.14 vs 1.83); preserves tabular and semantic boundaries |
 | **Cost Savings** | Drops LLM input cost per query from ~$0.11 to <$0.0007 |
-| **Noise Prevention** | Prevents the "Lost in the Middle" phenomenon; higher correctness despite less text |
+| **Answer Correctness** | Highest judge-graded correctness (3.95/5) of any retrieval strategy tested on FinanceBench |
 | **The Bottleneck** | AgentPack provides the context, but you still need a frontier model to perform the final reasoning |
 
 *Use deterministic, LLM-as-a-judge evals instead of trusting raw compression numbers.*

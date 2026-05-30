@@ -1,6 +1,6 @@
 {
   "name": "agent-context-packager",
-  "version": "0.2.0",
+  "version": "0.3.0",
   "description": "An offline document-to-agent-context compiler. Transform unstructured files (PDFs, CSVs, Markdown) into token-efficient, semantic context packs for LLM agents.",
   "bin": {
     "agentpack": "dist/agentpack"
