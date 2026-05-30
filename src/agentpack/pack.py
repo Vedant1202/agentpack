@@ -48,7 +48,9 @@ def _parse_one(
     doc = cache_get(cache_dir, cache_key)
     if doc is None:
         doc = parser.parse(file_path, source_id)
-        cache_set(cache_dir, cache_key, doc)
+        has_parse_error = any(w.type == "parse_error" for w in doc.warnings)
+        if not has_parse_error:
+            cache_set(cache_dir, cache_key, doc)
     else:
         doc.source_id = source_id
     return doc
@@ -167,12 +169,21 @@ def write_pack(
         doc_chunks = chunk_document(doc)
         all_chunks.extend(doc_chunks)
 
+        has_parse_error = any(w.type == "parse_error" for w in doc.warnings)
+        if has_parse_error or len(doc_chunks) == 0:
+            status = "failed"
+            reason = next((w.message for w in doc.warnings if w.type == "parse_error"), "produced 0 chunks")
+            if not quiet:
+                print(f"  WARNING: {file_path.name} failed to index ({reason})")
+        else:
+            status = "success"
+
         sources.append({
             "id": source_id,
             "path": file_path.name,
             "type": doc.type,
             "checksum": doc.checksum,
-            "status": "success",
+            "status": status,
             "warnings": [w.dict() for w in doc.warnings]
         })
 
