@@ -1,3 +1,4 @@
+import importlib.metadata
 import typer
 from agentpack.pack import write_pack
 from agentpack.validate import validate_pack
@@ -6,7 +7,18 @@ from agentpack.retrieve import search_pack, build_fts_index, build_vector_index
 from agentpack.config import load_config
 from agentpack.eval.runner import run_eval
 
+def _version_callback(value: bool):
+    if value:
+        typer.echo(importlib.metadata.version("agent-context-packager"))
+        raise typer.Exit()
+
 app = typer.Typer(help="AgentPack CLI", no_args_is_help=True)
+
+@app.callback()
+def _main(
+    version: bool = typer.Option(None, "--version", "-V", is_eager=True, callback=_version_callback, help="Show version and exit."),
+):
+    pass
 
 @app.command()
 def pack(
