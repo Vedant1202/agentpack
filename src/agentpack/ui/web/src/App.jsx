@@ -23,6 +23,10 @@ function getFileType(filename) {
   if (normalized.endsWith(".pdf")) return "pdf";
   if (normalized.endsWith(".csv")) return "csv";
   if (normalized.endsWith(".py")) return "py";
+  if (normalized.endsWith(".docx")) return "docx";
+  if (normalized.endsWith(".pptx")) return "pptx";
+  if (normalized.endsWith(".xlsx")) return "xlsx";
+  if (normalized.endsWith(".html") || normalized.endsWith(".htm")) return "html";
   return "other";
 }
 
@@ -31,6 +35,10 @@ function palette(type) {
   if (type === "pdf") return { fill: "#f59e0b", soft: "#fef3c7", border: "#fde68a", text: "#92400e" }; // amber
   if (type === "csv") return { fill: "#10b981", soft: "#d1fae5", border: "#a7f3d0", text: "#065f46" }; // emerald
   if (type === "py") return { fill: "#f43f5e", soft: "#fce7f3", border: "#fbcfe8", text: "#9d174d" }; // rose
+  if (type === "docx") return { fill: "#6366f1", soft: "#eef2ff", border: "#c7d2fe", text: "#3730a3" }; // indigo
+  if (type === "pptx") return { fill: "#f97316", soft: "#fff7ed", border: "#fed7aa", text: "#9a3412" }; // orange
+  if (type === "xlsx") return { fill: "#22c55e", soft: "#f0fdf4", border: "#bbf7d0", text: "#14532d" }; // green
+  if (type === "html") return { fill: "#a855f7", soft: "#faf5ff", border: "#e9d5ff", text: "#581c87" }; // purple
   return { fill: "#64748b", soft: "#f1f5f9", border: "#e2e8f0", text: "#334155" }; // slate
 }
 
@@ -122,7 +130,7 @@ function Stat({ label, value }) {
 }
 
 function GraphLegend() {
-  const fileTypes = ["md", "pdf", "csv", "py", "other"];
+  const fileTypes = ["md", "pdf", "csv", "py", "docx", "pptx", "xlsx", "html", "other"];
   return (
     <div className="tour-legend absolute bottom-6 left-6 bg-white/95 dark:bg-slate-900/95 backdrop-blur-md border border-slate-200 dark:border-slate-800 rounded-xl p-4 shadow-xl z-20 w-64 pointer-events-auto transition-colors">
       <h4 className="text-xs font-bold text-slate-900 dark:text-slate-100 uppercase tracking-wide mb-3 flex items-center gap-2">
