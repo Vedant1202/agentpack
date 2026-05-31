@@ -3,6 +3,14 @@ import tempfile
 import os
 from pathlib import Path
 
+FIXTURES_DIR = Path(__file__).parent / "fixtures"
+
+
+@pytest.fixture
+def sample_pdf_path():
+    """Real 2-page fixture PDF (heading + paragraph + table)."""
+    return FIXTURES_DIR / "sample.pdf"
+
 @pytest.fixture
 def mock_txt_file():
     fd, path = tempfile.mkstemp(suffix=".txt")

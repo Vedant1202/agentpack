@@ -2,14 +2,13 @@ import os
 import json
 import yaml
 import sqlite3
-import numpy as np
 from pathlib import Path
 from typing import Optional
 from fastapi import FastAPI, HTTPException, Request
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.staticfiles import StaticFiles
 from pydantic import BaseModel
-import re
+from agentpack.retrieve import search_hybrid
 
 app = FastAPI(title="AgentPack Corpus Intelligence API")
 
@@ -160,84 +159,38 @@ class SearchQuery(BaseModel):
 
 @app.post("/api/search")
 def search(req: SearchQuery):
+    ranked = search_hybrid(PACK_DIR, req.query, top_k=req.top_k)
+    if not ranked:
+        return {"results": []}
+
+    # Enrich with content from the lexical index (search_hybrid doesn't return it)
     db_path = get_base_path() / "indexes" / "lexical_index.db"
-    vector_path = get_base_path() / "indexes" / "vector_index.npy"
-    meta_path = get_base_path() / "indexes" / "vector_meta.json"
-    
-    results = {}
-    
-    # FTS Search
+    content_map: dict = {}
     if db_path.exists():
+        ids = [r["chunk_id"] for r in ranked]
+        placeholders = ",".join("?" * len(ids))
         conn = sqlite3.connect(db_path)
-        cur = conn.cursor()
-        clean_str = re.sub(r'[^a-zA-Z0-9\-\s]', ' ', req.query)
-        clean_query = " OR ".join([f'"{w}"' for w in clean_str.split() if w])
-        
-        if clean_query:
-            try:
-                cur.execute('''
-                    SELECT chunk_id, rank, content 
-                    FROM chunks_fts 
-                    WHERE chunks_fts MATCH ? 
-                    ORDER BY rank 
-                    LIMIT ?
-                ''', (clean_query, req.top_k))
-                
-                # BM25 rank is usually negative, smaller is better.
-                # Let's normalize it to a pseudo score 0-1 for visual UI.
-                rows = cur.fetchall()
-                if rows:
-                    ranks = [r[1] for r in rows]
-                    min_r = min(ranks)
-                    max_r = max(ranks) if max(ranks) != min_r else min_r + 1
-                    
-                    for r in rows:
-                        score = 1.0 - ((r[1] - min_r) / (max_r - min_r))
-                        results[r[0]] = {"fts": score, "vector": 0.0, "hybrid": score * 0.5, "content": r[2]}
-            except Exception as e:
-                print(f"FTS error: {e}")
-                pass
-        conn.close()
-        
-    # Vector Search
-    if vector_path.exists() and meta_path.exists():
         try:
-            from fastembed import TextEmbedding
-            # Lightweight init, ideally we'd cache this in memory across requests
-            model = TextEmbedding(model_name="BAAI/bge-small-en-v1.5")
-            query_emb = list(model.embed([req.query]))[0]
-            
-            embeddings = np.load(vector_path)
-            with open(meta_path, "r", encoding="utf-8") as f:
-                meta = json.load(f)
-                
-            similarities = np.dot(embeddings, query_emb) / (np.linalg.norm(embeddings, axis=1) * np.linalg.norm(query_emb))
-            top_indices = np.argsort(similarities)[::-1][:req.top_k]
-            
-            for idx in top_indices:
-                chunk_id = meta[idx]["chunk_id"]
-                score = float(similarities[idx])
-                if chunk_id in results:
-                    results[chunk_id]["vector"] = score
-                    results[chunk_id]["hybrid"] = (results[chunk_id]["fts"] + score) / 2
-                else:
-                    results[chunk_id] = {"fts": 0.0, "vector": score, "hybrid": score * 0.5, "content": "Fetch from db..."}
-        except Exception as e:
-            print(f"Vector search error: {e}")
-            pass
-            
-    # Sort by hybrid score
-    sorted_results = []
-    for chunk_id, scores in sorted(results.items(), key=lambda x: x[1]["hybrid"], reverse=True):
-        sorted_results.append({
-            "id": chunk_id,
-            "fts": scores["fts"],
-            "vector": scores["vector"],
-            "hybrid": scores["hybrid"],
-            "content": scores["content"]
-        })
-        
-    return {"results": sorted_results}
+            cur = conn.cursor()
+            cur.execute(
+                f"SELECT chunk_id, content FROM chunks_fts WHERE chunk_id IN ({placeholders})",
+                ids,
+            )
+            content_map = {row[0]: row[1] for row in cur.fetchall()}
+        finally:
+            conn.close()
+
+    results = [
+        {
+            "id": r["chunk_id"],
+            "fts": 0.0,
+            "vector": 0.0,
+            "hybrid": r["score"],
+            "content": content_map.get(r["chunk_id"], ""),
+        }
+        for r in ranked
+    ]
+    return {"results": results}
 
 class NeighborQuery(BaseModel):
     chunk_id: str

@@ -1,0 +1,12 @@
+pack:
+  name: demo_corpus
+  version: 0.1.0
+  generated_at: '2026-05-29T06:08:20.194048+00:00'
+sources: []
+chunks: []
+tables: []
+agent:
+  instructions:
+  - Use citations when answering.
+  - Prefer raw chunks over summaries.
+  - Say not found when the corpus does not contain the answer.

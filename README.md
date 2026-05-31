@@ -9,6 +9,8 @@
 
 Instead of forcing AI agents to parse messy, disparate file formats (PDFs, CSVs, Markdown, text) at runtime, AgentPack is an offline **document-to-agent-context compiler**. It takes unstructured knowledge bases, turns them into clean semantic chunks with citations, retrieves the right evidence, and sends only high-signal context to the model.
 
+> **Why AgentPack:** across 9 retrieval strategies on 2 corpora, it delivers the most consistent retrieval quality of any method tested — 0.83 Hit@3 on both homogeneous and heterogeneous document sets — while keeping context ~100× smaller than raw document stuffing. See the [full benchmark results](https://github.com/Vedant1202/agentpack/blob/main/BENCHMARK.md).
+
 ## The Benchmark
 **Given the same LLM, AgentPack provides better context than raw document stuffing or naive RAG.**
 
@@ -16,8 +18,8 @@ I benchmarked AgentPack against standard RAG baselines on 42 complex financial q
 
 **Benchmark Highlights:**
 * **161x Reduction in Token Cost:** Cut context token usage from 424k to 2.6k, saving ~$0.10 per query.
-* **2x Context Relevance:** Vastly outperformed naive chunking in retrieving semantically complete financial tables.
-* **"Lost in the Middle" Prevention:** Outperformed raw document stuffing in correctness by preventing the LLM from drowning in noise.
+* **Highest Correctness of Any Strategy:** AgentPack (Vector) scored 3.95/5 judge-graded correctness on FinanceBench — the top of all 9 retrieval strategies tested.
+* **~1.7x Context Relevance:** Retrieved context graded ~1.7x more relevant than naive chunking (3.14 vs 1.83) by preserving semantically complete financial tables.
 
 AgentPack is best treated as an offline document-to-agent-context compiler. It reduces context bloat, but a strong reasoning model is still required to solve complex queries.
 
@@ -25,9 +27,9 @@ AgentPack is best treated as an offline document-to-agent-context compiler. It r
 |--------|----------------------|
 | **Token reduction** | ~161x reduction (99% smaller) compared to raw document stuffing |
 | **Context per query** | Averages ~2.6k high-signal tokens per retrieval (vs 400k+ for raw files) |
-| **Context Relevance** | ~2x more relevant than naive chunking; preserves tabular and semantic boundaries |
+| **Context Relevance** | ~1.7x more relevant than naive chunking (3.14 vs 1.83); preserves tabular and semantic boundaries |
 | **Cost Savings** | Drops LLM input cost per query from ~$0.11 to <$0.0007 |
-| **Noise Prevention** | Prevents the "Lost in the Middle" phenomenon; higher correctness despite less text |
+| **Answer Correctness** | Highest judge-graded correctness (3.95/5) of any retrieval strategy tested on FinanceBench |
 | **The Bottleneck** | AgentPack provides the context, but you still need a frontier model to perform the final reasoning |
 
 *Use deterministic, LLM-as-a-judge evals instead of trusting raw compression numbers.*
@@ -70,7 +72,7 @@ detect-secrets scan > .secrets.baseline
 ```
 
 ### 2. Compile a Pack
-Point AgentPack at any folder containing your documents (`.txt`, `.md`, `.csv`, `.pdf`).
+Point AgentPack at any folder containing your documents (`.txt`, `.md`, `.csv`, `.pdf`, `.docx`, `.pptx`, `.xlsx`, `.html`).
 
 ```bash
 agentpack pack ./my_docs --out ./agentpack-output
@@ -81,12 +83,31 @@ agentpack pack ./my_docs --out ./agentpack-output
 - `--ignore "tests/,drafts/"`: Exclude specific directories or files.
 - `--remove-empty-lines`: Compress text files to save LLM tokens.
 - `--no-gitignore`: Ignore `.gitignore` rules and pack everything.
+- `--fast`: Fast mode (PyMuPDF for PDFs; skips Docling). Best for quick iteration on small corpora.
 
-### 2. Retrieve
-AgentPack comes with a built-in hybrid search engine (SQLite FTS5 + FastEmbed vector search) to test your chunks instantly.
+Settings can also be stored in an `agentpack.toml` file in your input directory:
+
+```toml
+[pack]
+chunk_max_tokens = 800
+exclude = ["drafts/", "*.log"]
+```
+
+### 2b. Pre-build Indexes (optional)
+Run this after packing to avoid paying the index-build cost on the first query:
+
+```bash
+agentpack index ./agentpack-output
+```
+
+### 3. Retrieve
+AgentPack comes with a built-in hybrid search engine (SQLite FTS5 + HNSW vector search, fused with RRF) to test your chunks instantly.
 
 ```bash
 agentpack retrieve ./agentpack-output "eligibility criteria" --top-k 5
+
+# Narrow results with metadata filters
+agentpack retrieve ./agentpack-output "revenue" --source "annual_report" --page 12
 ```
 
 ### 3. Deterministic Eval
@@ -117,7 +138,8 @@ AgentPack provides a rich CLI for auditing, validating, and testing your context
 - **TXT**: Paragraph-aware splitting.
 - **Markdown**: Semantic heading-aware section path tracking.
 - **CSV**: Uses Pandas & Tabulate to convert tabular data into Markdown tables.
-- **PDF**: Accurate page-by-page PyMuPDF extraction.
+- **PDF**: Docling structured-tree parse (default) — preserves page numbers, sections, and tables. PyMuPDF spatial extraction with `--fast`.
+- **DOCX / PPTX / XLSX / HTML**: Docling semantic parse — same structured-tree path as PDF.
 
 ## Architecture Overview
 
@@ -132,11 +154,11 @@ flowchart LR
 For a deep dive into how AgentPack parses, chunks, and indexes data, see [Architecture & Internals](https://github.com/Vedant1202/agentpack/blob/main/docs/architecture.md).
 
 ## Current Limitations & Roadmap
-AgentPack is currently focused on text-based semantic extraction. The following features are on the roadmap but **not yet implemented**:
-- **Image Understanding / Vision**: AgentPack does not currently run OCR or vision models on images embedded within PDFs or Markdown files. Images are currently ignored during the parsing phase.
-- **Complex Table Structures**: While basic CSVs are supported, highly nested or merged-cell tables within PDFs are not perfectly reconstructed yet.
-- **Web Crawling**: You currently need to provide local files. Direct URL scraping is planned.
-- **Cloud Vector DB Integration**: Retrieval currently runs locally using SQLite FTS5 and FastEmbed. Connectors for Pinecone, Weaviate, or Qdrant are planned.
+- **Image Understanding / Vision**: OCR and vision models on embedded images are not yet supported. Images are ignored during parsing.
+- **Complex Nested Tables**: Highly merged-cell tables in PDFs may not perfectly reconstruct.
+- **Web Crawling**: Local files only; URL scraping is planned.
+- **Cloud Vector DB Integration**: Retrieval runs locally (SQLite FTS5 + HNSW). Connectors for Pinecone, Weaviate, or Qdrant are planned.
+- **Cross-Encoder Reranking**: A secondary rerank pass is on the roadmap (deferred to v0.4).
 
 ---
 *Built with ❤️ for Agents.*

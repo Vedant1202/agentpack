@@ -1,18 +1,62 @@
+import hashlib
 import os
 import yaml
+from concurrent.futures import ThreadPoolExecutor, as_completed
 from datetime import datetime, timezone
+from importlib.metadata import version as _pkg_version, PackageNotFoundError
 from pathlib import Path
-from typing import List, Dict
+from typing import List, Dict, Optional
 
 from agentpack.scanner import scan_directory
 from agentpack.parsers.text_parser import TextParser
 from agentpack.parsers.markdown_parser import MarkdownParser
 from agentpack.parsers.csv_parser import CSVParser
 from agentpack.parsers.pdf_parser import PDFParser
+from agentpack.parsers.docling_parser import DoclingParser
 from agentpack.chunker import chunk_document, Chunk
 from agentpack.models import SourceDocument
+from agentpack.cache import cache_get, cache_set, make_key
 
-def get_parser(suffix: str):
+
+def _get_pack_version() -> str:
+    try:
+        return _pkg_version("agent-context-packager")
+    except PackageNotFoundError:
+        return "dev"
+
+
+def _parser_cache_version() -> str:
+    """Version string for L1 parse cache keys — bump when parse output schema changes."""
+    return f"parser_v{_get_pack_version()}"
+
+def _parse_one(
+    file_path: Path,
+    source_id: str,
+    fast_pdf: bool,
+    remove_empty_lines: bool,
+    cache_dir: Path,
+) -> Optional["SourceDocument"]:
+    """Parse one file, respecting the L1 parse cache. Returns None if unsupported."""
+    parser = get_parser(file_path.suffix, fast_pdf=fast_pdf)
+    if parser is None:
+        return None
+    if hasattr(parser, "remove_empty_lines"):
+        parser.remove_empty_lines = remove_empty_lines
+    with open(file_path, "rb") as _f:
+        file_hash = hashlib.sha256(_f.read()).hexdigest()
+    cache_key = make_key(file_hash, _parser_cache_version(), str(fast_pdf))
+    doc = cache_get(cache_dir, cache_key)
+    if doc is None:
+        doc = parser.parse(file_path, source_id)
+        has_parse_error = any(w.type == "parse_error" for w in doc.warnings)
+        if not has_parse_error:
+            cache_set(cache_dir, cache_key, doc)
+    else:
+        doc.source_id = source_id
+    return doc
+
+
+def get_parser(suffix: str, fast_pdf: bool = False):
     suffix = suffix.lower()
     if suffix == ".txt":
         return TextParser()
@@ -21,7 +65,9 @@ def get_parser(suffix: str):
     elif suffix == ".csv":
         return CSVParser()
     elif suffix == ".pdf":
-        return PDFParser()
+        return PDFParser(fast_pdf=fast_pdf)
+    elif suffix in {".docx", ".pptx", ".xlsx", ".html", ".htm"}:
+        return DoclingParser()
     return None
 
 def write_pack(
@@ -34,7 +80,8 @@ def write_pack(
     include_hidden: bool = False,
     verbose: bool = False,
     quiet: bool = False,
-    remove_empty_lines: bool = False
+    remove_empty_lines: bool = False,
+    fast_pdf: bool = False
 ):
     """
     Scans an input directory, parses supported files, chunks them, and generates a context pack.
@@ -76,39 +123,67 @@ def write_pack(
     
     sources = []
     all_chunks = []
-    
-    for i, file_path in enumerate(files):
-        source_id = f"src_{i:03d}"
-        parser = get_parser(file_path.suffix)
-        if not parser:
+    all_tables = []
+    cache_dir = out_path / ".cache"
+
+    # Dispatch parallel parses; results keyed by index to preserve manifest order.
+    indexed_files = [(i, fp) for i, fp in enumerate(files)
+                     if get_parser(fp.suffix, fast_pdf=fast_pdf) is not None]
+    docs_by_index: dict = {}
+
+    max_workers = min(4, len(indexed_files)) if indexed_files else 1
+    with ThreadPoolExecutor(max_workers=max_workers) as pool:
+        futures = {
+            pool.submit(
+                _parse_one, fp, f"src_{i:03d}", fast_pdf, remove_empty_lines, cache_dir
+            ): i
+            for i, fp in indexed_files
+        }
+        for future in as_completed(futures):
+            idx = futures[future]
+            doc = future.result()
+            if doc is not None:
+                docs_by_index[idx] = doc
+
+    for i, file_path in indexed_files:
+        doc = docs_by_index.get(i)
+        if doc is None:
             continue
-            
+        source_id = f"src_{i:03d}"
+
         if verbose and not quiet:
-            print(f"Parsing: {file_path}")
-            
-        if hasattr(parser, 'remove_empty_lines'):
-            parser.remove_empty_lines = remove_empty_lines
-            
-        doc: SourceDocument = parser.parse(file_path, source_id)
-        
-        # Save table texts to tables dir if they are tables
-        # For MVP, CSV tables are blocks with type 'table'
+            print(f"Parsed: {file_path}")
+
         for block in doc.blocks:
             if block.type == "table":
-                # Write to tables dir
-                table_path = out_path / "tables" / f"{block.block_id}.csv"
+                table_path = out_path / "tables" / f"{block.block_id}.md"
                 with open(table_path, "w", encoding="utf-8") as f:
                     f.write(block.text)
-        
+                all_tables.append({
+                    "block_id": block.block_id,
+                    "source_id": source_id,
+                    "page": block.page,
+                    "path": f"tables/{block.block_id}.md",
+                })
+
         doc_chunks = chunk_document(doc)
         all_chunks.extend(doc_chunks)
-        
+
+        has_parse_error = any(w.type == "parse_error" for w in doc.warnings)
+        if has_parse_error or len(doc_chunks) == 0:
+            status = "failed"
+            reason = next((w.message for w in doc.warnings if w.type == "parse_error"), "produced 0 chunks")
+            if not quiet:
+                print(f"  WARNING: {file_path.name} failed to index ({reason})")
+        else:
+            status = "success"
+
         sources.append({
             "id": source_id,
             "path": file_path.name,
             "type": doc.type,
             "checksum": doc.checksum,
-            "status": "success",
+            "status": status,
             "warnings": [w.dict() for w in doc.warnings]
         })
 
@@ -130,12 +205,12 @@ def write_pack(
     manifest = {
         "pack": {
             "name": in_path.name,
-            "version": "0.1.0",
+            "version": _get_pack_version(),
             "generated_at": datetime.now(timezone.utc).isoformat()
         },
         "sources": sources,
         "chunks": chunks_meta,
-        "tables": [],
+        "tables": all_tables,
         "agent": {
             "instructions": [
                 "Use citations when answering.",

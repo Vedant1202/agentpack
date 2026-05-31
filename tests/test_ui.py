@@ -87,16 +87,20 @@ def test_api_umap_missing(monkeypatch, tmp_path):
     response = client.get("/api/umap")
     assert response.status_code == 404
 
-@patch("agentpack.ui.server.umap.UMAP", create=True)
-def test_api_umap_valid(mock_umap_cls, monkeypatch, tmp_path):
-    mock_umap = mock_umap_cls.return_value
-    mock_umap.fit_transform.return_value = np.array([[1.0, 2.0], [3.0, 4.0]])
-    
+def test_api_umap_valid(monkeypatch, tmp_path):
     # Skip if umap-learn is not installed in the environment running the test
     try:
-        import umap
+        import umap.umap_
     except ImportError:
         pytest.skip("umap-learn not installed")
+        
+    class MockUMAP:
+        def __init__(self, **kwargs):
+            pass
+        def fit_transform(self, X):
+            return np.array([[1.0, 2.0], [3.0, 4.0]])
+            
+    monkeypatch.setattr(umap.umap_, "UMAP", MockUMAP)
         
     pack_dir = tmp_path / "agentpack_output"
     indexes_dir = pack_dir / "indexes"

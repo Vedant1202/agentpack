@@ -4,10 +4,10 @@ build-backend = "setuptools.build_meta"
 
 [project]
 name = "agent-context-packager"
-version = "0.2.0"
+version = "0.3.0"
 description = "A document-to-agent-context compiler."
 authors = [
-    { name = "Your Name", email = "your.email@example.com" }
+    { name = "Vedant Nandoskar", email = "vedant.nandoskar@gmail.com" }
 ]
 readme = "README.md"
 requires-python = ">=3.9"
@@ -15,17 +15,19 @@ dependencies = [
     "typer>=0.9.0",
     "pydantic>=2.0.0",
     "pymupdf>=1.23.0",
+    "docling>=2.0.0",
     "pandas>=2.0.0",
     "tiktoken>=0.5.0",
     "pyyaml>=6.0",
     "pyinstaller>=6.0.0",
     "tabulate>=0.9.0",
     "fastembed>=0.2.7",
-    "numpy>=1.24.0",
+    "numpy>=1.24.0,<2.0.0",
     "datasets>=2.0.0",
     "requests>=2.0.0",
     "pathspec>=0.11.0",
-    "detect-secrets>=1.4.0"
+    "detect-secrets>=1.4.0",
+    "hnswlib>=0.7.0"
 ]
 
 [project.scripts]
