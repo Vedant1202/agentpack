@@ -33,15 +33,15 @@ Then open `http://localhost:8000` in your browser.
 ## Key Features
 
 ### Holistic Corpus Explorer Map
-Powered by a WebGL 2D physics engine, the map renders thousands of chunks flawlessly. 
+Powered by a 2D force-graph canvas, the map renders the corpus as document nodes plus chunk nodes.
 - **Dynamic Node Sizing:** As you zoom in, the nodes adjust their size to keep the interface clean.
-- **Hover Labels:** Read the IDs and types of nodes just by hovering over them.
+- **Progressive Labels:** Document labels are always visible, and chunk labels appear when you zoom in or select a node.
 
 ### Interactive Hybrid Search
 The UI hooks directly into the AgentPack SQLite FTS5 + FastEmbed vector engine.
 - Type a query into the search bar.
 - The UI will instantly dim non-matching chunks.
-- Matching chunks will glow amber, and the UI will draw dashed **hybrid trajectory paths** between them to visualize the search path.
+- Matching chunks will glow amber, and the UI will draw dashed links between the ranked results so you can inspect the returned set at a glance.
 
 ![Visualizing Hybrid Retrieval (Search)](./assets/search.png)
 *Test your RAG queries instantly and see the semantic paths the vector engine took to find them.*

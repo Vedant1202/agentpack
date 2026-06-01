@@ -46,6 +46,14 @@ function getSourceName(chunk) {
   return chunk?.citation?.source_path || chunk?.source || "unknown";
 }
 
+function getChunkTitle(chunk) {
+  return chunk?.title || chunk?.id || "Unknown chunk";
+}
+
+function getResultTitle(result, fallbackChunk) {
+  return result?.title || fallbackChunk?.title || result?.id || fallbackChunk?.id || "Unknown chunk";
+}
+
 // ==========================================
 // GRAPH DATA BUILDER
 // ==========================================
@@ -257,7 +265,7 @@ export default function App() {
       tour.addStep({
         id: 'search',
         title: 'Search the Corpus',
-        text: "Type any query here to search the vector database. We'll highlight matching chunks and draw hybrid trajectory paths between them.",
+        text: "Type a query to search the corpus. Matching chunks glow amber, and dashed lines connect the ranked results so you can inspect the returned set quickly.",
         attachTo: { element: '.tour-search', on: 'bottom' },
         buttons: [btnBack, btnNext]
       });
@@ -359,7 +367,7 @@ export default function App() {
       const nodes = [...baseGraphData.nodes];
       const links = [...baseGraphData.links];
       
-      // Add temp trajectory links
+      // Add temporary links to show ranked-result ordering in the current search set.
       for(let i=1; i<searchHits.length; i++) {
           links.push({
               source: searchHits[i-1].id,
@@ -455,7 +463,7 @@ export default function App() {
             </div>
             <div>
                 <h1 className="text-xl font-bold tracking-tight text-slate-900 dark:text-white leading-tight">Agentpack Corpus Explorer</h1>
-                <p className="text-xs text-slate-500 dark:text-slate-400 font-medium">Holistic Universe View</p>
+                <p className="text-xs text-slate-500 dark:text-slate-400 font-medium">Corpus Relationship Map</p>
             </div>
         </div>
         
@@ -578,7 +586,7 @@ export default function App() {
                             <ul className="text-xs space-y-2 opacity-80 list-disc pl-4">
                                 <li><strong>Pan & Zoom</strong> to explore the document corpus.</li>
                                 <li><strong>Click</strong> a chunk to reveal its contents and semantic relations.</li>
-                                <li><strong>Search</strong> to query the vector database and highlight matching topics.</li>
+                                <li><strong>Search</strong> to query the corpus and trace the ranked result set.</li>
                             </ul>
                         </div>
                     </div>
@@ -590,6 +598,8 @@ export default function App() {
                         {searchHits.map((hit, index) => {
                             const chunk = chunks.find(c => c.id === hit.id);
                             const score = (hit.hybrid || hit.score || 0) * 100;
+                            const title = getResultTitle(hit, chunk);
+                            const source = hit.source_file_path || chunk?.source_file_path || getSourceName(chunk);
                             return (
                                 <div key={hit.id} 
                                      className="p-3 bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl shadow-sm cursor-pointer hover:border-amber-400 dark:hover:border-amber-500 hover:shadow-md transition"
@@ -603,10 +613,11 @@ export default function App() {
                                     <div className="flex justify-between items-start mb-2">
                                         <h4 className="font-bold text-sm text-slate-900 dark:text-slate-100 flex items-center gap-2 truncate">
                                             <span className="w-5 h-5 rounded flex items-center justify-center bg-slate-900 dark:bg-slate-700 text-white text-[10px] shrink-0">{index+1}</span>
-                                            <span className="truncate">{hit.id}</span>
+                                            <span className="truncate">{title}</span>
                                         </h4>
                                         <span className="bg-amber-100 dark:bg-amber-900/40 text-amber-800 dark:text-amber-400 text-[10px] font-bold px-2 py-0.5 rounded shrink-0">{score.toFixed(1)}%</span>
                                     </div>
+                                    <p className="text-[11px] text-slate-500 dark:text-slate-400 truncate mb-2">{source || "Source unavailable"}</p>
                                     <p className="text-xs text-slate-600 dark:text-slate-400 line-clamp-3 leading-relaxed">{hit.content || chunk?.content || "Content unavailable."}</p>
                                 </div>
                             );
@@ -622,11 +633,20 @@ export default function App() {
                             <Stat label="Tokens" value={activeChunk?.tokens || 0} />
                             <Stat label="Source Type" value={getFileType(activeNode.isDoc ? activeNode.id.replace('doc_', '') : getSourceName(activeChunk))} />
                         </div>
+
+                        {!activeNode.isDoc && activeChunk && (
+                            <div className="space-y-1">
+                                <div className="text-[10px] font-bold text-slate-500 dark:text-slate-400 uppercase tracking-wider mb-1">Chunk Title</div>
+                                <div className="text-sm font-semibold text-slate-800 dark:text-slate-200 bg-slate-100 dark:bg-slate-800 p-2 rounded-lg break-words">
+                                    {getChunkTitle(activeChunk)}
+                                </div>
+                            </div>
+                        )}
                         
                         <div className="space-y-1">
                             <div className="text-[10px] font-bold text-slate-500 dark:text-slate-400 uppercase tracking-wider mb-1">Source File</div>
                             <div className="text-sm font-semibold text-slate-800 dark:text-slate-200 bg-slate-100 dark:bg-slate-800 p-2 rounded-lg break-all">
-                                {activeNode.isDoc ? activeNode.id.replace('doc_', '') : getSourceName(activeChunk)}
+                                {activeNode.isDoc ? activeNode.id.replace('doc_', '') : (activeChunk?.source_file_path || getSourceName(activeChunk))}
                             </div>
                         </div>
 
@@ -663,7 +683,7 @@ export default function App() {
                                              }}>
                                             <div className="w-2.5 h-2.5 rounded-full shrink-0" style={{ background: palette(getFileType(n.source)).fill }}></div>
                                             <div className="min-w-0 flex-1">
-                                                <div className="text-xs font-bold text-slate-800 dark:text-slate-200 truncate">{n.id}</div>
+                                                <div className="text-xs font-bold text-slate-800 dark:text-slate-200 truncate">{n.title || n.id}</div>
                                                 <div className="text-[10px] text-slate-500 dark:text-slate-400">Match: {(n.score * 100).toFixed(1)}%</div>
                                             </div>
                                         </div>

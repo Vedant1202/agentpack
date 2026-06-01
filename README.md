@@ -118,7 +118,7 @@ agentpack eval ./benchmarks/my_dataset
 ```
 
 ### 4. Visualize with the Corpus Explorer
-If you installed AgentPack with the `[ui]` extra, you can launch a local WebGL-powered 2D physics visualization of your compiled chunks. This allows you to visually debug chunk sizes, semantic similarities, and hybrid search trajectories.
+If you installed AgentPack with the `[ui]` extra, you can launch a local 2D force-graph explorer of your compiled chunks. This allows you to visually debug chunk sizes, semantic similarities, and ranked retrieval results.
 
 ```bash
 agentpack ui ./agentpack-output --port 8000
