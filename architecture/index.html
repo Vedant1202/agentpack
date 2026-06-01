@@ -8,7 +8,7 @@
       
       
       
-        <link rel="canonical" href="https://yourusername.github.io/agentpack/architecture/">
+        <link rel="canonical" href="https://vedant1202.github.io/agentpack/architecture/">
       
       
         <link rel="prev" href="..">
@@ -351,10 +351,43 @@
 </li>
         
           <li class="md-nav__item">
+  <a href="#chunker" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Chunker
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#content-addressed-cache" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Content-Addressed Cache
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
   <a href="#indexing" class="md-nav__link">
     <span class="md-ellipsis">
       
         Indexing
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#index-invalidation" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Index Invalidation
       
     </span>
   </a>
@@ -648,10 +681,43 @@
 </li>
         
           <li class="md-nav__item">
+  <a href="#chunker" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Chunker
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#content-addressed-cache" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Content-Addressed Cache
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
   <a href="#indexing" class="md-nav__link">
     <span class="md-ellipsis">
       
         Indexing
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#index-invalidation" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Index Invalidation
       
     </span>
   </a>
@@ -687,65 +753,122 @@
     subgraph Raw Data
         A[Raw Documents]
         A1(PDFs) --&gt; A
-        A2(CSVs) --&gt; A
-        A3(Markdown) --&gt; A
-        A4(TXT) --&gt; A
+        A2(Office: docx/pptx/xlsx) --&gt; A
+        A3(Web: html) --&gt; A
+        A4(CSVs) --&gt; A
+        A5(Markdown) --&gt; A
+        A6(TXT) --&gt; A
     end
 
     subgraph AgentPack Processing
         S[Security &amp; Scanner]
         A --&gt; S
-        B[Parsers]
+        B["Parsers\n(Docling semantic | PyMuPDF fast)"]
         S --&gt; B
+        CA[".cache/cache.db\n(L1 parse · L3 embed · L5 query)"]
+        B &lt;--&gt;|"L1: sha256(file) + version"| CA
         C[Chunker]
         B --&gt; C
     end
 
     subgraph Pack Output
-        D[Manifest.yml]
-        E[Safe Markdown Chunks]
-        F[Extracted CSV Tables]
-        G[(SQLite FTS5 Indexes)]
-        V[(Vector Embeddings)]
+        D[manifest.yml]
+        E[chunks/*.md]
+        F[tables/*.md]
+        G[(indexes/lexical_index.db\nSQLite FTS5)]
+        V[(indexes/hnsw_index.bin\nHNSW vector index)]
 
         C --&gt; D
         C --&gt; E
         C --&gt; F
         C --&gt; G
         C --&gt; V
+        CA &lt;--&gt;|"L3: sha256(chunk) + model_id"| V
     end
 
     subgraph Runtime
         H[LLM Agent]
-        H --&gt;|Queries| G
-        G --&gt;|Returns Top-K Chunks| H
+        H --&gt;|"hybrid query (RRF)"| G
+        H --&gt; V
+        G --&gt;|Top-K chunks| H
+        V --&gt;|Top-K chunks| H
+        CA &lt;--&gt;|"L5: sha256(query) + pack_hash"| H
     end</code></pre>
 <h2 id="the-context-pack">The Context Pack</h2>
 <p>When you run <code>agentpack pack</code>, it generates a directory structure known as a <strong>Context Pack</strong>.</p>
 <div class="highlight"><pre><span></span><code>agentpack-output/
-├── manifest.yml           # The brain of the pack. Contains schema, sources, chunks.
-├── chunks/                # Safe, agent-ready markdown files.
-├── tables/                # Extracted CSV tables in standalone format.
-├── indexes/               # Cached SQLite FTS5 lexical indexes.
-└── reports/               # Generated audit and validation reports.
+├── manifest.yml           # Registry: sources, chunks, tables, citations, pack version.
+├── chunks/                # Agent-ready markdown files (one per chunk).
+├── tables/                # Extracted tables in standalone Markdown format.
+├── indexes/               # FTS and vector indexes.
+│   ├── lexical_index.db   # SQLite FTS5 full-text search index.
+│   ├── vector_index.npy   # Pre-normalized dense vectors (float32).
+│   ├── vector_meta.json   # Per-vector chunk metadata.
+│   ├── hnsw_index.bin     # HNSW approximate nearest-neighbour index.
+│   └── vector_index.hash  # Content hash for invalidation.
+├── .cache/
+│   └── cache.db           # Content-addressed cache (L1/L3/L5 layers).
+└── reports/               # Audit and validation reports.
 </code></pre></div>
 <h3 id="manifestyml"><code>manifest.yml</code></h3>
-<p>This is the core of the pack. It acts as the registry for all processed files. It maps original document sources to their resulting chunks and maintains citation metadata, ensuring that every piece of text sent to an agent can be traced back to its origin.</p>
+<p>The registry for the pack. Maps original document sources to their chunks and maintains citation metadata (source path, page number, section) so every piece of text sent to an agent can be traced back to its origin. The <code>version</code> field reflects the installed package version.</p>
 <h3 id="security-scanning-layer">Security &amp; Scanning Layer</h3>
 <p>Before parsing, AgentPack acts as a firewall against context bloat and secret leakage:
-1. <strong>Filtering Engine:</strong> It uses <code>pathspec</code> to deeply respect <code>.gitignore</code> and <code>.agentpackignore</code> rules, ensuring irrelevant files (like <code>node_modules/</code> or test suites) never reach the LLM. It also excludes hidden directories by default.
-2. <strong>Secret Detection:</strong> AgentPack ships with <code>detect-secrets</code>. Users are instructed to run a baseline scan (<code>detect-secrets scan &gt; .secrets.baseline</code>) before packing, actively preventing API keys and passwords from entering the final context window.</p>
+1. <strong>Filtering Engine:</strong> Uses <code>pathspec</code> to respect <code>.gitignore</code> and <code>.agentpackignore</code> rules, ensuring irrelevant files (like <code>node_modules/</code> or test suites) never reach the LLM. Hidden directories are excluded by default.
+2. <strong>Secret Detection:</strong> AgentPack ships with <code>detect-secrets</code>. Run <code>detect-secrets scan &gt; .secrets.baseline</code> before packing to prevent API keys and passwords from entering the final context window.</p>
 <h3 id="parsers">Parsers</h3>
-<p>AgentPack uses specialized parsers for different file types to ensure maximum fidelity:
-- <strong>TXT</strong>: Uses paragraph-aware splitting to prevent cutting sentences in half.
-- <strong>Markdown</strong>: Tracks semantic headings (e.g., <code># Header -&gt; ## Subheader</code>) so chunks retain hierarchical context.
-- <strong>CSV</strong>: Uses Pandas and Tabulate to convert raw tabular data into pristine, readable Markdown tables.
-- <strong>PDF</strong>: Uses PyMuPDF for accurate page-by-page text extraction.</p>
+<p>AgentPack uses two parsing modes, selected per file type:</p>
+<p><strong>Semantic mode (default):</strong>
+- <strong>PDF</strong>: Docling structured-tree parse — preserves page numbers, section hierarchy, and extracts <code>type="table"</code> blocks. Headings, paragraphs, and tables are emitted as distinct <code>DocumentBlock</code>s.
+- <strong>Office / Web</strong> (<code>.docx</code>, <code>.pptx</code>, <code>.xlsx</code>, <code>.html</code>): Docling via the same structured-tree path.
+- <code>DocumentConverter</code> is loaded once per process (singleton) to avoid repeated model initialization.</p>
+<p><strong>Fast mode (<code>--fast</code>):</strong>
+- <strong>PDF</strong>: PyMuPDF spatial extraction — page-by-page text, faster but no semantic structure.
+- Use <code>--fast</code> for quick iteration on small corpora where parse speed matters more than fidelity.</p>
+<p><strong>Always:</strong>
+- <strong>Markdown</strong>: Tracks semantic headings (<code># H1 → ## H2</code>) so chunks retain hierarchical <code>section_path</code>.
+- <strong>CSV</strong>: Pandas + Tabulate converts tabular data into Markdown tables.
+- <strong>TXT</strong>: Paragraph-aware splitting.</p>
+<h3 id="chunker">Chunker</h3>
+<p>Blocks are tokenized with <code>tiktoken</code> (<code>cl100k_base</code>) and accumulated into chunks up to <code>max_tokens</code> (default 800) with configurable overlap (default 15%). Blocks that exceed <code>max_tokens</code> on their own are <strong>split internally</strong> with overlap, preserving <code>page</code> and <code>section</code> metadata on every sub-block.</p>
+<h3 id="content-addressed-cache">Content-Addressed Cache</h3>
+<p>Re-runs pay only for what changed. Three cache layers are stored in <code>.cache/cache.db</code>:</p>
+<table>
+<thead>
+<tr>
+<th>Layer</th>
+<th>Key</th>
+<th>What's cached</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>L1 Parse</td>
+<td><code>sha256(file_bytes) + parser_version + fast_flag</code></td>
+<td>Serialized <code>SourceDocument</code> — skips Docling on unchanged files</td>
+</tr>
+<tr>
+<td>L3 Embed</td>
+<td><code>sha256(chunk_text) + model_id</code></td>
+<td>Embedding vector — unchanged chunks are never re-embedded</td>
+</tr>
+<tr>
+<td>L5 Query</td>
+<td><code>sha256(query + mode + top_k + filters + pack_hash)</code></td>
+<td>Result set — repeated queries served without re-searching</td>
+</tr>
+</tbody>
+</table>
+<p>Keys carry a version component so a logic change auto-invalidates only the affected layer.</p>
 <h3 id="indexing">Indexing</h3>
-<p>Instead of forcing agents to process thousands of tokens for every query, AgentPack creates dual indexes for lightning-fast retrieval:
-- <strong>Lexical Index (SQLite FTS5)</strong>: A Full-Text Search index optimized for exact keyword matching and fast lexical lookups.
-- <strong>Vector Index (FastEmbed + NumPy)</strong>: Generates dense vector embeddings for semantic search, capturing the underlying meaning of the text.
-- <strong>Hybrid Search</strong>: By default, retrieval combines both lexical and vector scores, allowing agents to retrieve exactly the evidence they need with sub-second latency and high semantic accuracy.</p>
+<p>Instead of forcing agents to process thousands of tokens for every query, AgentPack creates dual indexes for lightning-fast retrieval:</p>
+<ul>
+<li><strong>Lexical Index (SQLite FTS5)</strong>: Full-text search optimized for keyword matching. Queries are OR-of-terms by default.</li>
+<li><strong>Vector Index (FastEmbed + HNSW)</strong>: <code>BAAI/bge-small-en-v1.5</code> ONNX embeddings via FastEmbed; stored as pre-normalized float32 vectors. The default backend is <strong>HNSW</strong> (<code>hnswlib</code>, inner-product space = cosine on normalized vectors). Falls back to brute-force <code>np.dot</code> when <code>hnswlib</code> is absent or for very small corpora.</li>
+<li><strong>Hybrid Search (default)</strong>: Combines lexical and vector rank lists using <strong>Reciprocal Rank Fusion</strong> (<code>score = 1 / (60 + rank)</code>) — rank-stable across heterogeneous score scales.</li>
+</ul>
+<h3 id="index-invalidation">Index Invalidation</h3>
+<p>Both indexes store a content hash (SHA-256 of sorted chunk IDs + source checksums) at build time. Before every query, the stored hash is compared against the current manifest. A mismatch triggers an automatic rebuild — re-packing a corpus never silently serves stale results.</p>
 
 
 

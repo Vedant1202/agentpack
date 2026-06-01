@@ -1,0 +1,1172 @@
+
+<!doctype html>
+<html lang="en" class="no-js">
+  <head>
+    
+      <meta charset="utf-8">
+      <meta name="viewport" content="width=device-width,initial-scale=1">
+      
+      
+      
+        <link rel="canonical" href="https://vedant1202.github.io/agentpack/specs/0001-parsing-and-retrieval-overhaul/">
+      
+      
+      
+      
+        
+      
+      
+      <link rel="icon" href="../../assets/images/favicon.png">
+      <meta name="generator" content="mkdocs-1.6.1, mkdocs-material-9.7.6">
+    
+    
+      
+        <title>Spec: Parsing & Retrieval Overhaul - AgentPack Documentation</title>
+      
+    
+    
+      <link rel="stylesheet" href="../../assets/stylesheets/main.484c7ddc.min.css">
+      
+        
+        <link rel="stylesheet" href="../../assets/stylesheets/palette.ab4e12ef.min.css">
+      
+      
+
+
+    
+    
+      
+    
+    
+      
+        
+        
+        <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+        <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Roboto:300,300i,400,400i,700,700i%7CRoboto+Mono:400,400i,700,700i&display=fallback">
+        <style>:root{--md-text-font:"Roboto";--md-code-font:"Roboto Mono"}</style>
+      
+    
+    
+      <link rel="stylesheet" href="../../assets/_mkdocstrings.css">
+    
+    <script>__md_scope=new URL("../..",location),__md_hash=e=>[...e].reduce(((e,_)=>(e<<5)-e+_.charCodeAt(0)),0),__md_get=(e,_=localStorage,t=__md_scope)=>JSON.parse(_.getItem(t.pathname+"."+e)),__md_set=(e,_,t=localStorage,a=__md_scope)=>{try{t.setItem(a.pathname+"."+e,JSON.stringify(_))}catch(e){}}</script>
+    
+      
+
+    
+    
+  </head>
+  
+  
+    
+    
+    
+    
+    
+    <body dir="ltr" data-md-color-scheme="slate" data-md-color-primary="indigo" data-md-color-accent="indigo">
+  
+    
+    <input class="md-toggle" data-md-toggle="drawer" type="checkbox" id="__drawer" autocomplete="off">
+    <input class="md-toggle" data-md-toggle="search" type="checkbox" id="__search" autocomplete="off">
+    <label class="md-overlay" for="__drawer"></label>
+    <div data-md-component="skip">
+      
+        
+        <a href="#spec-parsing-retrieval-overhaul" class="md-skip">
+          Skip to content
+        </a>
+      
+    </div>
+    <div data-md-component="announce">
+      
+    </div>
+    
+    
+      
+
+  
+
+<header class="md-header md-header--shadow" data-md-component="header">
+  <nav class="md-header__inner md-grid" aria-label="Header">
+    <a href="../.." title="AgentPack Documentation" class="md-header__button md-logo" aria-label="AgentPack Documentation" data-md-component="logo">
+      
+  
+  <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M12 8a3 3 0 0 0 3-3 3 3 0 0 0-3-3 3 3 0 0 0-3 3 3 3 0 0 0 3 3m0 3.54C9.64 9.35 6.5 8 3 8v11c3.5 0 6.64 1.35 9 3.54 2.36-2.19 5.5-3.54 9-3.54V8c-3.5 0-6.64 1.35-9 3.54"/></svg>
+
+    </a>
+    <label class="md-header__button md-icon" for="__drawer">
+      
+      <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M3 6h18v2H3zm0 5h18v2H3zm0 5h18v2H3z"/></svg>
+    </label>
+    <div class="md-header__title" data-md-component="header-title">
+      <div class="md-header__ellipsis">
+        <div class="md-header__topic">
+          <span class="md-ellipsis">
+            AgentPack Documentation
+          </span>
+        </div>
+        <div class="md-header__topic" data-md-component="header-topic">
+          <span class="md-ellipsis">
+            
+              Spec: Parsing &amp; Retrieval Overhaul
+            
+          </span>
+        </div>
+      </div>
+    </div>
+    
+      
+    
+    
+    
+    
+      
+      
+        <label class="md-header__button md-icon" for="__search">
+          
+          <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M9.5 3A6.5 6.5 0 0 1 16 9.5c0 1.61-.59 3.09-1.56 4.23l.27.27h.79l5 5-1.5 1.5-5-5v-.79l-.27-.27A6.52 6.52 0 0 1 9.5 16 6.5 6.5 0 0 1 3 9.5 6.5 6.5 0 0 1 9.5 3m0 2C7 5 5 7 5 9.5S7 14 9.5 14 14 12 14 9.5 12 5 9.5 5"/></svg>
+        </label>
+        <div class="md-search" data-md-component="search" role="dialog">
+  <label class="md-search__overlay" for="__search"></label>
+  <div class="md-search__inner" role="search">
+    <form class="md-search__form" name="search">
+      <input type="text" class="md-search__input" name="query" aria-label="Search" placeholder="Search" autocapitalize="off" autocorrect="off" autocomplete="off" spellcheck="false" data-md-component="search-query" required>
+      <label class="md-search__icon md-icon" for="__search">
+        
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M9.5 3A6.5 6.5 0 0 1 16 9.5c0 1.61-.59 3.09-1.56 4.23l.27.27h.79l5 5-1.5 1.5-5-5v-.79l-.27-.27A6.52 6.52 0 0 1 9.5 16 6.5 6.5 0 0 1 3 9.5 6.5 6.5 0 0 1 9.5 3m0 2C7 5 5 7 5 9.5S7 14 9.5 14 14 12 14 9.5 12 5 9.5 5"/></svg>
+        
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M20 11v2H8l5.5 5.5-1.42 1.42L4.16 12l7.92-7.92L13.5 5.5 8 11z"/></svg>
+      </label>
+      <nav class="md-search__options" aria-label="Search">
+        
+        <button type="reset" class="md-search__icon md-icon" title="Clear" aria-label="Clear" tabindex="-1">
+          
+          <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M19 6.41 17.59 5 12 10.59 6.41 5 5 6.41 10.59 12 5 17.59 6.41 19 12 13.41 17.59 19 19 17.59 13.41 12z"/></svg>
+        </button>
+      </nav>
+      
+    </form>
+    <div class="md-search__output">
+      <div class="md-search__scrollwrap" tabindex="0" data-md-scrollfix>
+        <div class="md-search-result" data-md-component="search-result">
+          <div class="md-search-result__meta">
+            Initializing search
+          </div>
+          <ol class="md-search-result__list" role="presentation"></ol>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+      
+    
+    
+  </nav>
+  
+</header>
+    
+    <div class="md-container" data-md-component="container">
+      
+      
+        
+          
+        
+      
+      <main class="md-main" data-md-component="main">
+        <div class="md-main__inner md-grid">
+          
+            
+              
+              <div class="md-sidebar md-sidebar--primary" data-md-component="sidebar" data-md-type="navigation" >
+                <div class="md-sidebar__scrollwrap">
+                  <div class="md-sidebar__inner">
+                    
+
+
+
+<nav class="md-nav md-nav--primary" aria-label="Navigation" data-md-level="0">
+  <label class="md-nav__title" for="__drawer">
+    <a href="../.." title="AgentPack Documentation" class="md-nav__button md-logo" aria-label="AgentPack Documentation" data-md-component="logo">
+      
+  
+  <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M12 8a3 3 0 0 0 3-3 3 3 0 0 0-3-3 3 3 0 0 0-3 3 3 3 0 0 0 3 3m0 3.54C9.64 9.35 6.5 8 3 8v11c3.5 0 6.64 1.35 9 3.54 2.36-2.19 5.5-3.54 9-3.54V8c-3.5 0-6.64 1.35-9 3.54"/></svg>
+
+    </a>
+    AgentPack Documentation
+  </label>
+  
+  <ul class="md-nav__list" data-md-scrollfix>
+    
+      
+      
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../.." class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Home
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../architecture/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Architecture & Internals
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../cli-reference/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    CLI Reference
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../corpus-explorer-ui/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Corpus Explorer UI
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../benchmark/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Benchmark
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    
+    
+    
+    
+    
+    <li class="md-nav__item md-nav__item--nested">
+      
+        
+        
+        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_6" >
+        
+          
+          <label class="md-nav__link" for="__nav_6" id="__nav_6_label" tabindex="0">
+            
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    API Reference
+  
+
+    
+  </span>
+  
+  
+
+            <span class="md-nav__icon md-icon"></span>
+          </label>
+        
+        <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_6_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_6">
+            <span class="md-nav__icon md-icon"></span>
+            
+  
+    API Reference
+  
+
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../api/core/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Core
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../api/parsers/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Parsers
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+    
+  </ul>
+</nav>
+                  </div>
+                </div>
+              </div>
+            
+            
+              
+              <div class="md-sidebar md-sidebar--secondary" data-md-component="sidebar" data-md-type="toc" >
+                <div class="md-sidebar__scrollwrap">
+                  <div class="md-sidebar__inner">
+                    
+
+<nav class="md-nav md-nav--secondary" aria-label="Table of contents">
+  
+  
+  
+    
+  
+  
+    <label class="md-nav__title" for="__toc">
+      <span class="md-nav__icon md-icon"></span>
+      Table of contents
+    </label>
+    <ul class="md-nav__list" data-md-component="toc" data-md-scrollfix>
+      
+        <li class="md-nav__item">
+  <a href="#objective" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Objective
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Objective">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#who-is-the-user" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Who is the user
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#what-success-looks-like-top-level-testable" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        What success looks like (top-level, testable)
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#tech-stack" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Tech Stack
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#commands" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Commands
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#project-structure" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Project Structure
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#code-style" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Code Style
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#testing-strategy" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Testing Strategy
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#boundaries" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Boundaries
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#scope-gaps-success-criteria" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Scope: Gaps &amp; Success Criteria
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Scope: Gaps &amp; Success Criteria">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#a-docling-parsing-fidelity" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        A. Docling / parsing fidelity
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#b-retrieval-correctness" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        B. Retrieval correctness
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#c-chunking" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        C. Chunking
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#d-retrieval-quality" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        D. Retrieval quality
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#e-performance" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        E. Performance
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#f-system-design-data-model" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        F. System design / data model
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#g-product-surface" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        G. Product surface
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#h-caching-content-addressed-layered" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        H. Caching (content-addressed, layered)
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#success-criteria-rollup-definition-of-done" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Success Criteria (rollup — definition of done)
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#open-questions" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Open Questions
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#implementation-plan-phase-2-awaiting-review" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Implementation Plan (Phase 2 — awaiting review)
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Implementation Plan (Phase 2 — awaiting review)">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#components-dependency-graph" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Components &amp; dependency graph
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#phasing-ordered-by-dependency-not-importance" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Phasing (ordered by dependency, not importance)
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#risks-mitigations" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Risks &amp; mitigations
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#parallelism-summary" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Parallelism summary
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#still-needs-a-decision-before-phase-3" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Still needs a decision before Phase 3
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+    </ul>
+  
+</nav>
+                  </div>
+                </div>
+              </div>
+            
+          
+          
+            <div class="md-content" data-md-component="content">
+              
+              <article class="md-content__inner md-typeset">
+                
+                  
+
+
+
+<h1 id="spec-parsing-retrieval-overhaul">Spec: Parsing &amp; Retrieval Overhaul</h1>
+<blockquote>
+<p>Status: <strong>SPEC APPROVED (Phase 1 ✓) — Implementation Plan below awaiting review (Phase 2 gate)</strong>
+Owner: Vedant
+Created: 2026-05-29
+Supersedes parts of: <code>docs/architecture.md</code></p>
+</blockquote>
+<h2 id="objective">Objective</h2>
+<p>AgentPack compiles documents into an agent-friendly, citation-first context pack and serves
+retrieval over it. Two reviews surfaced a set of correctness, quality, and performance gaps
+across the <strong>parsing pipeline</strong> (especially the Docling PDF path) and the <strong>retrieval layer</strong>.</p>
+<p>This spec defines the work to make AgentPack:</p>
+<ol>
+<li><strong>Trustworthy</strong> — retrieval never silently serves stale or wrong-citation results.</li>
+<li><strong>High-fidelity</strong> — semantic parsing preserves page numbers and tables, not just plain text.</li>
+<li><strong>Fast at scale</strong> — packing and querying stay usable on corpora of thousands of files/chunks.</li>
+</ol>
+<h3 id="who-is-the-user">Who is the user</h3>
+<p>Engineers and AI builders who pack a corpus of PDFs/docs and let an agent retrieve cited
+evidence from it. Correct citations (source + page + section) are the core value proposition.</p>
+<h3 id="what-success-looks-like-top-level-testable">What success looks like (top-level, testable)</h3>
+<ul>
+<li>Re-packing a corpus into an existing output dir never serves results from the previous corpus.</li>
+<li>A PDF parsed in semantic (Docling) mode yields chunks with correct <code>page</code> citations and
+  <code>type="table"</code> blocks for tabular content — parity with or better than <code>--fast-pdf</code>.</li>
+<li>No chunk exceeds the configured <code>max_tokens</code>.</li>
+<li>Re-packing a corpus where only 1 of N files changed reprocesses ~1 file, not N.</li>
+<li>The embedding model and Docling converter are each loaded at most once per process.</li>
+<li>The full parser + retrieval test suite passes <strong>with Docling installed</strong>, in CI.</li>
+</ul>
+<hr />
+<h2 id="tech-stack">Tech Stack</h2>
+<ul>
+<li>Python <code>&gt;=3.9</code>, <code>pydantic&gt;=2</code>, <code>typer</code> CLI</li>
+<li>Parsing: <code>docling&gt;=2</code> (semantic), <code>pymupdf</code> (fast/spatial fallback), <code>pandas</code>/<code>tabulate</code> (CSV)</li>
+<li>Retrieval: <code>sqlite3</code> FTS5 (lexical), <code>fastembed</code> (ONNX/CPU embeddings), <code>numpy&lt;2</code> (vectors)</li>
+<li>Vector backend: <code>hnswlib</code> (HNSW, <strong>default — core dependency</strong>), <code>sqlite-vec</code> (exact, used in <code>--fast</code> mode)</li>
+<li>Tokenization: <code>tiktoken</code> (<code>cl100k_base</code>)</li>
+<li>Optional UI: <code>fastapi</code> + <code>uvicorn</code></li>
+<li>Tests: <code>pytest</code>, <code>pytest-mock</code></li>
+</ul>
+<hr />
+<h2 id="commands">Commands</h2>
+<div class="highlight"><pre><span></span><code>Install (with semantic + test extras): pip install -e &quot;.[test]&quot;   # docling is a core dep
+Build pack (full/semantic):            agentpack pack &lt;input_dir&gt; --out &lt;out_dir&gt;
+Build pack (fast/lightweight):         agentpack pack &lt;input_dir&gt; --out &lt;out_dir&gt; --fast
+                                       # --fast = PyMuPDF parse + sqlite-vec; default = Docling + HNSW
+                                       # --fast-pdf kept as a deprecated alias for --fast
+Pre-build indexes:                     agentpack index &lt;pack_dir&gt;        # NEW command
+Retrieve:                              agentpack retrieve &lt;pack_dir&gt; &quot;&lt;query&gt;&quot; --mode hybrid
+Validate:                              agentpack validate &lt;pack_dir&gt;
+Audit:                                 agentpack audit &lt;pack_dir&gt;
+Test (all):                            python -m pytest -q
+Test (parsers only):                   python -m pytest tests/test_parsers.py -q
+</code></pre></div>
+<hr />
+<h2 id="project-structure">Project Structure</h2>
+<div class="highlight"><pre><span></span><code>src/agentpack/
+  parsers/        → Parser per file type (text, markdown, csv, pdf). New: docx/pptx/xlsx/html.
+  pack.py         → Orchestration: scan → parse → chunk → write. Add incremental cache + parallelism.
+  chunker.py      → Block→chunk tokenization. Add intra-block splitting.
+  retrieve.py     → FTS / vector / hybrid search + index build. Add invalidation, RRF, singletons.
+  models.py       → Canonical Document Model (SourceDocument / DocumentBlock / ExtractionWarning).
+  cli.py          → Typer commands. Add `index`; wire `--config`.
+  ui/server.py    → FastAPI corpus explorer.
+docs/specs/       → This spec and future specs (committed alongside code).
+tests/            → pytest suite. Tests live here, mirroring module names (test_parsers.py, ...).
+</code></pre></div>
+<hr />
+<h2 id="code-style">Code Style</h2>
+<p>Match existing style: explicit pydantic models, small functions, typed signatures, warnings
+collected as data (not raised) during parsing. Example of the target shape for the Docling path
+consuming the <strong>structured tree</strong> (not a markdown round-trip):</p>
+<div class="highlight"><pre><span></span><code><span class="k">def</span><span class="w"> </span><span class="nf">_parse_semantic</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">file_path</span><span class="p">:</span> <span class="n">Path</span><span class="p">,</span> <span class="n">source_id</span><span class="p">:</span> <span class="nb">str</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">SourceDocument</span><span class="p">:</span>
+    <span class="n">result</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_converter</span><span class="p">()</span><span class="o">.</span><span class="n">convert</span><span class="p">(</span><span class="n">file_path</span><span class="p">)</span>          <span class="c1"># cached converter</span>
+    <span class="n">blocks</span><span class="p">:</span> <span class="nb">list</span><span class="p">[</span><span class="n">DocumentBlock</span><span class="p">]</span> <span class="o">=</span> <span class="p">[]</span>
+    <span class="k">for</span> <span class="n">item</span><span class="p">,</span> <span class="n">_level</span> <span class="ow">in</span> <span class="n">result</span><span class="o">.</span><span class="n">document</span><span class="o">.</span><span class="n">iterate_items</span><span class="p">():</span>
+        <span class="n">page</span> <span class="o">=</span> <span class="n">_page_of</span><span class="p">(</span><span class="n">item</span><span class="p">)</span>                              <span class="c1"># preserve provenance</span>
+        <span class="k">if</span> <span class="n">item</span><span class="o">.</span><span class="n">label</span> <span class="o">==</span> <span class="s2">&quot;table&quot;</span><span class="p">:</span>
+            <span class="n">blocks</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">DocumentBlock</span><span class="p">(</span>
+                <span class="n">block_id</span><span class="o">=</span><span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="n">source_id</span><span class="si">}</span><span class="s2">_b</span><span class="si">{</span><span class="nb">len</span><span class="p">(</span><span class="n">blocks</span><span class="p">)</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">,</span> <span class="n">source_id</span><span class="o">=</span><span class="n">source_id</span><span class="p">,</span>
+                <span class="nb">type</span><span class="o">=</span><span class="s2">&quot;table&quot;</span><span class="p">,</span> <span class="n">text</span><span class="o">=</span><span class="n">item</span><span class="o">.</span><span class="n">export_to_markdown</span><span class="p">(),</span> <span class="n">page</span><span class="o">=</span><span class="n">page</span><span class="p">,</span>
+            <span class="p">))</span>
+        <span class="k">elif</span> <span class="n">item</span><span class="o">.</span><span class="n">label</span> <span class="ow">in</span> <span class="p">(</span><span class="s2">&quot;section_header&quot;</span><span class="p">,</span> <span class="s2">&quot;title&quot;</span><span class="p">):</span>
+            <span class="n">blocks</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">DocumentBlock</span><span class="p">(</span><span class="o">...</span><span class="p">,</span> <span class="nb">type</span><span class="o">=</span><span class="s2">&quot;heading&quot;</span><span class="p">,</span> <span class="n">text</span><span class="o">=</span><span class="n">item</span><span class="o">.</span><span class="n">text</span><span class="p">,</span> <span class="n">page</span><span class="o">=</span><span class="n">page</span><span class="p">))</span>
+        <span class="k">elif</span> <span class="n">item</span><span class="o">.</span><span class="n">text</span><span class="p">:</span>
+            <span class="n">blocks</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">DocumentBlock</span><span class="p">(</span><span class="o">...</span><span class="p">,</span> <span class="nb">type</span><span class="o">=</span><span class="s2">&quot;paragraph&quot;</span><span class="p">,</span> <span class="n">text</span><span class="o">=</span><span class="n">item</span><span class="o">.</span><span class="n">text</span><span class="p">,</span> <span class="n">page</span><span class="o">=</span><span class="n">page</span><span class="p">))</span>
+    <span class="k">return</span> <span class="n">SourceDocument</span><span class="p">(</span><span class="n">source_id</span><span class="o">=</span><span class="n">source_id</span><span class="p">,</span> <span class="n">path</span><span class="o">=</span><span class="n">file_path</span><span class="o">.</span><span class="n">name</span><span class="p">,</span> <span class="nb">type</span><span class="o">=</span><span class="s2">&quot;pdf&quot;</span><span class="p">,</span> <span class="o">...</span><span class="p">)</span>
+</code></pre></div>
+<p>Conventions: <code>block_id = f"{source_id}_b{n}"</code>; warnings use <code>ExtractionWarning(type=..., message=...)</code>;
+never <code>print</code> from library code paths except behind <code>verbose and not quiet</code>.</p>
+<hr />
+<h2 id="testing-strategy">Testing Strategy</h2>
+<ul>
+<li><strong>Framework:</strong> pytest, fixtures in <code>tests/conftest.py</code>, mocking via <code>pytest-mock</code> / <code>unittest.mock</code>.</li>
+<li><strong>Location:</strong> <code>tests/</code>, one module per source module.</li>
+<li><strong>Levels:</strong></li>
+<li><em>Unit</em> — parsers (per type), chunker splitting, RRF fusion math, index-hash invalidation logic.</li>
+<li><em>Integration</em> — full <code>pack → index → retrieve</code> round-trip on a small fixture corpus (1 PDF with a
+    table + 1 md + 1 csv), asserting page/section/table citations survive end-to-end.</li>
+<li><strong>Docling in CI:</strong> semantic-path tests must run with Docling actually installed (no skip).
+  Use a tiny committed fixture PDF, not a mocked converter, for at least one end-to-end test.</li>
+<li><strong>Regression guards:</strong> a test that re-packs into an existing dir and asserts the index is rebuilt
+  (no stale results); a test asserting no chunk exceeds <code>max_tokens</code>.</li>
+<li><strong>Coverage expectation:</strong> every fixed gap below ships with at least one failing-then-passing test.</li>
+</ul>
+<hr />
+<h2 id="boundaries">Boundaries</h2>
+<ul>
+<li><strong>Always:</strong> run <code>python -m pytest -q</code> before committing; keep <code>--fast-pdf</code> working as a fallback;
+  collect parse failures as <code>ExtractionWarning</code>s rather than crashing the whole pack; keep CLI
+  flags backward compatible.</li>
+<li><strong>Ask first:</strong> adding heavyweight deps (faiss/torch/rerank models); changing the on-disk pack
+  format or manifest schema; changing default <code>max_tokens</code>/embedding model; making Docling a hard
+  failure when missing.</li>
+<li><strong>Never:</strong> commit secrets or large binary corpora; serve a retrieval result without re-validating
+  the index against the current pack; remove or <code>xfail</code> a failing test to make CI green without
+  approval; delete the <code>demo_corpus/</code>, <code>src/test_output_*</code> scratch dirs without confirming.</li>
+</ul>
+<hr />
+<h2 id="scope-gaps-success-criteria">Scope: Gaps &amp; Success Criteria</h2>
+<p>Each item is independently testable. IDs are referenced by the Plan/Tasks phases.</p>
+<h3 id="a-docling-parsing-fidelity">A. Docling / parsing fidelity</h3>
+<ul>
+<li><strong>G-A1 Docling installed &amp; exercised in CI.</strong> Semantic test runs against a real (tiny) PDF;
+  <code>pip install -e ".[test]"</code> yields an importable <code>docling</code>. <em>Success:</em> <code>test_pdf_parser_semantic</code>
+  passes without mocking the converter.</li>
+<li><strong>G-A2 Preserve page numbers in semantic mode.</strong> Consume Docling's structured doc; every block
+  carries its source <code>page</code>. <em>Success:</em> semantic-mode chunks expose <code>citation.page</code>, matching the
+  page a string appears on in the fixture PDF.</li>
+<li><strong>G-A3 Preserve tables as <code>type="table"</code>.</strong> Tables become table blocks (written to <code>tables/</code> and
+  recorded in the manifest), not paragraphs. <em>Success:</em> fixture PDF's table appears in
+  <code>tables/*.csv|md</code> and in <code>manifest.tables</code>, and is excluded from overlap duplication.</li>
+<li><strong>G-A4 Reuse one converter.</strong> <code>DocumentConverter</code> built once per process, not per file.
+  <em>Success:</em> a multi-PDF pack constructs the converter exactly once (assert via spy/log).</li>
+<li><strong>G-A5 Robust semantic test.</strong> Replace the brittle module-patch test with a fixture-based one.</li>
+</ul>
+<h3 id="b-retrieval-correctness">B. Retrieval correctness</h3>
+<ul>
+<li><strong>G-B1 Index invalidation.</strong> FTS + vector indexes store the manifest content hash; a changed pack
+  triggers rebuild. <em>Success:</em> re-pack with new content → next <code>retrieve</code> reflects new content.</li>
+<li><strong>G-B2 Explicit <code>agentpack index</code> command.</strong> Builds both indexes; <code>pack</code> optionally invokes it.
+  <em>Success:</em> <code>index</code> exists, is idempotent, and first post-index query pays no build cost.</li>
+</ul>
+<h3 id="c-chunking">C. Chunking</h3>
+<ul>
+<li><strong>G-C1 Split oversized blocks.</strong> Any block &gt; <code>max_tokens</code> is split (with overlap) so no chunk
+  exceeds the limit. <em>Success:</em> a synthetic 5k-token block yields multiple ≤<code>max_tokens</code> chunks.</li>
+</ul>
+<h3 id="d-retrieval-quality">D. Retrieval quality</h3>
+<ul>
+<li><strong>G-D1 RRF fusion</strong> replaces min-max hybrid scoring. <em>Success:</em> fusion is rank-based; unit test on
+  known rankings matches expected RRF order.</li>
+<li><strong>G-D2 FTS precision.</strong> Move off pure OR-of-terms (phrase/AND/BM25 weighting). <em>Success:</em> a
+  multi-term query ranks chunks containing all terms above chunks containing one.</li>
+<li><strong>G-D3 Metadata filtering.</strong> Retrieve can filter by <code>source_id</code> / <code>page</code> / <code>section</code>.
+  <em>Success:</em> <code>--source</code>/<code>--section</code> flags constrain results.</li>
+<li><strong>G-D4 Reranker hook</strong> — optional cross-encoder rerank pass behind a flag/extra. <strong>DEFERRED to v2 spec.</strong></li>
+</ul>
+<h3 id="e-performance">E. Performance</h3>
+<ul>
+<li><strong>G-E1 Embedding model singleton</strong> (build + query share one instance). <em>Success:</em> model loaded once.</li>
+<li><strong>G-E2 Pre-normalized vectors</strong> at index build; query cosine = dot product. <em>Success:</em> no per-query
+  <code>linalg.norm</code> over the matrix; results unchanged within tolerance. Remains the fallback path when no
+  vector extension is available / for tiny corpora.</li>
+<li><strong>G-E3 Incremental packing</strong> keyed by source checksum; unchanged files reuse cached blocks/chunks.
+  <em>Success:</em> re-pack with 1/N changed reprocesses ~1 file. (Realized via the L1 parse cache, G-H1.)</li>
+<li><strong>G-E4 Parallel parsing</strong> across files (process pool), order-stable output. <em>Success:</em> wall-clock
+  speedup on multi-file corpus; identical manifest vs sequential.</li>
+<li><strong>G-E5 ANN vector index (default).</strong> Replace brute-force <code>np.dot</code> with an <strong>HNSW</strong> index (<code>hnswlib</code>)
+  as the default vector backend — true approximate NN, fast queries at scale. The pre-normalized
+  brute-force path (G-E2) stays as the no-extension fallback. <em>Success:</em> vector search on a
+  ~10k-chunk corpus returns top-k via HNSW with &gt;0.95 recall@10 vs exact.</li>
+<li><strong>G-E6 One lightweight switch, no backend flag.</strong> Default (full/semantic) mode = Docling + HNSW.
+  A single <code>--fast</code> mode = PyMuPDF parse + <strong>sqlite-vec</strong> (exact, in-SQLite, ~instant index build,
+  minimal deps) — ideal for small corpora / quick iteration. Generalize the existing <code>--fast-pdf</code>
+  into <code>--fast</code> (keep <code>--fast-pdf</code> as a deprecated alias) so users face one mental switch, not a
+  separate vector-backend option. <em>Success:</em> <code>--fast</code> selects PyMuPDF + sqlite-vec; default selects
+  Docling + HNSW; no standalone vector-backend flag exists.</li>
+<li><strong>G-E7 Baseline benchmark harness.</strong> A small, repeatable script measuring cold-pack time, re-pack
+  time, and query p50/recall across a few corpus sizes. Establishes the baseline that perf work is
+  judged "measurably faster" against, and the evidence for any future numeric gates. <em>Success:</em>
+  <code>benchmarks/</code> harness runs and prints a before/after comparison table.</li>
+</ul>
+<h3 id="f-system-design-data-model">F. System design / data model</h3>
+<ul>
+<li><strong>G-F1 Manifest version correctness</strong> — single source of version (read from package), not <code>0.1.0</code>.</li>
+<li><strong>G-F2 SQLite as chunk-metadata source of truth</strong>; YAML manifest becomes a lean summary. (May be
+  staged; requires format-change approval.)</li>
+<li><strong>G-F3 Chunk storage consolidation</strong> — evaluate JSONL/SQLite over thousands of tiny <code>.md</code> files.</li>
+</ul>
+<h3 id="g-product-surface">G. Product surface</h3>
+<ul>
+<li><strong>G-G1 Broader formats</strong> via Docling: docx, pptx, xlsx, html (+ images/OCR toggle). Incremental,
+  one parser registration each.</li>
+<li><strong>G-G2 Character-offset provenance</strong> back into source (enables highlight-in-original). <strong>DEFERRED to v2 spec.</strong></li>
+<li><strong>G-G3 Secret/PII redaction</strong> — confirm/wire <code>detect-secrets</code> into the scan/parse path; redact or
+  flag before packing. <em>Success:</em> a planted secret in a fixture is flagged/redacted in output.</li>
+<li><strong>G-G4 Config file</strong> (<code>agentpack.toml</code>: chunk size, embedding model, included types) for
+  reproducible packs.</li>
+</ul>
+<h3 id="h-caching-content-addressed-layered">H. Caching (content-addressed, layered)</h3>
+<p>Re-runs should pay only for what changed. Adopt the LlamaIndex <code>IngestionPipeline</code> /
+LangChain <code>CacheBackedEmbeddings</code> pattern: hash each transformation's input and key its output by
+that hash. AgentPack already computes <code>sha256(content)</code> per source (<code>pack.py:111</code>) but discards it —
+that is the cache key. Store layers in a single <code>cache.db</code> (SQLite) alongside <code>indexes/</code>. Keys embed
+a <em>version</em> component so changing logic auto-invalidates only the affected layer.</p>
+<ul>
+<li><strong>G-H1 Parse cache (L1).</strong> Key <code>sha256(file_bytes) + parser_version + parse_opts</code> → serialized
+  <code>SourceDocument</code>. Skips Docling entirely on unchanged files. (This is how G-E3 is realized.)
+  <em>Success:</em> re-pack of an unchanged corpus performs zero Docling conversions.</li>
+<li><strong>G-H2 Embedding cache (L3).</strong> Key <code>sha256(chunk_text) + model_id</code> → vector BLOB. Unchanged chunks
+  are never re-embedded, even when their file changed elsewhere. <em>Success:</em> editing one paragraph in
+  a large file re-embeds only the affected chunk(s).</li>
+<li><strong>G-H3 Index invalidation (L4).</strong> Same mechanism as G-B1 — pack content hash stamped in each index;
+  mismatch triggers rebuild. Listed here to anchor it in the cache-coherence model.</li>
+<li><strong>G-H4 (Optional) Query cache (L5).</strong> Key <code>sha256(query + mode + top_k + pack_hash)</code> → result set.
+  Memoizes repeated/UI queries. <em>Success:</em> an identical repeat query is served without re-search.</li>
+<li><strong>G-H5 Versioned keys.</strong> <code>parser_version</code> / <code>chunker_version</code> / <code>model_id</code> participate in keys so a
+  logic change self-invalidates without a manual cache clear. <em>Success:</em> bumping <code>chunker_version</code>
+  forces re-chunk but reuses the L1 parse cache (no re-parse).</li>
+</ul>
+<hr />
+<h2 id="success-criteria-rollup-definition-of-done">Success Criteria (rollup — definition of done)</h2>
+<ul>
+<li>[ ] Semantic PDF parse preserves page + tables (G-A2, G-A3); CI runs it for real (G-A1).</li>
+<li>[ ] No stale-index results possible (G-B1); <code>agentpack index</code> exists (G-B2).</li>
+<li>[ ] No chunk exceeds <code>max_tokens</code> (G-C1).</li>
+<li>[ ] Hybrid uses RRF (G-D1); heavy resources loaded once (G-A4, G-E1); vectors pre-normalized (G-E2).</li>
+<li>[ ] Incremental + parallel packing measurably faster on a multi-file corpus (G-E3, G-E4).</li>
+<li>[ ] HNSW is the default vector backend; <code>--fast</code> selects PyMuPDF + sqlite-vec (G-E5, G-E6).</li>
+<li>[ ] Content-addressed cache: unchanged files skip Docling; unchanged chunks skip embedding (G-H1, G-H2).</li>
+<li>[ ] Manifest version is correct and tables are recorded (G-F1, G-A3).</li>
+<li>[ ] Full test suite green in CI with Docling installed.</li>
+</ul>
+<hr />
+<h2 id="open-questions">Open Questions</h2>
+<ol>
+<li><strong>Format change appetite (G-F2/G-F3):</strong> OK to migrate chunk metadata into SQLite and slim the
+   YAML manifest, with a one-time re-index on upgrade? Or keep YAML authoritative for now?</li>
+<li><strong>FTS precision (G-D2):</strong> acceptable to switch default ranking to AND-of-terms / BM25? This can
+   change existing result ordering.</li>
+<li><strong>Redaction (G-G3):</strong> is <code>detect-secrets</code> meant to <em>redact</em> content or only <em>flag</em> it in warnings?</li>
+<li><strong>New formats (G-G1):</strong> in-scope for this spec, or split into a follow-up spec once the core
+   correctness/perf work lands?</li>
+<li>~~Remaining stretch items~~ — <strong>DECIDED:</strong> G-D4 reranker and G-G2 char-offset provenance are
+   deferred to a v2 spec. G-E5 ANN is in-scope and the default.</li>
+<li>~~Perf targets~~ — <strong>DECIDED:</strong> directional acceptance now ("measurably faster + output unchanged"),
+   plus an early baseline-benchmark task (G-E7). Numeric CI gates may be promoted later from real
+   measured baselines, not guessed.</li>
+<li>~~CLI generalization (G-E6)~~ — <strong>DECIDED:</strong> fold <code>--fast-pdf</code> into <code>--fast</code> (deprecated alias kept).</li>
+<li>~~HNSW dependency~~ — <strong>DECIDED:</strong> <code>hnswlib</code> is a core dependency.</li>
+</ol>
+<p><em>All open questions resolved. Phase 1 complete.</em></p>
+<hr />
+<h2 id="implementation-plan-phase-2-awaiting-review">Implementation Plan (Phase 2 — awaiting review)</h2>
+<h3 id="components-dependency-graph">Components &amp; dependency graph</h3>
+<div class="highlight"><pre><span></span><code>                    ┌─ Canonical model (models.py) ─┐   shared foundation
+                    ▼                                ▼
+        Parsing pipeline                     Retrieval layer
+   (parsers/, pack.py, chunker.py)        (retrieve.py, cli.py)
+                    │                                │
+        ┌───────────┴──────────┐          ┌──────────┴───────────┐
+        ▼                      ▼          ▼                      ▼
+   Docling fidelity       Caching     Index correctness     Vector backend
+   (A: page/table)        (H: L1/L3)  (B: invalidation)     (E5/E6: HNSW/sqlite-vec)
+</code></pre></div>
+<h3 id="phasing-ordered-by-dependency-not-importance">Phasing (ordered by dependency, not importance)</h3>
+<p><strong>Phase 0 — Foundations &amp; safety net</strong> <em>(do first; unblocks everything; mostly sequential)</em>
+- Pin/verify Docling installed; convert the brittle semantic test to a real-fixture test (G-A1, G-A5).
+- Add the integration fixture corpus (1 PDF w/ table + 1 md + 1 csv) and a <code>pack→index→retrieve</code>
+  round-trip test that currently <em>fails</em> on citations — our regression net.
+- Build the baseline benchmark harness (G-E7) and record current numbers.
+- <em>Checkpoint:</em> CI runs Docling for real; baseline table committed.</p>
+<p><strong>Phase 1 — Correctness (highest severity; can parallelize the three tracks)</strong>
+- <em>Track 1.1 Docling fidelity:</em> consume structured doc tree → preserve <code>page</code>, emit <code>type="table"</code>
+  blocks; reuse one converter (G-A2, G-A3, G-A4). Manifest records tables; version fix (G-A3, G-F1).
+- <em>Track 1.2 Index invalidation:</em> stamp pack content hash in FTS + vector indexes; rebuild on mismatch
+  (G-B1). Add <code>agentpack index</code> command (G-B2).
+- <em>Track 1.3 Chunking:</em> split oversized blocks with overlap (G-C1).
+- <em>Checkpoint:</em> the Phase-0 round-trip test now passes (pages + tables cited end-to-end); no chunk
+  exceeds <code>max_tokens</code>; re-pack never serves stale results.</p>
+<p><strong>Phase 2 — Caching &amp; build performance</strong> <em>(depends on Phase 1 stable models)</em>
+- L1 parse cache → realizes incremental packing (G-H1, G-E3). Versioned keys (G-H5).
+- L3 embedding cache (G-H2). Single <code>cache.db</code>.
+- Parallel parsing across files (G-E4).
+- <em>Checkpoint:</em> re-pack of unchanged corpus does zero Docling conversions; benchmark shows the win.</p>
+<p><strong>Phase 3 — Retrieval quality &amp; query performance</strong> <em>(parallelizable)</em>
+- Embedding-model singleton + pre-normalized vectors (G-E1, G-E2).
+- HNSW default backend via <code>hnswlib</code>; brute-force fallback retained (G-E5).
+- <code>--fast</code> mode = PyMuPDF + sqlite-vec; deprecate <code>--fast-pdf</code> alias (G-E6).
+- RRF fusion replaces min-max (G-D1); FTS precision AND/BM25 — <em>pending Q3 decision</em> (G-D2);
+  metadata filtering by source/page/section (G-D3). Optional query cache (G-H4).
+- <em>Checkpoint:</em> recall@10 &gt;0.95 vs exact on the ~10k fixture; hybrid ordering verified by unit test.</p>
+<p><strong>Phase 4 — Product surface</strong> <em>(lowest coupling; do last / can defer per-item)</em>
+- Config file <code>agentpack.toml</code> (G-G4).
+- Secret/PII handling wired into scan (G-G3).
+- New formats docx/pptx/xlsx/html via Docling (G-G1).
+- SQLite-as-source-of-truth + chunk-storage consolidation (G-F2, G-F3) — <em>pending Q1/Q2 format
+  decisions; may split to its own spec.</em></p>
+<h3 id="risks-mitigations">Risks &amp; mitigations</h3>
+<ul>
+<li><strong>Docling structured-tree API mismatch</strong> (page extraction varies by version) → pin a Docling
+  version; cover with the real-fixture test before refactoring.</li>
+<li><strong>HNSW non-determinism</strong> (ANN recall varies) → keep brute-force as ground truth; assert recall
+  threshold, not exact equality.</li>
+<li><strong>Cache key bugs = stale output</strong> (the exact class of bug we're fixing) → versioned keys + a
+  cache-invalidation test are themselves acceptance criteria.</li>
+<li><strong><code>--fast</code> rename</strong> breaks existing scripts → keep <code>--fast-pdf</code> as a working deprecated alias.</li>
+<li><strong>Format-change scope creep (Phase 4)</strong> → gated behind Q1/Q2; can fork to a v2 spec.</li>
+</ul>
+<h3 id="parallelism-summary">Parallelism summary</h3>
+<ul>
+<li>Sequential gates: Phase 0 → Phase 1 → Phase 2. (Each builds on the prior's stable models.)</li>
+<li>Parallel within Phase 1 (3 tracks) and Phase 3.</li>
+<li>Phase 4 items are mutually independent and individually deferrable.</li>
+</ul>
+<h3 id="still-needs-a-decision-before-phase-3">Still needs a decision before Phase 3</h3>
+<ul>
+<li><strong>Q2 (FTS ranking, G-D2):</strong> change default ranking to AND/BM25 (reorders results) or keep OR + only
+  add RRF on top? Everything else in Phase 3 is unaffected.</li>
+<li><strong>Q1 (format change, G-F2/F3):</strong> in this spec or a follow-up? Only gates Phase 4.
+```</li>
+</ul>
+
+
+
+
+
+
+
+
+
+
+
+
+                
+              </article>
+            </div>
+          
+          
+<script>var target=document.getElementById(location.hash.slice(1));target&&target.name&&(target.checked=target.name.startsWith("__tabbed_"))</script>
+        </div>
+        
+      </main>
+      
+        <footer class="md-footer">
+  
+  <div class="md-footer-meta md-typeset">
+    <div class="md-footer-meta__inner md-grid">
+      <div class="md-copyright">
+  
+  
+    Made with
+    <a href="https://squidfunk.github.io/mkdocs-material/" target="_blank" rel="noopener">
+      Material for MkDocs
+    </a>
+  
+</div>
+      
+    </div>
+  </div>
+</footer>
+      
+    </div>
+    <div class="md-dialog" data-md-component="dialog">
+      <div class="md-dialog__inner md-typeset"></div>
+    </div>
+    
+    
+    
+      
+      
+      <script id="__config" type="application/json">{"annotate": null, "base": "../..", "features": [], "search": "../../assets/javascripts/workers/search.2c215733.min.js", "tags": null, "translations": {"clipboard.copied": "Copied to clipboard", "clipboard.copy": "Copy to clipboard", "search.result.more.one": "1 more on this page", "search.result.more.other": "# more on this page", "search.result.none": "No matching documents", "search.result.one": "1 matching document", "search.result.other": "# matching documents", "search.result.placeholder": "Type to start searching", "search.result.term.missing": "Missing", "select.version": "Select version"}, "version": null}</script>
+    
+    
+      <script src="../../assets/javascripts/bundle.79ae519e.min.js"></script>
+      
+    
+  </body>
+</html>
