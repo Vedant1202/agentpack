@@ -148,6 +148,8 @@ def test_api_search_fts(monkeypatch, tmp_path):
     res = response.json()["results"]
     assert len(res) == 1
     assert res[0]["id"] == "c1"
+    assert res[0]["title"] == "s1"
+    assert res[0]["source"] == "s1"
 
 @patch("fastembed.TextEmbedding")
 def test_api_search_vector(mock_embed_cls, monkeypatch, tmp_path):
@@ -170,6 +172,8 @@ def test_api_search_vector(mock_embed_cls, monkeypatch, tmp_path):
     res = response.json()["results"]
     assert len(res) == 1
     assert res[0]["id"] == "c1"
+    assert res[0]["source"] == "Unknown"
+    assert res[0]["title"] == "Unknown"
 
 def test_api_neighbors_missing(monkeypatch, tmp_path):
     import agentpack.ui.server as server
@@ -194,6 +198,7 @@ def test_api_neighbors_valid(monkeypatch, tmp_path):
     neighbors = response.json()["neighbors"]
     assert len(neighbors) == 1
     assert neighbors[0]["id"] == "c2"
+    assert neighbors[0]["title"] == "Unknown"
 
 def test_api_neighbors_chunk_not_found(monkeypatch, tmp_path):
     pack_dir = tmp_path / "agentpack_output"

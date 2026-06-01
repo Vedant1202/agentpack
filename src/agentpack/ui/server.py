@@ -2,6 +2,7 @@ import os
 import json
 import yaml
 import sqlite3
+import numpy as np
 from pathlib import Path
 from typing import Optional
 from fastapi import FastAPI, HTTPException, Request
@@ -69,6 +70,58 @@ def resolve_source_file_path(base_path: Path, citation: dict) -> Optional[str]:
             return str(candidate.resolve())
     return None
 
+
+def load_vector_artifacts(base_path: Path):
+    vector_path = base_path / "indexes" / "vector_index.npy"
+    meta_path = base_path / "indexes" / "vector_meta.json"
+    if not vector_path.exists() or not meta_path.exists():
+        raise HTTPException(status_code=404, detail="Vector index not found")
+
+    embeddings = np.load(vector_path)
+    with open(meta_path, "r", encoding="utf-8") as f:
+        meta = json.load(f)
+    return embeddings, meta
+
+
+def search_vector_artifacts(base_path: Path, query: str, top_k: int):
+    try:
+        from fastembed import TextEmbedding
+    except ImportError as exc:
+        raise HTTPException(
+            status_code=500,
+            detail="fastembed is not installed. Run pip install agentpack[ui]",
+        ) from exc
+
+    embeddings, meta = load_vector_artifacts(base_path)
+    if len(embeddings) == 0 or not meta:
+        return []
+
+    model = TextEmbedding()
+    raw_q = np.array(list(model.embed([query]))[0], dtype=np.float32)
+    q_norm = np.linalg.norm(raw_q)
+    query_emb = raw_q / q_norm if q_norm > 0 else raw_q
+
+    k = min(max(top_k, 0), len(embeddings))
+    if k == 0:
+        return []
+
+    similarities = np.dot(embeddings, query_emb)
+    top_indices = np.argsort(similarities)[::-1][:k]
+    results = []
+    for idx in top_indices:
+        item = meta[int(idx)]
+        results.append(
+            {
+                "chunk_id": item["chunk_id"],
+                "source_id": item.get("source_id", "Unknown"),
+                "path": item.get("path"),
+                "token_count": item.get("token_count", 0),
+                "citation": item.get("citation", {}),
+                "score": float(similarities[idx]),
+            }
+        )
+    return results
+
 @app.get("/api/chunks")
 def get_chunks():
     base_path = get_base_path()
@@ -112,15 +165,7 @@ def get_umap():
     except ImportError:
         raise HTTPException(status_code=500, detail="umap-learn is not installed. Run pip install agentpack[ui]")
         
-    vector_path = get_base_path() / "indexes" / "vector_index.npy"
-    meta_path = get_base_path() / "indexes" / "vector_meta.json"
-    
-    if not vector_path.exists() or not meta_path.exists():
-        raise HTTPException(status_code=404, detail="Vector index not found")
-        
-    embeddings = np.load(vector_path)
-    with open(meta_path, "r", encoding="utf-8") as f:
-        meta = json.load(f)
+    embeddings, meta = load_vector_artifacts(get_base_path())
         
     # Compute UMAP
     reducer = umap.UMAP(n_components=2, metric='cosine', random_state=42)
@@ -159,13 +204,18 @@ class SearchQuery(BaseModel):
 
 @app.post("/api/search")
 def search(req: SearchQuery):
-    ranked = search_hybrid(PACK_DIR, req.query, top_k=req.top_k)
+    base_path = get_base_path()
+    try:
+        ranked = search_hybrid(PACK_DIR, req.query, top_k=req.top_k)
+    except FileNotFoundError:
+        ranked = search_vector_artifacts(base_path, req.query, req.top_k)
     if not ranked:
         return {"results": []}
 
     # Enrich with content from the lexical index (search_hybrid doesn't return it)
-    db_path = get_base_path() / "indexes" / "lexical_index.db"
+    db_path = base_path / "indexes" / "lexical_index.db"
     content_map: dict = {}
+    chunk_meta: dict = {}
     if db_path.exists():
         ids = [r["chunk_id"] for r in ranked]
         placeholders = ",".join("?" * len(ids))
@@ -173,23 +223,52 @@ def search(req: SearchQuery):
         try:
             cur = conn.cursor()
             cur.execute(
-                f"SELECT chunk_id, content FROM chunks_fts WHERE chunk_id IN ({placeholders})",
+                "SELECT chunk_id, source_id, path, token_count, citation, content "
+                f"FROM chunks_fts WHERE chunk_id IN ({placeholders})",
                 ids,
             )
-            content_map = {row[0]: row[1] for row in cur.fetchall()}
+            for chunk_id, source_id, path, token_count, citation_str, content in cur.fetchall():
+                try:
+                    citation = json.loads(citation_str)
+                except Exception:
+                    citation = {}
+                content_map[chunk_id] = content
+                chunk_meta[chunk_id] = {
+                    "source": source_id,
+                    "path": path,
+                    "tokens": token_count,
+                    "citation": citation,
+                    "title": build_human_readable_title(source_id, citation),
+                    "source_file_path": resolve_source_file_path(base_path, citation),
+                }
         finally:
             conn.close()
 
-    results = [
-        {
-            "id": r["chunk_id"],
-            "fts": 0.0,
-            "vector": 0.0,
-            "hybrid": r["score"],
-            "content": content_map.get(r["chunk_id"], ""),
-        }
-        for r in ranked
-    ]
+    results = []
+    for r in ranked:
+        citation = r.get("citation", {})
+        source_id = r.get("source_id", "Unknown")
+        meta = chunk_meta.get(
+            r["chunk_id"],
+            {
+                "source": source_id,
+                "path": r.get("path"),
+                "tokens": r.get("token_count", 0),
+                "citation": citation,
+                "title": build_human_readable_title(source_id, citation),
+                "source_file_path": resolve_source_file_path(base_path, citation),
+            },
+        )
+        results.append(
+            {
+                "id": r["chunk_id"],
+                "fts": 0.0,
+                "vector": r.get("score", 0.0),
+                "hybrid": r["score"],
+                "content": content_map.get(r["chunk_id"], ""),
+                **meta,
+            }
+        )
     return {"results": results}
 
 class NeighborQuery(BaseModel):
@@ -198,16 +277,9 @@ class NeighborQuery(BaseModel):
 
 @app.post("/api/neighbors")
 def get_neighbors(req: NeighborQuery):
-    vector_path = get_base_path() / "indexes" / "vector_index.npy"
-    meta_path = get_base_path() / "indexes" / "vector_meta.json"
-    
-    if not vector_path.exists() or not meta_path.exists():
-        raise HTTPException(status_code=404, detail="Vector index not found")
-        
+    base_path = get_base_path()
     try:
-        embeddings = np.load(vector_path)
-        with open(meta_path, "r", encoding="utf-8") as f:
-            meta = json.load(f)
+        embeddings, meta = load_vector_artifacts(base_path)
             
         # Find index of target chunk
         target_idx = None
@@ -232,7 +304,11 @@ def get_neighbors(req: NeighborQuery):
                 neighbors.append({
                     "id": chunk_id,
                     "score": float(similarities[idx]),
-                    "source": meta[idx].get("source_id", "Unknown")
+                    "source": meta[idx].get("source_id", "Unknown"),
+                    "title": build_human_readable_title(
+                        meta[idx].get("source_id", "Unknown"),
+                        meta[idx].get("citation", {}),
+                    ),
                 })
                 
         return {"neighbors": neighbors[:req.top_k]}
