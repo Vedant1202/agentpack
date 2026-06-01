@@ -8,7 +8,7 @@
       
       
       
-        <link rel="canonical" href="https://yourusername.github.io/agentpack/">
+        <link rel="canonical" href="https://vedant1202.github.io/agentpack/">
       
       
       
@@ -322,10 +322,21 @@
 </li>
         
           <li class="md-nav__item">
-  <a href="#2-retrieve" class="md-nav__link">
+  <a href="#2b-pre-build-indexes-optional" class="md-nav__link">
     <span class="md-ellipsis">
       
-        2. Retrieve
+        2b. Pre-build Indexes (optional)
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#3-retrieve" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        3. Retrieve
       
     </span>
   </a>
@@ -712,10 +723,21 @@
 </li>
         
           <li class="md-nav__item">
-  <a href="#2-retrieve" class="md-nav__link">
+  <a href="#2b-pre-build-indexes-optional" class="md-nav__link">
     <span class="md-ellipsis">
       
-        2. Retrieve
+        2b. Pre-build Indexes (optional)
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#3-retrieve" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        3. Retrieve
       
     </span>
   </a>
@@ -817,13 +839,16 @@
 <a href="https://opensource.org/licenses/ISC"><img alt="License: ISC" src="https://img.shields.io/badge/License-ISC-blue.svg" /></a></p>
 <p><strong>AgentPack</strong> improves the context pipeline for document-grounded agents.</p>
 <p>Instead of forcing AI agents to parse messy, disparate file formats (PDFs, CSVs, Markdown, text) at runtime, AgentPack is an offline <strong>document-to-agent-context compiler</strong>. It takes unstructured knowledge bases, turns them into clean semantic chunks with citations, retrieves the right evidence, and sends only high-signal context to the model.</p>
+<blockquote>
+<p><strong>Why AgentPack:</strong> across 9 retrieval strategies on 2 corpora, it delivers the most consistent retrieval quality of any method tested — 0.83 Hit@3 on both homogeneous and heterogeneous document sets — while keeping context ~100× smaller than raw document stuffing. See the <a href="https://github.com/Vedant1202/agentpack/blob/main/BENCHMARK.md">full benchmark results</a>.</p>
+</blockquote>
 <h2 id="the-benchmark">The Benchmark</h2>
 <p><strong>Given the same LLM, AgentPack provides better context than raw document stuffing or naive RAG.</strong></p>
 <p>I benchmarked AgentPack against standard RAG baselines on 42 complex financial queries from <a href="https://github.com/patronus-ai/financebench">Patronus AI FinanceBench</a>. The results prove that AgentPack reduces context bloat, improves evidence retrieval, preserves citations, and helps the exact same LLM produce more grounded answers.</p>
 <p><strong>Benchmark Highlights:</strong>
 * <strong>161x Reduction in Token Cost:</strong> Cut context token usage from 424k to 2.6k, saving ~$0.10 per query.
-* <strong>2x Context Relevance:</strong> Vastly outperformed naive chunking in retrieving semantically complete financial tables.
-* <strong>"Lost in the Middle" Prevention:</strong> Outperformed raw document stuffing in correctness by preventing the LLM from drowning in noise.</p>
+* <strong>Highest Correctness of Any Strategy:</strong> AgentPack (Vector) scored 3.95/5 judge-graded correctness on FinanceBench — the top of all 9 retrieval strategies tested.
+* <strong>~1.7x Context Relevance:</strong> Retrieved context graded ~1.7x more relevant than naive chunking (3.14 vs 1.83) by preserving semantically complete financial tables.</p>
 <p>AgentPack is best treated as an offline document-to-agent-context compiler. It reduces context bloat, but a strong reasoning model is still required to solve complex queries.</p>
 <table>
 <thead>
@@ -843,15 +868,15 @@
 </tr>
 <tr>
 <td><strong>Context Relevance</strong></td>
-<td>~2x more relevant than naive chunking; preserves tabular and semantic boundaries</td>
+<td>~1.7x more relevant than naive chunking (3.14 vs 1.83); preserves tabular and semantic boundaries</td>
 </tr>
 <tr>
 <td><strong>Cost Savings</strong></td>
 <td>Drops LLM input cost per query from ~$0.11 to &lt;$0.0007</td>
 </tr>
 <tr>
-<td><strong>Noise Prevention</strong></td>
-<td>Prevents the "Lost in the Middle" phenomenon; higher correctness despite less text</td>
+<td><strong>Answer Correctness</strong></td>
+<td>Highest judge-graded correctness (3.95/5) of any retrieval strategy tested on FinanceBench</td>
 </tr>
 <tr>
 <td><strong>The Bottleneck</strong></td>
@@ -886,24 +911,37 @@ pip<span class="w"> </span>install<span class="w"> </span>-e<span class="w"> </s
 <div class="highlight"><pre><span></span><code>detect-secrets<span class="w"> </span>scan<span class="w"> </span>&gt;<span class="w"> </span>.secrets.baseline
 </code></pre></div></p>
 <h3 id="2-compile-a-pack">2. Compile a Pack</h3>
-<p>Point AgentPack at any folder containing your documents (<code>.txt</code>, <code>.md</code>, <code>.csv</code>, <code>.pdf</code>).</p>
+<p>Point AgentPack at any folder containing your documents (<code>.txt</code>, <code>.md</code>, <code>.csv</code>, <code>.pdf</code>, <code>.docx</code>, <code>.pptx</code>, <code>.xlsx</code>, <code>.html</code>).</p>
 <div class="highlight"><pre><span></span><code>agentpack<span class="w"> </span>pack<span class="w"> </span>./my_docs<span class="w"> </span>--out<span class="w"> </span>./agentpack-output
 </code></pre></div>
 <p><strong>Key Compilation Options:</strong>
 - <code>--include "*.md,*.txt"</code>: Only pack specific files or extensions.
 - <code>--ignore "tests/,drafts/"</code>: Exclude specific directories or files.
 - <code>--remove-empty-lines</code>: Compress text files to save LLM tokens.
-- <code>--no-gitignore</code>: Ignore <code>.gitignore</code> rules and pack everything.</p>
-<h3 id="2-retrieve">2. Retrieve</h3>
-<p>AgentPack comes with a built-in hybrid search engine (SQLite FTS5 + FastEmbed vector search) to test your chunks instantly.</p>
+- <code>--no-gitignore</code>: Ignore <code>.gitignore</code> rules and pack everything.
+- <code>--fast</code>: Fast mode (PyMuPDF for PDFs; skips Docling). Best for quick iteration on small corpora.</p>
+<p>Settings can also be stored in an <code>agentpack.toml</code> file in your input directory:</p>
+<div class="highlight"><pre><span></span><code><span class="k">[pack]</span>
+<span class="n">chunk_max_tokens</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="mi">800</span>
+<span class="n">exclude</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="p">[</span><span class="s2">&quot;drafts/&quot;</span><span class="p">,</span><span class="w"> </span><span class="s2">&quot;*.log&quot;</span><span class="p">]</span>
+</code></pre></div>
+<h3 id="2b-pre-build-indexes-optional">2b. Pre-build Indexes (optional)</h3>
+<p>Run this after packing to avoid paying the index-build cost on the first query:</p>
+<div class="highlight"><pre><span></span><code>agentpack<span class="w"> </span>index<span class="w"> </span>./agentpack-output
+</code></pre></div>
+<h3 id="3-retrieve">3. Retrieve</h3>
+<p>AgentPack comes with a built-in hybrid search engine (SQLite FTS5 + HNSW vector search, fused with RRF) to test your chunks instantly.</p>
 <div class="highlight"><pre><span></span><code>agentpack<span class="w"> </span>retrieve<span class="w"> </span>./agentpack-output<span class="w"> </span><span class="s2">&quot;eligibility criteria&quot;</span><span class="w"> </span>--top-k<span class="w"> </span><span class="m">5</span>
+
+<span class="c1"># Narrow results with metadata filters</span>
+agentpack<span class="w"> </span>retrieve<span class="w"> </span>./agentpack-output<span class="w"> </span><span class="s2">&quot;revenue&quot;</span><span class="w"> </span>--source<span class="w"> </span><span class="s2">&quot;annual_report&quot;</span><span class="w"> </span>--page<span class="w"> </span><span class="m">12</span>
 </code></pre></div>
 <h3 id="3-deterministic-eval">3. Deterministic Eval</h3>
 <p>Benchmark AgentPack against naive chunking using our offline evaluation harness.</p>
 <div class="highlight"><pre><span></span><code>agentpack<span class="w"> </span><span class="nb">eval</span><span class="w"> </span>./benchmarks/my_dataset
 </code></pre></div>
 <h3 id="4-visualize-with-the-corpus-explorer">4. Visualize with the Corpus Explorer</h3>
-<p>If you installed AgentPack with the <code>[ui]</code> extra, you can launch a local WebGL-powered 2D physics visualization of your compiled chunks. This allows you to visually debug chunk sizes, semantic similarities, and hybrid search trajectories.</p>
+<p>If you installed AgentPack with the <code>[ui]</code> extra, you can launch a local 2D force-graph explorer of your compiled chunks. This allows you to visually debug chunk sizes, semantic similarities, and ranked retrieval results.</p>
 <div class="highlight"><pre><span></span><code>agentpack<span class="w"> </span>ui<span class="w"> </span>./agentpack-output<span class="w"> </span>--port<span class="w"> </span><span class="m">8000</span>
 </code></pre></div>
 <p><img alt="Visualizing Hybrid Retrieval (Search)" src="./docs/assets/search.png" /></p>
@@ -916,7 +954,8 @@ pip<span class="w"> </span>install<span class="w"> </span>-e<span class="w"> </s
 <li><strong>TXT</strong>: Paragraph-aware splitting.</li>
 <li><strong>Markdown</strong>: Semantic heading-aware section path tracking.</li>
 <li><strong>CSV</strong>: Uses Pandas &amp; Tabulate to convert tabular data into Markdown tables.</li>
-<li><strong>PDF</strong>: Accurate page-by-page PyMuPDF extraction.</li>
+<li><strong>PDF</strong>: Docling structured-tree parse (default) — preserves page numbers, sections, and tables. PyMuPDF spatial extraction with <code>--fast</code>.</li>
+<li><strong>DOCX / PPTX / XLSX / HTML</strong>: Docling semantic parse — same structured-tree path as PDF.</li>
 </ul>
 <h2 id="architecture-overview">Architecture Overview</h2>
 <pre class="mermaid"><code>flowchart LR
@@ -926,11 +965,13 @@ pip<span class="w"> </span>install<span class="w"> </span>-e<span class="w"> </s
     Pack --&gt; Agent[LLM Agent]</code></pre>
 <p>For a deep dive into how AgentPack parses, chunks, and indexes data, see <a href="https://github.com/Vedant1202/agentpack/blob/main/docs/architecture.md">Architecture &amp; Internals</a>.</p>
 <h2 id="current-limitations-roadmap">Current Limitations &amp; Roadmap</h2>
-<p>AgentPack is currently focused on text-based semantic extraction. The following features are on the roadmap but <strong>not yet implemented</strong>:
-- <strong>Image Understanding / Vision</strong>: AgentPack does not currently run OCR or vision models on images embedded within PDFs or Markdown files. Images are currently ignored during the parsing phase.
-- <strong>Complex Table Structures</strong>: While basic CSVs are supported, highly nested or merged-cell tables within PDFs are not perfectly reconstructed yet.
-- <strong>Web Crawling</strong>: You currently need to provide local files. Direct URL scraping is planned.
-- <strong>Cloud Vector DB Integration</strong>: Retrieval currently runs locally using SQLite FTS5 and FastEmbed. Connectors for Pinecone, Weaviate, or Qdrant are planned.</p>
+<ul>
+<li><strong>Image Understanding / Vision</strong>: OCR and vision models on embedded images are not yet supported. Images are ignored during parsing.</li>
+<li><strong>Complex Nested Tables</strong>: Highly merged-cell tables in PDFs may not perfectly reconstruct.</li>
+<li><strong>Web Crawling</strong>: Local files only; URL scraping is planned.</li>
+<li><strong>Cloud Vector DB Integration</strong>: Retrieval runs locally (SQLite FTS5 + HNSW). Connectors for Pinecone, Weaviate, or Qdrant are planned.</li>
+<li><strong>Cross-Encoder Reranking</strong>: A secondary rerank pass is on the roadmap (deferred to v0.4).</li>
+</ul>
 <hr />
 <p><em>Built with ❤️ for Agents.</em></p>
 
