@@ -3,16 +3,18 @@
   "version": "0.3.0",
   "description": "An offline document-to-agent-context compiler. Transform unstructured files (PDFs, CSVs, Markdown) into token-efficient, semantic context packs for LLM agents.",
   "bin": {
-    "agentpack": "dist/agentpack"
+    "agentpack": "bin/agentpack.js"
   },
   "files": [
-    "dist/agentpack"
+    "bin/agentpack.js",
+    "scripts/postinstall.js"
   ],
   "scripts": {
+    "postinstall": "node scripts/postinstall.js",
     "build:binary": ". venv/bin/activate && pyinstaller --onefile --name agentpack src/agentpack/__main__.py",
     "build:python": ". venv/bin/activate && python3 -I -m build",
     "publish:pypi": "npm run build:python && . venv/bin/activate && python3 -I -m twine upload dist/*.whl dist/*.tar.gz",
-    "publish:npm": "npm run build:binary && npm publish",
+    "publish:npm": "npm publish",
     "changelog": "npx auto-changelog -p",
     "release:create": "gh release create v$npm_package_version --title \"AgentPack v$npm_package_version\" --generate-notes",
     "release:upload": "gh release upload v$npm_package_version dist/*",
