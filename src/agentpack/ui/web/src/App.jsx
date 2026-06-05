@@ -298,13 +298,18 @@ export default function App() {
   }, [loading, chunks.length]);
 
   // 2. Resize Observer for Graph Container
+  // Depends on `loading`: while loading, the early-return spinner is rendered and
+  // containerRef is null, so the observer has nothing to attach to. Once loading
+  // flips to false the graph container mounts and this effect re-runs, attaching
+  // the observer (which fires immediately with the real container dimensions).
   useEffect(() => {
+    if (!containerRef.current) return;
     const observer = new ResizeObserver((entries) => {
       setDim({ width: entries[0].contentRect.width, height: entries[0].contentRect.height });
     });
-    if (containerRef.current) observer.observe(containerRef.current);
+    observer.observe(containerRef.current);
     return () => observer.disconnect();
-  }, []);
+  }, [loading]);
 
   // 3. Search Handler
   const handleSearch = useCallback(async () => {
