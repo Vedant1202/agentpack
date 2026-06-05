@@ -4,7 +4,7 @@ build-backend = "setuptools.build_meta"
 
 [project]
 name = "agent-context-packager"
-version = "0.3.2"
+version = "0.3.3"
 description = "A document-to-agent-context compiler."
 authors = [
     { name = "Vedant Nandoskar", email = "vedant.nandoskar@gmail.com" }
