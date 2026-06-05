@@ -1,0 +1,3 @@
+# Include the pre-built UI assets in source distributions.
+# These are produced by `npm run build` in src/agentpack/ui/web before packaging.
+recursive-include src/agentpack/ui/web/dist *
