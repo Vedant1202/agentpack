@@ -48,3 +48,11 @@ test = [
     "pytest>=7.0.0",
     "pytest-mock>=3.10.0"
 ]
+
+[tool.setuptools.packages.find]
+where = ["src"]
+
+[tool.setuptools.package-data]
+# Bundle the pre-built UI (output of `npm run build` in src/agentpack/ui/web)
+# so `agentpack ui` works from a pip-installed package.
+agentpack = ["ui/web/dist/*", "ui/web/dist/**/*"]
