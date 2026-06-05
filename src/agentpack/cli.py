@@ -1,11 +1,9 @@
 import importlib.metadata
 import typer
-from agentpack.pack import write_pack
-from agentpack.validate import validate_pack
-from agentpack.audit import audit_pack
-from agentpack.retrieve import search_pack, build_fts_index, build_vector_index
-from agentpack.config import load_config
-from agentpack.eval.runner import run_eval
+
+# NOTE: Heavy modules (agentpack.pack/retrieve/eval and their pymupdf/docling/
+# pandas/fastembed/datasets dependencies) are imported lazily inside each command
+# so that lightweight invocations like `--version` and `--help` stay fast.
 
 def _version_callback(value: bool):
     if value:
@@ -36,6 +34,9 @@ def pack(
     fast_pdf: bool = typer.Option(False, "--fast-pdf", hidden=True, help="[Deprecated] Use --fast instead"),
 ):
     """Pack documents into an agent-friendly context pack."""
+    from agentpack.pack import write_pack
+    from agentpack.config import load_config
+
     if fast_pdf and not fast:
         typer.secho("Warning: --fast-pdf is deprecated; use --fast instead.", fg=typer.colors.YELLOW)
         fast = True
@@ -73,6 +74,8 @@ def pack(
 @app.command()
 def validate(pack_dir: str):
     """Validates the structural integrity of a context pack."""
+    from agentpack.validate import validate_pack
+
     typer.echo(f"Validating pack at {pack_dir}...")
     errors = validate_pack(pack_dir)
     if errors:
@@ -86,6 +89,8 @@ def validate(pack_dir: str):
 @app.command()
 def audit(pack_dir: str):
     """Generates an audit report for a context pack."""
+    from agentpack.audit import audit_pack
+
     typer.echo(f"Auditing pack at {pack_dir}...")
     report = audit_pack(pack_dir)
     if report.startswith("Error:"):
@@ -106,6 +111,8 @@ def retrieve(
     page: int = typer.Option(None, help="Filter results to this page number"),
 ):
     """Retrieves top-k evidence chunks from a pack."""
+    from agentpack.retrieve import search_pack
+
     typer.echo(f"Searching for '{query}' in {pack_dir} using {mode} mode...")
     results = search_pack(
         pack_dir, query, top_k, mode=mode,
@@ -139,6 +146,7 @@ def index_cmd(
 ):
     """Build (or rebuild) FTS and vector indexes for a compiled pack."""
     from pathlib import Path as _Path
+    from agentpack.retrieve import build_fts_index, build_vector_index
 
     base = _Path(pack_dir)
     indexes = base / "indexes"
@@ -179,6 +187,8 @@ def evaluate(
     ),
 ):
     """Runs a deterministic evaluation benchmark."""
+    from agentpack.eval.runner import run_eval
+
     typer.echo(f"Running evaluation on {benchmark_dir}...")
     if include_llm_baselines:
         typer.echo(f"Including LLM-in-retrieval baselines (Contextual Retrieval, HyDE) using {llm_model}.")
