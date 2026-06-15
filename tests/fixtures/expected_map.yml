@@ -12,6 +12,7 @@ documents:
 - source_id: src_000
   path: guide.md
   title: Guide
+  status: success
   pages: null
   stats:
     sections: 3

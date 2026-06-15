@@ -243,6 +243,34 @@ def test_pages_roll_up_over_subtree():
     assert chapter["pages"] == [2, 7], "parent page span must include its subtree"
 
 
+def test_failed_source_annotated_with_status():
+    """Sources that failed to parse / produced no chunks are kept but flagged status=failed."""
+    from agentpack.mapper import build_map
+    from agentpack.models import ExtractionWarning
+    good = SourceDocument(
+        source_id="src_000", path="ok.md", type="markdown", checksum="x",
+        blocks=[
+            DocumentBlock(block_id="b0", source_id="src_000", type="heading",
+                          text="Title", section_path=["Title"]),
+            DocumentBlock(block_id="b1", source_id="src_000", type="paragraph",
+                          text="some content here", section_path=["Title"]),
+        ],
+        warnings=[],
+    )
+    bad = SourceDocument(
+        source_id="src_001", path="broken.pdf", type="pdf", checksum="y",
+        blocks=[],
+        warnings=[ExtractionWarning(source_id="src_001", type="parse_error", message="boom")],
+    )
+    chunks = chunk_document(good, max_tokens=100)  # bad has no blocks -> no chunks
+    m = build_map({"name": "c", "generated_at": "t", "manifest": "manifest.yml"}, [good, bad], chunks)
+
+    docs = {d["source_id"]: d for d in m["documents"]}
+    assert docs["src_000"]["status"] == "success"
+    assert docs["src_001"]["status"] == "failed"
+    assert docs["src_001"]["sections"] == [], "a failed/empty source has no sections"
+
+
 def test_golden_map_snapshot():
     """Structural regression guard: emitted map must match the committed snapshot."""
     from agentpack.mapper import build_map

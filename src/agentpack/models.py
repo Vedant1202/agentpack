@@ -45,6 +45,7 @@ class DocumentMap(BaseModel):
     source_id: str
     path: str
     title: str
+    status: str = "success"            # "failed" when the source did not parse / produced no chunks
     pages: Optional[List[int]] = None
     stats: Dict[str, int] = {}
     sections: List[SectionNode] = []

@@ -137,6 +137,8 @@ def build_map(pack_meta: dict, docs: List[SourceDocument], chunks: List[Chunk]) 
 
     for doc in docs:
         doc_chunks = chunks_by_source.get(doc.source_id, [])
+        has_parse_error = any(w.type == "parse_error" for w in doc.warnings)
+        status = "failed" if (has_parse_error or len(doc_chunks) == 0) else "success"
         roots, orphan = _build_tree(doc, doc_chunks)
 
         sections: List[SectionNode] = []
@@ -153,6 +155,7 @@ def build_map(pack_meta: dict, docs: List[SourceDocument], chunks: List[Chunk]) 
             source_id=doc.source_id,
             path=doc.path,
             title=_doc_title(doc),
+            status=status,
             pages=[min(doc_pages), max(doc_pages)] if doc_pages else None,
             stats={"sections": n_sections, "chunks": len(doc_chunks)},
             sections=sections,
@@ -179,7 +182,7 @@ def build_map_from_manifest(pack_dir: str) -> dict:
     sections that contain no chunks. Run ``agentpack pack`` for the full-fidelity map.
     """
     import yaml
-    from agentpack.models import SourceDocument, DocumentBlock
+    from agentpack.models import SourceDocument, DocumentBlock, ExtractionWarning
 
     base = Path(pack_dir)
     with open(base / "manifest.yml", "r", encoding="utf-8") as f:
@@ -207,9 +210,13 @@ def build_map_from_manifest(pack_dir: str) -> dict:
                 chunk_id=cm.get("id"), source_id=sid, path=cm.get("path", ""),
                 token_count=cm.get("token_count", 0), content="", metadata=cit,
             ))
+        warnings = []
+        if src.get("status") == "failed":
+            warnings = [ExtractionWarning(source_id=sid, type="parse_error",
+                                          message="source marked failed in manifest")]
         docs.append(SourceDocument(
             source_id=sid, path=src.get("path", sid), type=src.get("type", "txt"),
-            checksum=src.get("checksum", ""), blocks=blocks, warnings=[],
+            checksum=src.get("checksum", ""), blocks=blocks, warnings=warnings,
         ))
 
     p = manifest.get("pack", {}) or {}
