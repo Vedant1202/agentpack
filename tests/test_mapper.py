@@ -107,7 +107,7 @@ def test_pack_writes_map_yml(tmp_path):
         manifest = yaml.safe_load(f)
 
     manifest_ids = {c["id"] for c in manifest["chunks"]}
-    referenced = [cid for d in m["documents"] for s in d["sections"] for cid in s["chunk_ids"]]
+    referenced = [cid for d in m["documents"] for cid in _walk_chunk_ids(d["sections"])]
     assert referenced, "map must reference chunks"
     assert set(referenced).issubset(manifest_ids)
 
@@ -124,3 +124,119 @@ def test_pack_no_map_flag_suppresses_map(tmp_path):
 
     assert not (out_dir / "map.yml").exists()
     assert (out_dir / "manifest.yml").exists()
+
+
+# --- Phase A2: recursive hierarchy, __root__ orphans, has_tables, page rollup ---
+
+LONG = "lorem ipsum dolor sit amet consectetur adipiscing elit " * 25
+
+
+def _walk_chunk_ids(nodes):
+    out = []
+    for n in nodes:
+        out += n["chunk_ids"]
+        out += _walk_chunk_ids(n["nodes"])
+    return out
+
+
+def _nested_doc():
+    return SourceDocument(
+        source_id="src_000", path="guide.md", type="markdown", checksum="x",
+        blocks=[
+            DocumentBlock(block_id="b0", source_id="src_000", type="heading",
+                          text="Guide", section_path=["Guide"]),
+            DocumentBlock(block_id="b1", source_id="src_000", type="paragraph",
+                          text=LONG, section_path=["Guide"]),
+            DocumentBlock(block_id="b2", source_id="src_000", type="heading",
+                          text="Setup", section_path=["Guide", "Setup"]),
+            DocumentBlock(block_id="b3", source_id="src_000", type="paragraph",
+                          text=LONG, section_path=["Guide", "Setup"]),
+            DocumentBlock(block_id="b4", source_id="src_000", type="heading",
+                          text="Usage", section_path=["Usage"]),
+            DocumentBlock(block_id="b5", source_id="src_000", type="table",
+                          text="| a | b |\n|---|---|\n| 1 | 2 |", section_path=["Usage"]),
+            DocumentBlock(block_id="b6", source_id="src_000", type="paragraph",
+                          text=LONG, section_path=["Usage"]),
+        ],
+        warnings=[],
+    )
+
+
+def test_nested_hierarchy_built_from_blocks():
+    from agentpack.mapper import build_map
+    doc = _nested_doc()
+    chunks = chunk_document(doc, max_tokens=40)
+    m = build_map({"name": "c", "generated_at": "t", "manifest": "manifest.yml"}, [doc], chunks)
+
+    sections = m["documents"][0]["sections"]
+    titles = [s["title"] for s in sections]
+    assert "Guide" in titles and "Usage" in titles, "top-level sections from blocks"
+
+    guide = next(s for s in sections if s["title"] == "Guide")
+    assert any(c["title"] == "Setup" for c in guide["nodes"]), "Setup must nest under Guide"
+
+    # child node_id encodes the ordinal path under its parent
+    setup = next(c for c in guide["nodes"] if c["title"] == "Setup")
+    assert setup["node_id"].startswith(guide["node_id"])
+
+
+def test_has_tables_is_block_derived_and_local():
+    from agentpack.mapper import build_map
+    doc = _nested_doc()
+    chunks = chunk_document(doc, max_tokens=40)
+    m = build_map({"name": "c", "generated_at": "t", "manifest": "manifest.yml"}, [doc], chunks)
+    sections = m["documents"][0]["sections"]
+    usage = next(s for s in sections if s["title"] == "Usage")
+    guide = next(s for s in sections if s["title"] == "Guide")
+    assert usage["has_tables"] is True
+    assert guide["has_tables"] is False
+
+
+def test_recursive_chunk_reachability():
+    from agentpack.mapper import build_map
+    doc = _nested_doc()
+    chunks = chunk_document(doc, max_tokens=40)
+    m = build_map({"name": "c", "generated_at": "t", "manifest": "manifest.yml"}, [doc], chunks)
+    referenced = _walk_chunk_ids(m["documents"][0]["sections"])
+    all_ids = sorted(c.chunk_id for c in chunks)
+    assert sorted(referenced) == all_ids, "every chunk reachable exactly once across the tree"
+
+
+def test_orphan_chunks_under_synthetic_root():
+    from agentpack.mapper import build_map
+    doc = SourceDocument(
+        source_id="src_txt", path="notes.txt", type="txt", checksum="x",
+        blocks=[DocumentBlock(block_id="b0", source_id="src_txt", type="paragraph",
+                              text="hello world with no headings at all here")],
+        warnings=[],
+    )
+    chunks = chunk_document(doc, max_tokens=100)
+    m = build_map({"name": "c", "generated_at": "t", "manifest": "manifest.yml"}, [doc], chunks)
+    sections = m["documents"][0]["sections"]
+    assert len(sections) == 1
+    assert sections[0]["title"] == "(root)"
+    assert sections[0]["node_id"] == "src_txt_root"
+    assert set(sections[0]["chunk_ids"]) == {c.chunk_id for c in chunks}
+
+
+def test_pages_roll_up_over_subtree():
+    from agentpack.mapper import build_map
+    doc = SourceDocument(
+        source_id="src_pdf", path="doc.pdf", type="pdf", checksum="x",
+        blocks=[
+            DocumentBlock(block_id="b0", source_id="src_pdf", type="heading",
+                          text="Chapter", section_path=["Chapter"], page=2),
+            DocumentBlock(block_id="b1", source_id="src_pdf", type="paragraph",
+                          text="intro text", section_path=["Chapter"], page=2),
+            DocumentBlock(block_id="b2", source_id="src_pdf", type="heading",
+                          text="Part", section_path=["Chapter", "Part"], page=5),
+            DocumentBlock(block_id="b3", source_id="src_pdf", type="paragraph",
+                          text="body text", section_path=["Chapter", "Part"], page=7),
+        ],
+        warnings=[],
+    )
+    chunks = chunk_document(doc, max_tokens=800)
+    m = build_map({"name": "c", "generated_at": "t", "manifest": "manifest.yml"}, [doc], chunks)
+    chapter = m["documents"][0]["sections"][0]
+    assert chapter["title"] == "Chapter"
+    assert chapter["pages"] == [2, 7], "parent page span must include its subtree"

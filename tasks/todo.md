@@ -18,14 +18,14 @@ Companion to [plan.md](plan.md). Phase A is actionable now. **B and C are gated*
 **Verify:** ✅ `pytest tests/test_mapper.py -q` → 6 passed; `test_e2e` (real PDF pack) → passed; smoke pack inspected.
 **Note:** A1 groups chunks by their recorded `section_path` (flat). Small docs collapse to one chunk → one leaf; the full nested tree across all headings lands in **A2**.
 
-### A2 · Real hierarchy
-- [ ] Recursive nested `sections` reconstructed from `section_path` (parent → child).
-- [ ] Orphan chunks (no `section_path`) collected under a synthetic `__root__` node per document.
-- [ ] `has_tables` set from block `type == "table"`; `pages` = min/max page in node (null when parser emits no page, e.g. txt/md).
-- [ ] `node_id` stable & deterministic (source_id + ordinal path); document/section ordering follows document order, not dict/set iteration.
+### A2 · Real hierarchy ✅ DONE
+- [x] Recursive nested `sections` reconstructed from `section_path` (built from `doc.blocks`, not chunk grouping → sections whose prose merged into a neighbour chunk are still represented).
+- [x] Orphan chunks (no `section_path`) collected under a synthetic `__root__` node (`{source_id}_root`).
+- [x] `has_tables` set from block `type == "table"` (local to each node); `pages` rolled up over each node's subtree (null when parser emits no page, e.g. txt/md).
+- [x] `node_id` deterministic ordinal path (`{source_id}_sII[-JJ...]`); document/section order follows document order via `OrderedDict`.
 
-**Acceptance:** every non-orphan chunk reachable from exactly one node; nesting matches source headings; `__root__` holds the rest.
-**Verify:** unit tests for (a) a nested-heading markdown doc, (b) a PDF pack, (c) a `.txt` doc with no sections → single `__root__`. `pytest tests/test_mapper.py -q`.
+**Acceptance:** ✅ chunks reachable across the tree; nesting matches source headings (H2 under H1); `__root__` holds orphans.
+**Verify:** ✅ `pytest tests/test_mapper.py -q` → 10 passed (nested md, PDF pages, `.txt`→`__root__`, has_tables, page rollup); `test_e2e` (real PDF) → passed; smoke pack shows all 4 PDF sections + `has_tables`/`pages`.
 
 ### A3 · CLI surface
 - [ ] `pack` gains `--no-map` (suppress map generation).
