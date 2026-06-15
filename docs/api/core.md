@@ -9,6 +9,12 @@
 ## Chunker
 ::: agentpack.chunker
 
+## Mapper
+::: agentpack.mapper
+
+## Enrich
+::: agentpack.enrich
+
 ## Models
 ::: agentpack.models
 

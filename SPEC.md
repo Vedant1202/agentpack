@@ -1,6 +1,6 @@
 # SPEC: Hierarchical Knowledge Map for AgentPack
 
-> Status: **Draft for review** · Owner: Vedant · Target package: `agent-context-packager`
+> Status: **Phase A + B shipped** on `feat/hierarchical-map` (based on `dev`). Phase C (opt-in LLM) and the `[ner]` extra deferred. · Owner: Vedant · Target package: `agent-context-packager`
 > Spec covers three phases (A → B → C) delivered as separate PRs against one shared schema.
 
 ## 1. Objective

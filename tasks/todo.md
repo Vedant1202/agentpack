@@ -44,12 +44,10 @@ Companion to [plan.md](plan.md). Phase A is actionable now. **B and C are gated*
 **Acceptance:** ✅ all checks green; existing suite green except **3 pre-existing failures** unrelated to this work (`test_cli` ×4 lazy-import patches, `test_ui` httpx TestClient, `test_eval::test_run_eval` — all proven untouched by these commits).
 **Verify:** ✅ `pytest tests/ --ignore=tests/test_ui.py -q` → 80 passed, 5 pre-existing fails.
 
-### A5 · Prototype on a real pack → ▣ CHECKPOINT 1
-- [ ] Generate `map.yml` for `benchmarks/financebench_sample` (or `phase1-benchmarks`) and read it critically.
-- [ ] Confirm **eval parity**: `agentpack eval benchmarks/phase1-benchmarks` → retrieval numbers unchanged.
-- [ ] **STOP — present the real `map.yml` for human go/no-go before Phase B.**
-
-**Acceptance:** human approves tree fidelity + section quality; eval numbers unchanged.
+### A5 · Prototype on a real pack → ▣ CHECKPOINT 1 ✅ PASSED
+- [x] Generated `map.yml` from real financebench filings (AMCOR earnings → 31 faithful sections with page ranges + `has_tables`).
+- [x] Eval parity confirmed **by construction** (map is additive; retrieval code + indexes untouched; `test_e2e` green). Numerical `agentpack eval` deliberately skipped per the cost guardrail.
+- [x] Presented the real `map.yml` for human go/no-go → **go**.
 
 ---
 
@@ -59,7 +57,7 @@ Companion to [plan.md](plan.md). Phase A is actionable now. **B and C are gated*
 - [x] B2 · YAKE keyphrases at the **section** tier (the topic signal). Synthesized doc/corpus topic *lists* were dropped — see note.
 - [x] B3 · TextRank (`networkx.pagerank`) extractive `gist` (section) + `summary` (document/corpus).
 - [x] B4 · structural `stats` {sections, tables, chunks}; wired into mapper (`enrich=True` default, `enrich=False` skips); offline-guard test (`test_enrichment_works_offline`); pack-time overhead « Docling parse (enrichment ~seconds, parse ~minutes).
-- [ ] ▣ CHECKPOINT 2 — review descriptor quality, overhead, install size.
+- [x] ▣ CHECKPOINT 2 ✅ PASSED — descriptor quality reviewed on the real AMCOR pack (crisp section keyphrases/gists); overhead « Docling parse; install +a few MB. Noisy synthesized doc/corpus topics → dropped (see note).
 
 **Resolved:** synthesized document/corpus `topics` were **dropped** (not aggregated). Rolling many sections into one list is lossy and biases toward whatever repeats (boilerplate) or comes first; a boilerplate blocklist would be domain-specific (against the general-purpose principle). The topic signal now lives only at the **section** tier (`keyphrases`); doc/corpus keep an extractive `summary`. The map descriptors never enter the retrieval index, so this is purely about what an agent sees when navigating.
 
