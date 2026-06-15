@@ -288,3 +288,47 @@ def test_golden_map_snapshot():
         "map structure changed vs tests/fixtures/expected_map.yml; "
         "if intentional, delete that file to regenerate."
     )
+
+
+# --- Phase B: descriptors wired into the map ---
+
+def _has_descriptor(nodes):
+    for n in nodes:
+        if n["keyphrases"] or n["gist"]:
+            return True
+        if _has_descriptor(n["nodes"]):
+            return True
+    return False
+
+
+def _all_empty(nodes):
+    return all(
+        not n["keyphrases"] and not n["gist"] and _all_empty(n["nodes"])
+        for n in nodes
+    )
+
+
+def test_map_nodes_carry_descriptors_by_default():
+    from agentpack.mapper import build_map
+    doc = _nested_doc()
+    chunks = chunk_document(doc, max_tokens=40)
+    m = build_map({"name": "c", "generated_at": "t", "manifest": "manifest.yml"}, [doc], chunks)
+
+    d = m["documents"][0]
+    assert d["topics"], "document should carry topics"
+    assert d["summary"], "document should carry a summary"
+    assert _has_descriptor(d["sections"]), "at least one section node should carry descriptors"
+    assert m["corpus"]["topics"], "corpus should carry aggregated topics"
+
+
+def test_enrich_false_yields_no_descriptors():
+    from agentpack.mapper import build_map
+    doc = _nested_doc()
+    chunks = chunk_document(doc, max_tokens=40)
+    m = build_map({"name": "c", "generated_at": "t", "manifest": "manifest.yml"},
+                  [doc], chunks, enrich=False)
+
+    d = m["documents"][0]
+    assert d["topics"] == [] and d["summary"] is None
+    assert "topics" not in m["corpus"] and "summary" not in m["corpus"]
+    assert _all_empty(d["sections"])

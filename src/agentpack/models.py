@@ -36,6 +36,8 @@ class SectionNode(BaseModel):
     title: str
     pages: Optional[List[int]] = None          # [start_page, end_page]
     has_tables: bool = False
+    keyphrases: List[str] = []                  # [B] YAKE keyphrases for this section's text
+    gist: Optional[str] = None                  # [B] one-line extractive (TextRank) summary
     chunk_ids: List[str] = []
     nodes: List["SectionNode"] = []            # child sections (recursive; flat in Phase A1)
 
@@ -47,6 +49,8 @@ class DocumentMap(BaseModel):
     title: str
     status: str = "success"            # "failed" when the source did not parse / produced no chunks
     pages: Optional[List[int]] = None
+    summary: Optional[str] = None       # [B] document-level extractive summary
+    topics: List[str] = []              # [B] document-level keyphrases
     stats: Dict[str, int] = {}
     sections: List[SectionNode] = []
 

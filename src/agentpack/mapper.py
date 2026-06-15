@@ -5,7 +5,10 @@ carries the full ``section_path``), so sections whose prose merged into a neighb
 chunk are still represented. Per node we capture nested children, page span (rolled up
 over the subtree), and ``has_tables`` (from block types). Chunks are attached to the node
 matching their recorded ``section_path``; chunks with no section land under a synthetic
-``__root__`` node. Output is a plain dict ready for ``yaml.dump``.
+``__root__`` node.
+
+Phase B: when ``enrich`` is on (default), each node/document/corpus also gets deterministic,
+offline descriptors — YAKE ``keyphrases`` and a TextRank ``gist``/``summary`` (see ``enrich.py``).
 """
 from collections import OrderedDict
 from pathlib import Path
@@ -13,16 +16,21 @@ from typing import List, Optional, Tuple
 
 from agentpack.models import SourceDocument, SectionNode, DocumentMap, CorpusMap
 from agentpack.chunker import Chunk
+from agentpack.enrich import keyphrases as _keyphrases, gist as _gist
+
+# Cap text fed to document/corpus-level enrichment so pack-time stays bounded on huge filings.
+_ENRICH_TEXT_CAP = 8000
 
 
 class _TreeNode:
     """Mutable scratch node used while assembling a single document's section tree."""
-    __slots__ = ("title", "children", "own_pages", "has_tables", "chunk_ids")
+    __slots__ = ("title", "children", "own_pages", "own_text", "has_tables", "chunk_ids")
 
     def __init__(self, title: str):
         self.title = title
         self.children: "OrderedDict[str, _TreeNode]" = OrderedDict()
         self.own_pages: List[int] = []
+        self.own_text: List[str] = []
         self.has_tables = False
         self.chunk_ids: List[str] = []
 
@@ -33,6 +41,17 @@ def _doc_title(doc: SourceDocument) -> str:
         if block.type == "heading" and block.text:
             return block.text.strip()
     return Path(doc.path).stem.replace("_", " ")
+
+
+def _dedupe(items: List[str]) -> List[str]:
+    """Order-preserving case-insensitive de-duplication."""
+    seen, out = set(), []
+    for it in items:
+        key = it.lower()
+        if key not in seen:
+            seen.add(key)
+            out.append(it)
+    return out
 
 
 def _build_tree(doc: SourceDocument, doc_chunks: List[Chunk]):
@@ -65,7 +84,7 @@ def _build_tree(doc: SourceDocument, doc_chunks: List[Chunk]):
             level = node.children
         return node
 
-    # 1. Structure + page/table facts come from blocks (the authoritative hierarchy).
+    # 1. Structure + page/table/text facts come from blocks (the authoritative hierarchy).
     for block in doc.blocks:
         path = tuple(block.section_path or [])
         if not path:
@@ -75,6 +94,8 @@ def _build_tree(doc: SourceDocument, doc_chunks: List[Chunk]):
             target = ensure(path)
         if block.page:
             target.own_pages.append(block.page)
+        if block.text:
+            target.own_text.append(block.text)
         if block.type == "table":
             target.has_tables = True
 
@@ -91,11 +112,11 @@ def _build_tree(doc: SourceDocument, doc_chunks: List[Chunk]):
     return roots, (root_orphan if root_used else None)
 
 
-def _to_section_node(title: str, tnode: _TreeNode, node_id: str) -> SectionNode:
-    """Convert a scratch node to a SectionNode, assigning ordinal node_ids and rolling up pages."""
+def _to_section_node(title: str, tnode: _TreeNode, node_id: str, enrich: bool) -> SectionNode:
+    """Convert a scratch node to a SectionNode: ordinal node_ids, rolled-up pages, descriptors."""
     children: List[SectionNode] = []
     for j, (ctitle, cnode) in enumerate(tnode.children.items()):
-        children.append(_to_section_node(ctitle, cnode, f"{node_id}-{j:02d}"))
+        children.append(_to_section_node(ctitle, cnode, f"{node_id}-{j:02d}", enrich))
 
     pages = list(tnode.own_pages)
     for child in children:
@@ -103,11 +124,14 @@ def _to_section_node(title: str, tnode: _TreeNode, node_id: str) -> SectionNode:
             pages.extend(child.pages)
     page_span = [min(pages), max(pages)] if pages else None
 
+    node_text = " ".join(tnode.own_text).strip()
     return SectionNode(
         node_id=node_id,
         title=title,
         pages=page_span,
-        has_tables=tnode.has_tables,   # local to this section (subsection tables sit on their own node)
+        has_tables=tnode.has_tables,
+        keyphrases=_keyphrases(node_text) if enrich else [],
+        gist=(_gist(node_text) or None) if enrich else None,
         chunk_ids=tnode.chunk_ids,
         nodes=children,
     )
@@ -117,13 +141,15 @@ def _count_nodes(nodes: List[SectionNode]) -> int:
     return sum(1 + _count_nodes(n.nodes) for n in nodes)
 
 
-def build_map(pack_meta: dict, docs: List[SourceDocument], chunks: List[Chunk]) -> dict:
+def build_map(pack_meta: dict, docs: List[SourceDocument], chunks: List[Chunk],
+              enrich: bool = True) -> dict:
     """Assemble the corpus -> document -> section -> chunk map.
 
     Args:
         pack_meta: ``{"name", "generated_at", "manifest"}`` echoed into the map's ``pack`` block.
         docs: parsed source documents, in manifest order.
         chunks: every chunk produced for the pack (carry ``source_id`` + ``metadata.section_path``).
+        enrich: when True (default), attach deterministic keyphrases/gist/summary descriptors.
 
     Returns:
         A plain dict (validated via pydantic models) ready for ``yaml.dump``.
@@ -134,6 +160,9 @@ def build_map(pack_meta: dict, docs: List[SourceDocument], chunks: List[Chunk]) 
 
     documents: List[DocumentMap] = []
     total_sections = 0
+    total_tables = 0
+    corpus_topics: List[str] = []
+    doc_summaries: List[str] = []
 
     for doc in docs:
         doc_chunks = chunks_by_source.get(doc.source_id, [])
@@ -143,32 +172,53 @@ def build_map(pack_meta: dict, docs: List[SourceDocument], chunks: List[Chunk]) 
 
         sections: List[SectionNode] = []
         if orphan is not None:
-            sections.append(_to_section_node("(root)", orphan, f"{doc.source_id}_root"))
+            sections.append(_to_section_node("(root)", orphan, f"{doc.source_id}_root", enrich))
         for i, (title, tnode) in enumerate(roots.items()):
-            sections.append(_to_section_node(title, tnode, f"{doc.source_id}_s{i:02d}"))
+            sections.append(_to_section_node(title, tnode, f"{doc.source_id}_s{i:02d}", enrich))
 
         n_sections = _count_nodes(sections)
         total_sections += n_sections
+        n_tables = sum(1 for b in doc.blocks if b.type == "table")
+        total_tables += n_tables
 
         doc_pages = [p for s in sections if s.pages for p in s.pages]
+
+        summary, topics = None, []
+        if enrich and status == "success":
+            doc_text = " ".join(b.text for b in doc.blocks if b.text)[:_ENRICH_TEXT_CAP]
+            summary = _gist(doc_text) or None
+            topics = _keyphrases(doc_text, top=8)
+            if summary:
+                doc_summaries.append(summary)
+            corpus_topics.extend(topics)
+
         documents.append(DocumentMap(
             source_id=doc.source_id,
             path=doc.path,
             title=_doc_title(doc),
             status=status,
             pages=[min(doc_pages), max(doc_pages)] if doc_pages else None,
-            stats={"sections": n_sections, "chunks": len(doc_chunks)},
+            summary=summary,
+            topics=topics,
+            stats={"sections": n_sections, "tables": n_tables, "chunks": len(doc_chunks)},
             sections=sections,
         ))
+
+    corpus: dict = {}
+    if enrich:
+        corpus["summary"] = _gist(" ".join(doc_summaries)[:_ENRICH_TEXT_CAP]) or None
+        corpus["topics"] = _dedupe(corpus_topics)[:10]
+    corpus["stats"] = {
+        "documents": len(documents),
+        "sections": total_sections,
+        "tables": total_tables,
+        "chunks": len(chunks),
+    }
 
     corpus_map = CorpusMap(
         map_version=1,
         pack=pack_meta,
-        corpus={"stats": {
-            "documents": len(documents),
-            "sections": total_sections,
-            "chunks": len(chunks),
-        }},
+        corpus=corpus,
         documents=documents,
     )
     return corpus_map.model_dump()
@@ -177,9 +227,9 @@ def build_map(pack_meta: dict, docs: List[SourceDocument], chunks: List[Chunk]) 
 def build_map_from_manifest(pack_dir: str) -> dict:
     """Rebuild map.yml for an existing pack from its manifest alone (no re-parse).
 
-    Lighter-weight than the during-pack map: the tree is reconstructed from chunk
-    citations (``section_path`` + ``page``), so it cannot recover ``has_tables`` or
-    sections that contain no chunks. Run ``agentpack pack`` for the full-fidelity map.
+    Lighter-weight than the during-pack map: the tree is reconstructed from chunk citations
+    (``section_path`` + ``page``), so it cannot recover ``has_tables``, sections that contain
+    no chunks, or text-derived descriptors. Run ``agentpack pack`` for the full-fidelity map.
     """
     import yaml
     from agentpack.models import SourceDocument, DocumentBlock, ExtractionWarning
@@ -223,4 +273,5 @@ def build_map_from_manifest(pack_dir: str) -> dict:
     pack_meta = {"name": p.get("name", "corpus"),
                  "generated_at": p.get("generated_at", ""),
                  "manifest": "manifest.yml"}
-    return build_map(pack_meta, docs, chunks)
+    # No real text in a manifest rebuild -> skip text-derived descriptors.
+    return build_map(pack_meta, docs, chunks, enrich=False)
