@@ -8,13 +8,13 @@
       
       
       
-        <link rel="canonical" href="https://vedant1202.github.io/agentpack/architecture/">
+        <link rel="canonical" href="https://vedant1202.github.io/agentpack/knowledge-map/">
       
       
-        <link rel="prev" href="..">
+        <link rel="prev" href="../architecture/">
       
       
-        <link rel="next" href="../knowledge-map/">
+        <link rel="next" href="../cli-reference/">
       
       
         
@@ -25,7 +25,7 @@
     
     
       
-        <title>Architecture & Internals - AgentPack Documentation</title>
+        <title>Knowledge Map - AgentPack Documentation</title>
       
     
     
@@ -76,7 +76,7 @@
     <div data-md-component="skip">
       
         
-        <a href="#agentpack-architecture" class="md-skip">
+        <a href="#hierarchical-knowledge-map-mapyml" class="md-skip">
           Skip to content
         </a>
       
@@ -112,7 +112,7 @@
         <div class="md-header__topic" data-md-component="header-topic">
           <span class="md-ellipsis">
             
-              Architecture & Internals
+              Knowledge Map
             
           </span>
         </div>
@@ -232,6 +232,33 @@
       
   
   
+  
+  
+    <li class="md-nav__item">
+      <a href="../architecture/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Architecture & Internals
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+    
+      
+      
+  
+  
     
   
   
@@ -251,7 +278,7 @@
   <span class="md-ellipsis">
     
   
-    Architecture & Internals
+    Knowledge Map
   
 
     
@@ -269,7 +296,7 @@
   <span class="md-ellipsis">
     
   
-    Architecture & Internals
+    Knowledge Map
   
 
     
@@ -295,10 +322,10 @@
     <ul class="md-nav__list" data-md-component="toc" data-md-scrollfix>
       
         <li class="md-nav__item">
-  <a href="#high-level-data-flow" class="md-nav__link">
+  <a href="#why-a-map" class="md-nav__link">
     <span class="md-ellipsis">
       
-        High-Level Data Flow
+        Why a map?
       
     </span>
   </a>
@@ -306,107 +333,46 @@
 </li>
       
         <li class="md-nav__item">
-  <a href="#the-context-pack" class="md-nav__link">
+  <a href="#structure" class="md-nav__link">
     <span class="md-ellipsis">
       
-        The Context Pack
-      
-    </span>
-  </a>
-  
-    <nav class="md-nav" aria-label="The Context Pack">
-      <ul class="md-nav__list">
-        
-          <li class="md-nav__item">
-  <a href="#manifestyml" class="md-nav__link">
-    <span class="md-ellipsis">
-      
-        manifest.yml
+        Structure
       
     </span>
   </a>
   
 </li>
-        
-          <li class="md-nav__item">
-  <a href="#mapyml" class="md-nav__link">
+      
+        <li class="md-nav__item">
+  <a href="#descriptors-are-deterministic-and-offline" class="md-nav__link">
     <span class="md-ellipsis">
       
-        map.yml
+        Descriptors are deterministic and offline
       
     </span>
   </a>
   
 </li>
-        
-          <li class="md-nav__item">
-  <a href="#security-scanning-layer" class="md-nav__link">
+      
+        <li class="md-nav__item">
+  <a href="#the-map-never-affects-retrieval" class="md-nav__link">
     <span class="md-ellipsis">
       
-        Security &amp; Scanning Layer
+        The map never affects retrieval
       
     </span>
   </a>
   
 </li>
-        
-          <li class="md-nav__item">
-  <a href="#parsers" class="md-nav__link">
+      
+        <li class="md-nav__item">
+  <a href="#cli" class="md-nav__link">
     <span class="md-ellipsis">
       
-        Parsers
+        CLI
       
     </span>
   </a>
-  
-</li>
-        
-          <li class="md-nav__item">
-  <a href="#chunker" class="md-nav__link">
-    <span class="md-ellipsis">
-      
-        Chunker
-      
-    </span>
-  </a>
-  
-</li>
-        
-          <li class="md-nav__item">
-  <a href="#content-addressed-cache" class="md-nav__link">
-    <span class="md-ellipsis">
-      
-        Content-Addressed Cache
-      
-    </span>
-  </a>
-  
-</li>
-        
-          <li class="md-nav__item">
-  <a href="#indexing" class="md-nav__link">
-    <span class="md-ellipsis">
-      
-        Indexing
-      
-    </span>
-  </a>
-  
-</li>
-        
-          <li class="md-nav__item">
-  <a href="#index-invalidation" class="md-nav__link">
-    <span class="md-ellipsis">
-      
-        Index Invalidation
-      
-    </span>
-  </a>
-  
-</li>
-        
-      </ul>
-    </nav>
   
 </li>
       
@@ -414,33 +380,6 @@
   
 </nav>
       
-    </li>
-  
-
-    
-      
-      
-  
-  
-  
-  
-    <li class="md-nav__item">
-      <a href="../knowledge-map/" class="md-nav__link">
-        
-  
-  
-  <span class="md-ellipsis">
-    
-  
-    Knowledge Map
-  
-
-    
-  </span>
-  
-  
-
-      </a>
     </li>
   
 
@@ -663,10 +602,10 @@
     <ul class="md-nav__list" data-md-component="toc" data-md-scrollfix>
       
         <li class="md-nav__item">
-  <a href="#high-level-data-flow" class="md-nav__link">
+  <a href="#why-a-map" class="md-nav__link">
     <span class="md-ellipsis">
       
-        High-Level Data Flow
+        Why a map?
       
     </span>
   </a>
@@ -674,107 +613,46 @@
 </li>
       
         <li class="md-nav__item">
-  <a href="#the-context-pack" class="md-nav__link">
+  <a href="#structure" class="md-nav__link">
     <span class="md-ellipsis">
       
-        The Context Pack
-      
-    </span>
-  </a>
-  
-    <nav class="md-nav" aria-label="The Context Pack">
-      <ul class="md-nav__list">
-        
-          <li class="md-nav__item">
-  <a href="#manifestyml" class="md-nav__link">
-    <span class="md-ellipsis">
-      
-        manifest.yml
+        Structure
       
     </span>
   </a>
   
 </li>
-        
-          <li class="md-nav__item">
-  <a href="#mapyml" class="md-nav__link">
+      
+        <li class="md-nav__item">
+  <a href="#descriptors-are-deterministic-and-offline" class="md-nav__link">
     <span class="md-ellipsis">
       
-        map.yml
+        Descriptors are deterministic and offline
       
     </span>
   </a>
   
 </li>
-        
-          <li class="md-nav__item">
-  <a href="#security-scanning-layer" class="md-nav__link">
+      
+        <li class="md-nav__item">
+  <a href="#the-map-never-affects-retrieval" class="md-nav__link">
     <span class="md-ellipsis">
       
-        Security &amp; Scanning Layer
+        The map never affects retrieval
       
     </span>
   </a>
   
 </li>
-        
-          <li class="md-nav__item">
-  <a href="#parsers" class="md-nav__link">
+      
+        <li class="md-nav__item">
+  <a href="#cli" class="md-nav__link">
     <span class="md-ellipsis">
       
-        Parsers
+        CLI
       
     </span>
   </a>
-  
-</li>
-        
-          <li class="md-nav__item">
-  <a href="#chunker" class="md-nav__link">
-    <span class="md-ellipsis">
-      
-        Chunker
-      
-    </span>
-  </a>
-  
-</li>
-        
-          <li class="md-nav__item">
-  <a href="#content-addressed-cache" class="md-nav__link">
-    <span class="md-ellipsis">
-      
-        Content-Addressed Cache
-      
-    </span>
-  </a>
-  
-</li>
-        
-          <li class="md-nav__item">
-  <a href="#indexing" class="md-nav__link">
-    <span class="md-ellipsis">
-      
-        Indexing
-      
-    </span>
-  </a>
-  
-</li>
-        
-          <li class="md-nav__item">
-  <a href="#index-invalidation" class="md-nav__link">
-    <span class="md-ellipsis">
-      
-        Index Invalidation
-      
-    </span>
-  </a>
-  
-</li>
-        
-      </ul>
-    </nav>
   
 </li>
       
@@ -795,134 +673,82 @@
 
 
 
-<h1 id="agentpack-architecture">AgentPack Architecture</h1>
-<p>AgentPack acts as a bridge between raw, unstructured knowledge and LLM-powered agents. It performs the heavy lifting of parsing, chunking, and indexing offline, so agents receive clean, high-signal context.</p>
-<h2 id="high-level-data-flow">High-Level Data Flow</h2>
-<pre class="mermaid"><code>flowchart TD
-    subgraph Raw Data
-        A[Raw Documents]
-        A1(PDFs) --&gt; A
-        A2(Office: docx/pptx/xlsx) --&gt; A
-        A3(Web: html) --&gt; A
-        A4(CSVs) --&gt; A
-        A5(Markdown) --&gt; A
-        A6(TXT) --&gt; A
-    end
-
-    subgraph AgentPack Processing
-        S[Security &amp; Scanner]
-        A --&gt; S
-        B["Parsers\n(Docling semantic | PyMuPDF fast)"]
-        S --&gt; B
-        CA[".cache/cache.db\n(L1 parse · L3 embed · L5 query)"]
-        B &lt;--&gt;|"L1: sha256(file) + version"| CA
-        C[Chunker]
-        B --&gt; C
-    end
-
-    subgraph Pack Output
-        D[manifest.yml]
-        E[chunks/*.md]
-        F[tables/*.md]
-        G[(indexes/lexical_index.db\nSQLite FTS5)]
-        V[(indexes/hnsw_index.bin\nHNSW vector index)]
-        M[map.yml\nhierarchical knowledge map]
-
-        C --&gt; D
-        C --&gt; E
-        C --&gt; F
-        C --&gt; G
-        C --&gt; V
-        C --&gt; M
-        CA &lt;--&gt;|"L3: sha256(chunk) + model_id"| V
-    end
-
-    subgraph Runtime
-        H[LLM Agent]
-        H --&gt;|"hybrid query (RRF)"| G
-        H --&gt; V
-        G --&gt;|Top-K chunks| H
-        V --&gt;|Top-K chunks| H
-        CA &lt;--&gt;|"L5: sha256(query) + pack_hash"| H
-    end</code></pre>
-<h2 id="the-context-pack">The Context Pack</h2>
-<p>When you run <code>agentpack pack</code>, it generates a directory structure known as a <strong>Context Pack</strong>.</p>
-<div class="highlight"><pre><span></span><code>agentpack-output/
-├── manifest.yml           # Registry: sources, chunks, tables, citations, pack version.
-├── map.yml                # Hierarchical knowledge map (corpus → document → section → chunk).
-├── chunks/                # Agent-ready markdown files (one per chunk).
-├── tables/                # Extracted tables in standalone Markdown format.
-├── indexes/               # FTS and vector indexes.
-│   ├── lexical_index.db   # SQLite FTS5 full-text search index.
-│   ├── vector_index.npy   # Pre-normalized dense vectors (float32).
-│   ├── vector_meta.json   # Per-vector chunk metadata.
-│   ├── hnsw_index.bin     # HNSW approximate nearest-neighbour index.
-│   └── vector_index.hash  # Content hash for invalidation.
-├── .cache/
-│   └── cache.db           # Content-addressed cache (L1/L3/L5 layers).
-└── reports/               # Audit and validation reports.
+<h1 id="hierarchical-knowledge-map-mapyml">Hierarchical Knowledge Map (<code>map.yml</code>)</h1>
+<p>Alongside <code>manifest.yml</code>, every pack emits a <strong><code>map.yml</code></strong> — a compact, hierarchical map of <em>what information lives where</em> in the corpus. It is built for <strong>agentic / RAG-style retrieval</strong>: an agent reads the map to reason about where to look, then pulls only the chunks it needs.</p>
+<p>Where <code>manifest.yml</code> is a flat registry of chunks and citations, <code>map.yml</code> is a navigable tree:</p>
+<div class="highlight"><pre><span></span><code>corpus → document → section (recursive) → chunk_ids
 </code></pre></div>
-<h3 id="manifestyml"><code>manifest.yml</code></h3>
-<p>The registry for the pack. Maps original document sources to their chunks and maintains citation metadata (source path, page number, section, and the full <code>section_path</code>) so every piece of text sent to an agent can be traced back to its origin. The <code>version</code> field reflects the installed package version.</p>
-<h3 id="mapyml"><code>map.yml</code></h3>
-<p>A hierarchical <strong>knowledge map</strong> — <code>corpus → document → section → chunk</code> — that an agent reads to locate <em>where</em> information lives, then pulls only the chunks it needs. The tree structure is reconstructed from the parsed section hierarchy; each section also carries deterministic, offline descriptors (YAKE <code>keyphrases</code> + a TextRank <code>gist</code>). The map is purely additive and <strong>never enters the retrieval indexes</strong>. Built by default (<code>--no-map</code> to skip; <code>agentpack map</code> to rebuild). See <strong><a href="../knowledge-map/">Knowledge Map</a></strong> for the full schema and rationale.</p>
-<h3 id="security-scanning-layer">Security &amp; Scanning Layer</h3>
-<p>Before parsing, AgentPack acts as a firewall against context bloat and secret leakage:
-1. <strong>Filtering Engine:</strong> Uses <code>pathspec</code> to respect <code>.gitignore</code> and <code>.agentpackignore</code> rules, ensuring irrelevant files (like <code>node_modules/</code> or test suites) never reach the LLM. Hidden directories are excluded by default.
-2. <strong>Secret Detection:</strong> AgentPack ships with <code>detect-secrets</code>. Run <code>detect-secrets scan &gt; .secrets.baseline</code> before packing to prevent API keys and passwords from entering the final context window.</p>
-<h3 id="parsers">Parsers</h3>
-<p>AgentPack uses two parsing modes, selected per file type:</p>
-<p><strong>Semantic mode (default):</strong>
-- <strong>PDF</strong>: Docling structured-tree parse — preserves page numbers, section hierarchy, and extracts <code>type="table"</code> blocks. Headings, paragraphs, and tables are emitted as distinct <code>DocumentBlock</code>s.
-- <strong>Office / Web</strong> (<code>.docx</code>, <code>.pptx</code>, <code>.xlsx</code>, <code>.html</code>): Docling via the same structured-tree path.
-- <code>DocumentConverter</code> is loaded once per process (singleton) to avoid repeated model initialization.</p>
-<p><strong>Fast mode (<code>--fast</code>):</strong>
-- <strong>PDF</strong>: PyMuPDF spatial extraction — page-by-page text, faster but no semantic structure.
-- Use <code>--fast</code> for quick iteration on small corpora where parse speed matters more than fidelity.</p>
-<p><strong>Always:</strong>
-- <strong>Markdown</strong>: Tracks semantic headings (<code># H1 → ## H2</code>) so chunks retain hierarchical <code>section_path</code>.
-- <strong>CSV</strong>: Pandas + Tabulate converts tabular data into Markdown tables.
-- <strong>TXT</strong>: Paragraph-aware splitting.</p>
-<h3 id="chunker">Chunker</h3>
-<p>Blocks are tokenized with <code>tiktoken</code> (<code>cl100k_base</code>) and accumulated into chunks up to <code>max_tokens</code> (default 800) with configurable overlap (default 15%). Blocks that exceed <code>max_tokens</code> on their own are <strong>split internally</strong> with overlap, preserving <code>page</code> and <code>section</code> metadata on every sub-block.</p>
-<h3 id="content-addressed-cache">Content-Addressed Cache</h3>
-<p>Re-runs pay only for what changed. Three cache layers are stored in <code>.cache/cache.db</code>:</p>
+<p>It is generated by default during <code>agentpack pack</code> (disable with <code>--no-map</code>).</p>
+<h2 id="why-a-map">Why a map?</h2>
+<p>The flat manifest tells an agent a chunk's <em>address</em> (<code>page 11</code>), but not its <em>aboutness</em> or the document's <em>structure</em>. To answer "where does this corpus discuss restructuring liabilities?" an agent would otherwise have to read chunks. The map encodes the section hierarchy AgentPack already parses (headings, page ranges) plus deterministic descriptors, so an agent can drill <strong>top-down</strong> — corpus → document → section → chunk — without scanning the whole pack.</p>
+<h2 id="structure">Structure</h2>
+<div class="highlight"><pre><span></span><code><span class="nt">map_version</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">1</span>
+<span class="nt">pack</span><span class="p">:</span><span class="w"> </span><span class="p p-Indicator">{</span><span class="w"> </span><span class="nv">name</span><span class="p p-Indicator">,</span><span class="w"> </span><span class="nv">generated_at</span><span class="p p-Indicator">,</span><span class="nt"> manifest</span><span class="p">:</span><span class="w"> </span><span class="nv">manifest.yml</span><span class="w"> </span><span class="p p-Indicator">}</span>
+<span class="nt">corpus</span><span class="p">:</span>
+<span class="w">  </span><span class="nt">summary</span><span class="p">:</span><span class="w"> </span><span class="s">&quot;...&quot;</span><span class="w">                      </span><span class="c1"># extractive (TextRank) overview</span>
+<span class="w">  </span><span class="nt">stats</span><span class="p">:</span><span class="w"> </span><span class="p p-Indicator">{</span><span class="w"> </span><span class="nv">documents</span><span class="p p-Indicator">,</span><span class="w"> </span><span class="nv">sections</span><span class="p p-Indicator">,</span><span class="w"> </span><span class="nv">tables</span><span class="p p-Indicator">,</span><span class="w"> </span><span class="nv">chunks</span><span class="w"> </span><span class="p p-Indicator">}</span>
+<span class="nt">documents</span><span class="p">:</span>
+<span class="p p-Indicator">-</span><span class="w"> </span><span class="nt">source_id</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">src_000</span><span class="w">                  </span><span class="c1"># → manifest.sources[].id</span>
+<span class="w">  </span><span class="nt">path</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">report.pdf</span>
+<span class="w">  </span><span class="nt">title</span><span class="p">:</span><span class="w"> </span><span class="s">&quot;Annual</span><span class="nv"> </span><span class="s">Report&quot;</span>
+<span class="w">  </span><span class="nt">status</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">success</span><span class="w">                     </span><span class="c1"># &quot;failed&quot; if the source did not parse</span>
+<span class="w">  </span><span class="nt">pages</span><span class="p">:</span><span class="w"> </span><span class="p p-Indicator">[</span><span class="nv">1</span><span class="p p-Indicator">,</span><span class="w"> </span><span class="nv">188</span><span class="p p-Indicator">]</span>
+<span class="w">  </span><span class="nt">summary</span><span class="p">:</span><span class="w"> </span><span class="s">&quot;...&quot;</span><span class="w">                      </span><span class="c1"># extractive document summary</span>
+<span class="w">  </span><span class="nt">stats</span><span class="p">:</span><span class="w"> </span><span class="p p-Indicator">{</span><span class="w"> </span><span class="nv">sections</span><span class="p p-Indicator">,</span><span class="w"> </span><span class="nv">tables</span><span class="p p-Indicator">,</span><span class="w"> </span><span class="nv">chunks</span><span class="w"> </span><span class="p p-Indicator">}</span>
+<span class="w">  </span><span class="nt">sections</span><span class="p">:</span><span class="w">                           </span><span class="c1"># recursive TOC tree</span>
+<span class="w">  </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="nt">node_id</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">src_000_s07</span>
+<span class="w">    </span><span class="nt">title</span><span class="p">:</span><span class="w"> </span><span class="s">&quot;Consolidated</span><span class="nv"> </span><span class="s">Balance</span><span class="nv"> </span><span class="s">Sheets&quot;</span>
+<span class="w">    </span><span class="nt">pages</span><span class="p">:</span><span class="w"> </span><span class="p p-Indicator">[</span><span class="nv">96</span><span class="p p-Indicator">,</span><span class="w"> </span><span class="nv">101</span><span class="p p-Indicator">]</span>
+<span class="w">    </span><span class="nt">has_tables</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">true</span>
+<span class="w">    </span><span class="nt">keyphrases</span><span class="p">:</span><span class="w"> </span><span class="p p-Indicator">[</span><span class="nv">accounts receivable</span><span class="p p-Indicator">,</span><span class="w"> </span><span class="nv">inventory</span><span class="p p-Indicator">,</span><span class="w"> </span><span class="nv">current liabilities</span><span class="p p-Indicator">]</span>
+<span class="w">    </span><span class="nt">gist</span><span class="p">:</span><span class="w"> </span><span class="s">&quot;Current</span><span class="nv"> </span><span class="s">assets</span><span class="nv"> </span><span class="s">incl.</span><span class="nv"> </span><span class="s">net</span><span class="nv"> </span><span class="s">trade</span><span class="nv"> </span><span class="s">receivables;</span><span class="nv"> </span><span class="s">current</span><span class="nv"> </span><span class="s">liabilities.&quot;</span>
+<span class="w">    </span><span class="nt">chunk_ids</span><span class="p">:</span><span class="w"> </span><span class="p p-Indicator">[</span><span class="nv">src_000_chunk_241</span><span class="p p-Indicator">,</span><span class="w"> </span><span class="nv">src_000_chunk_242</span><span class="p p-Indicator">]</span>
+<span class="w">    </span><span class="nt">nodes</span><span class="p">:</span><span class="w"> </span><span class="p p-Indicator">[]</span><span class="w">                         </span><span class="c1"># child sections (same shape, recursive)</span>
+</code></pre></div>
 <table>
 <thead>
 <tr>
-<th>Layer</th>
-<th>Key</th>
-<th>What's cached</th>
+<th>Tier</th>
+<th>Fields</th>
 </tr>
 </thead>
 <tbody>
 <tr>
-<td>L1 Parse</td>
-<td><code>sha256(file_bytes) + parser_version + fast_flag</code></td>
-<td>Serialized <code>SourceDocument</code> — skips Docling on unchanged files</td>
+<td><strong>corpus</strong></td>
+<td><code>summary</code> (extractive), <code>stats</code></td>
 </tr>
 <tr>
-<td>L3 Embed</td>
-<td><code>sha256(chunk_text) + model_id</code></td>
-<td>Embedding vector — unchanged chunks are never re-embedded</td>
+<td><strong>document</strong></td>
+<td><code>title</code>, <code>status</code>, <code>pages</code>, <code>summary</code>, <code>stats</code>, <code>sections</code></td>
 </tr>
 <tr>
-<td>L5 Query</td>
-<td><code>sha256(query + mode + top_k + filters + pack_hash)</code></td>
-<td>Result set — repeated queries served without re-searching</td>
+<td><strong>section</strong> (recursive)</td>
+<td><code>node_id</code>, <code>title</code>, <code>pages</code>, <code>has_tables</code>, <code>keyphrases</code>, <code>gist</code>, <code>chunk_ids</code>, <code>nodes</code></td>
 </tr>
 </tbody>
 </table>
-<p>Keys carry a version component so a logic change auto-invalidates only the affected layer.</p>
-<h3 id="indexing">Indexing</h3>
-<p>Instead of forcing agents to process thousands of tokens for every query, AgentPack creates dual indexes for lightning-fast retrieval:</p>
 <ul>
-<li><strong>Lexical Index (SQLite FTS5)</strong>: Full-text search optimized for keyword matching. Queries are OR-of-terms by default.</li>
-<li><strong>Vector Index (FastEmbed + HNSW)</strong>: <code>BAAI/bge-small-en-v1.5</code> ONNX embeddings via FastEmbed; stored as pre-normalized float32 vectors. The default backend is <strong>HNSW</strong> (<code>hnswlib</code>, inner-product space = cosine on normalized vectors). Falls back to brute-force <code>np.dot</code> when <code>hnswlib</code> is absent or for very small corpora.</li>
-<li><strong>Hybrid Search (default)</strong>: Combines lexical and vector rank lists using <strong>Reciprocal Rank Fusion</strong> (<code>score = 1 / (60 + rank)</code>) — rank-stable across heterogeneous score scales.</li>
+<li><strong>Structure</strong> (<code>node_id</code>, <code>title</code>, <code>pages</code>, <code>has_tables</code>, <code>chunk_ids</code>, <code>nodes</code>) is reconstructed deterministically from the parsed <code>DocumentBlock.section_path</code> + page numbers — so sections whose prose merged into a neighbouring chunk are still represented.</li>
+<li><strong><code>chunk_ids</code></strong> at every node point back to <code>manifest.chunks</code>. A document's chunks attach to the section matching their <code>section_path</code>; chunks with no section land under a synthetic <code>__root__</code> node.</li>
+<li><strong><code>status: failed</code></strong> flags sources that did not parse / produced no chunks — they are kept (with empty sections) so the agent sees the full corpus.</li>
+<li><strong><code>node_id</code></strong> is a stable, deterministic ordinal path (e.g. <code>src_000_s07-02</code>).</li>
 </ul>
-<h3 id="index-invalidation">Index Invalidation</h3>
-<p>Both indexes store a content hash (SHA-256 of sorted chunk IDs + source checksums) at build time. Before every query, the stored hash is compared against the current manifest. A mismatch triggers an automatic rebuild — re-packing a corpus never silently serves stale results.</p>
+<h2 id="descriptors-are-deterministic-and-offline">Descriptors are deterministic and offline</h2>
+<p>The <code>keyphrases</code>, <code>gist</code>, and <code>summary</code> fields are produced with <strong>no LLM and no network</strong>:</p>
+<ul>
+<li><strong><code>keyphrases</code></strong> — <a href="https://github.com/INESCTEC/yake">YAKE</a>: unsupervised, language-independent, statistical keyphrase extraction (no training, dictionaries, or corpora).</li>
+<li><strong><code>gist</code> / <code>summary</code></strong> — extractive <strong>TextRank</strong> (PageRank over sentence overlap, via <code>networkx</code>): a verbatim, most-central sentence.</li>
+</ul>
+<p>Both are <strong>domain-agnostic</strong> (no finance/legal/etc. assumptions) and <strong>deterministic</strong> — the same corpus always yields the same map. The topic signal lives only at the <strong>section</strong> tier (<code>keyphrases</code>); synthesized document/corpus topic <em>lists</em> are intentionally omitted, because rolling many sections into one list biases toward whatever repeats (e.g. page headers). Documents and the corpus carry only an extractive <code>summary</code>.</p>
+<h2 id="the-map-never-affects-retrieval">The map never affects retrieval</h2>
+<p><code>map.yml</code> is a <strong>navigation layer, not an index</strong>. Its descriptors are never written into the FTS or vector index (those are built purely from chunk <em>content</em>), and the retrieval engine never reads the map. Enabling, disabling, or regenerating the map therefore cannot change what <code>agentpack retrieve</code> returns — it only changes what an agent sees when deciding <em>where</em> to look.</p>
+<h2 id="cli">CLI</h2>
+<div class="highlight"><pre><span></span><code>agentpack<span class="w"> </span>pack<span class="w"> </span>./docs<span class="w"> </span>--out<span class="w"> </span>./out<span class="w">               </span><span class="c1"># map.yml built by default</span>
+agentpack<span class="w"> </span>pack<span class="w"> </span>./docs<span class="w"> </span>--out<span class="w"> </span>./out<span class="w"> </span>--no-map<span class="w">      </span><span class="c1"># skip the map</span>
+agentpack<span class="w"> </span>map<span class="w"> </span>./out<span class="w">                             </span><span class="c1"># (re)build map.yml for an existing pack</span>
+</code></pre></div>
+<p><code>agentpack map</code> rebuilds the map from an existing pack's manifest alone (no re-parse). It is a lighter-weight reconstruction — it cannot recover <code>has_tables</code>, sections with no chunks, or descriptors; run <code>agentpack pack</code> for the full-fidelity map.</p>
+<p><code>agentpack validate</code> also checks <code>map.yml</code> when present (every <code>chunk_ids</code> / <code>source_id</code> resolves against the manifest); an absent map is not an error.</p>
 
 
 
