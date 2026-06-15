@@ -9,7 +9,7 @@ from fastapi import FastAPI, HTTPException, Request
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.staticfiles import StaticFiles
 from pydantic import BaseModel
-from agentpack.retrieve import search_hybrid
+from agentpack.retrieve import build_fts_index, build_vector_index, search_hybrid
 
 app = FastAPI(title="AgentPack Corpus Intelligence API")
 
@@ -27,11 +27,45 @@ PACK_DIR = os.environ.get("AGENTPACK_DIR", ".")
 def get_base_path():
     return Path(PACK_DIR)
 
+
+def ensure_manifest_exists(base_path: Path):
+    manifest_path = base_path / "manifest.yml"
+    if not manifest_path.exists():
+        raise HTTPException(status_code=404, detail="Manifest not found")
+
+
+def ensure_lexical_index(base_path: Path) -> Path:
+    ensure_manifest_exists(base_path)
+    indexes_dir = base_path / "indexes"
+    indexes_dir.mkdir(exist_ok=True)
+    db_path = indexes_dir / "lexical_index.db"
+    if not db_path.exists():
+        build_fts_index(base_path, db_path)
+    return db_path
+
+
+def ensure_vector_index_artifacts(base_path: Path):
+    ensure_manifest_exists(base_path)
+    indexes_dir = base_path / "indexes"
+    indexes_dir.mkdir(exist_ok=True)
+    vector_path = indexes_dir / "vector_index.npy"
+    meta_path = indexes_dir / "vector_meta.json"
+    if not vector_path.exists() or not meta_path.exists():
+        try:
+            build_vector_index(base_path, vector_path, meta_path)
+        except ImportError as exc:
+            raise HTTPException(
+                status_code=500,
+                detail="fastembed is not installed. Run pip install agentpack[ui]",
+            ) from exc
+    if not vector_path.exists() or not meta_path.exists():
+        raise HTTPException(status_code=404, detail="Vector index not found")
+    return vector_path, meta_path
+
 @app.get("/api/manifest")
 def get_manifest():
     manifest_path = get_base_path() / "manifest.yml"
-    if not manifest_path.exists():
-        raise HTTPException(status_code=404, detail="Manifest not found")
+    ensure_manifest_exists(get_base_path())
     with open(manifest_path, "r", encoding="utf-8") as f:
         return yaml.safe_load(f)
 
@@ -72,10 +106,7 @@ def resolve_source_file_path(base_path: Path, citation: dict) -> Optional[str]:
 
 
 def load_vector_artifacts(base_path: Path):
-    vector_path = base_path / "indexes" / "vector_index.npy"
-    meta_path = base_path / "indexes" / "vector_meta.json"
-    if not vector_path.exists() or not meta_path.exists():
-        raise HTTPException(status_code=404, detail="Vector index not found")
+    vector_path, meta_path = ensure_vector_index_artifacts(base_path)
 
     embeddings = np.load(vector_path)
     with open(meta_path, "r", encoding="utf-8") as f:
@@ -125,9 +156,7 @@ def search_vector_artifacts(base_path: Path, query: str, top_k: int):
 @app.get("/api/chunks")
 def get_chunks():
     base_path = get_base_path()
-    db_path = base_path / "indexes" / "lexical_index.db"
-    if not db_path.exists():
-        raise HTTPException(status_code=404, detail="Lexical index not found")
+    db_path = ensure_lexical_index(base_path)
         
     conn = sqlite3.connect(db_path)
     try:

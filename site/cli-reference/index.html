@@ -8,7 +8,7 @@
       
       
       
-        <link rel="canonical" href="https://yourusername.github.io/agentpack/cli-reference/">
+        <link rel="canonical" href="https://vedant1202.github.io/agentpack/cli-reference/">
       
       
         <link rel="prev" href="../architecture/">
@@ -342,6 +342,34 @@
     </span>
   </a>
   
+    <nav class="md-nav" aria-label="agentpack pack">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#config-file-agentpacktoml" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Config file (agentpack.toml)
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#agentpack-index" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        agentpack index
+      
+    </span>
+  </a>
+  
 </li>
         
           <li class="md-nav__item">
@@ -651,6 +679,34 @@
     </span>
   </a>
   
+    <nav class="md-nav" aria-label="agentpack pack">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#config-file-agentpacktoml" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Config file (agentpack.toml)
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#agentpack-index" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        agentpack index
+      
+    </span>
+  </a>
+  
 </li>
         
           <li class="md-nav__item">
@@ -765,7 +821,7 @@
 <p>Pack documents into an agent-friendly context pack.</p>
 <p><div class="highlight"><pre><span></span><code>agentpack<span class="w"> </span>pack<span class="w"> </span>&lt;input_dir&gt;<span class="w"> </span>--out<span class="w"> </span>&lt;output_dir&gt;<span class="w"> </span><span class="o">[</span>OPTIONS<span class="o">]</span>
 </code></pre></div>
-- <code>&lt;input_dir&gt;</code>: The directory containing your raw documents (<code>.txt</code>, <code>.md</code>, <code>.csv</code>, <code>.pdf</code>).
+- <code>&lt;input_dir&gt;</code>: The directory containing your raw documents (<code>.txt</code>, <code>.md</code>, <code>.csv</code>, <code>.pdf</code>, <code>.docx</code>, <code>.pptx</code>, <code>.xlsx</code>, <code>.html</code>).
 - <code>--out</code>: The output directory where the pack will be generated.
 - <code>--include</code>: Include only files matching these glob patterns (comma-separated).
 - <code>-i, --ignore, --exclude</code>: Additional glob patterns to exclude.
@@ -773,19 +829,41 @@
 - <code>--no-default-patterns</code>: Don't apply built-in ignore patterns (e.g. <code>.git</code>, <code>node_modules</code>).
 - <code>--include-hidden</code>: Include hidden files and directories.
 - <code>--remove-empty-lines</code>: Automatically strip blank lines from text and markdown files to save tokens.
+- <code>--fast</code>: Fast mode — use PyMuPDF for PDFs instead of Docling, and skip HNSW index build. Best for quick iteration on small corpora.
 - <code>--verbose</code>: Enable detailed debug logging.
 - <code>--quiet</code>: Suppress all console output except errors.</p>
+<blockquote>
+<p><strong>Deprecated:</strong> <code>--fast-pdf</code> is an alias for <code>--fast</code> and will be removed in a future release. Use <code>--fast</code> instead.</p>
+</blockquote>
+<h4 id="config-file-agentpacktoml">Config file (<code>agentpack.toml</code>)</h4>
+<p>Pack settings can be stored in an <code>agentpack.toml</code> file in <code>&lt;input_dir&gt;</code>. CLI flags take precedence over config values.</p>
+<div class="highlight"><pre><span></span><code><span class="k">[pack]</span>
+<span class="n">chunk_max_tokens</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="mi">800</span><span class="w">    </span><span class="c1"># max tokens per chunk (default: 800)</span>
+<span class="n">chunk_overlap</span><span class="w">    </span><span class="o">=</span><span class="w"> </span><span class="mf">0.15</span><span class="w">   </span><span class="c1"># overlap fraction between chunks (default: 0.15)</span>
+<span class="n">fast</span><span class="w">             </span><span class="o">=</span><span class="w"> </span><span class="kc">false</span><span class="w">  </span><span class="c1"># use fast mode (default: false)</span>
+<span class="n">remove_empty_lines</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="kc">false</span>
+<span class="n">include</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="p">[]</span><span class="w">              </span><span class="c1"># glob patterns to include</span>
+<span class="n">exclude</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="p">[</span><span class="s2">&quot;*.log&quot;</span><span class="p">]</span><span class="w">       </span><span class="c1"># glob patterns to exclude</span>
+</code></pre></div>
+<h3 id="agentpack-index"><code>agentpack index</code></h3>
+<p>Pre-build FTS and vector indexes for a compiled pack. Running this before the first <code>retrieve</code> avoids paying the index-build cost at query time.</p>
+<div class="highlight"><pre><span></span><code>agentpack<span class="w"> </span>index<span class="w"> </span>&lt;pack_dir&gt;
+</code></pre></div>
+<p>The command is idempotent — if the pack content hasn't changed since the last build, both indexes are reused without rebuilding.</p>
 <h3 id="agentpack-audit"><code>agentpack audit</code></h3>
 <p>Generates an audit report for a context pack, highlighting extraction warnings (e.g., empty files, PDFs with no readable text) and statistics.</p>
 <div class="highlight"><pre><span></span><code>agentpack<span class="w"> </span>audit<span class="w"> </span>&lt;pack_dir&gt;
 </code></pre></div>
 <h3 id="agentpack-retrieve"><code>agentpack retrieve</code></h3>
-<p>Retrieves top-k evidence chunks from a pack using the built-in SQLite FTS5 lexical search engine.</p>
+<p>Retrieves top-k evidence chunks from a pack using hybrid search (SQLite FTS5 + HNSW vector index, fused with RRF).</p>
 <p><div class="highlight"><pre><span></span><code>agentpack<span class="w"> </span>retrieve<span class="w"> </span>&lt;pack_dir&gt;<span class="w"> </span><span class="s2">&quot;&lt;query&gt;&quot;</span><span class="w"> </span>--top-k<span class="w"> </span><span class="m">5</span><span class="w"> </span>--mode<span class="w"> </span>hybrid
 </code></pre></div>
 - <code>&lt;query&gt;</code>: The search term.
 - <code>--top-k</code>: Number of results to return (default: 5).
-- <code>--mode</code>: Search mode to use (<code>hybrid</code>, <code>vector</code>, or <code>fts</code>. default: <code>hybrid</code>).</p>
+- <code>--mode</code>: Search mode — <code>hybrid</code> (default), <code>vector</code>, or <code>fts</code>.
+- <code>--source</code>: Filter results to chunks whose <code>source_id</code> contains this string (substring match).
+- <code>--section</code>: Filter results to chunks whose <code>citation.section</code> contains this string (substring match).
+- <code>--page</code>: Filter results to chunks from this page number.</p>
 <h3 id="agentpack-validate"><code>agentpack validate</code></h3>
 <p>Validates the structural integrity of a context pack, ensuring all expected files and tables exist and are properly referenced in the manifest.</p>
 <div class="highlight"><pre><span></span><code>agentpack<span class="w"> </span>validate<span class="w"> </span>&lt;pack_dir&gt;

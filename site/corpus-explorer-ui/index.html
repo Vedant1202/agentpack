@@ -8,7 +8,7 @@
       
       
       
-        <link rel="canonical" href="https://yourusername.github.io/agentpack/corpus-explorer-ui/">
+        <link rel="canonical" href="https://vedant1202.github.io/agentpack/corpus-explorer-ui/">
       
       
         <link rel="prev" href="../cli-reference/">
@@ -768,14 +768,14 @@
 Then open <code>http://localhost:8000</code> in your browser.</p>
 <h2 id="key-features">Key Features</h2>
 <h3 id="holistic-corpus-explorer-map">Holistic Corpus Explorer Map</h3>
-<p>Powered by a WebGL 2D physics engine, the map renders thousands of chunks flawlessly. 
+<p>Powered by a 2D force-graph canvas, the map renders the corpus as document nodes plus chunk nodes.
 - <strong>Dynamic Node Sizing:</strong> As you zoom in, the nodes adjust their size to keep the interface clean.
-- <strong>Hover Labels:</strong> Read the IDs and types of nodes just by hovering over them.</p>
+- <strong>Progressive Labels:</strong> Document labels are always visible, and chunk labels appear when you zoom in or select a node.</p>
 <h3 id="interactive-hybrid-search">Interactive Hybrid Search</h3>
 <p>The UI hooks directly into the AgentPack SQLite FTS5 + FastEmbed vector engine.
 - Type a query into the search bar.
 - The UI will instantly dim non-matching chunks.
-- Matching chunks will glow amber, and the UI will draw dashed <strong>hybrid trajectory paths</strong> between them to visualize the search path.</p>
+- Matching chunks will glow amber, and the UI will draw dashed links between the ranked results so you can inspect the returned set at a glance.</p>
 <p><img alt="Visualizing Hybrid Retrieval (Search)" src="../assets/search.png" />
 <em>Test your RAG queries instantly and see the semantic paths the vector engine took to find them.</em></p>
 <h3 id="context-sidebar">Context Sidebar</h3>

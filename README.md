@@ -5,6 +5,10 @@
 [![Python Versions](https://img.shields.io/pypi/pyversions/agent-context-packager.svg)](https://pypi.org/project/agent-context-packager/)
 [![License: ISC](https://img.shields.io/badge/License-ISC-blue.svg)](https://opensource.org/licenses/ISC)
 
+### ▶️ Watch the 90-second launch video
+
+[![Watch the AgentPack launch video](https://img.youtube.com/vi/4_Vak-a--Jg/maxresdefault.jpg)](https://youtu.be/4_Vak-a--Jg)
+
 **AgentPack** improves the context pipeline for document-grounded agents.
 
 Instead of forcing AI agents to parse messy, disparate file formats (PDFs, CSVs, Markdown, text) at runtime, AgentPack is an offline **document-to-agent-context compiler**. It takes unstructured knowledge bases, turns them into clean semantic chunks with citations, retrieves the right evidence, and sends only high-signal context to the model.
