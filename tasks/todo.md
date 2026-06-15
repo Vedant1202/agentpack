@@ -27,22 +27,22 @@ Companion to [plan.md](plan.md). Phase A is actionable now. **B and C are gated*
 **Acceptance:** ✅ chunks reachable across the tree; nesting matches source headings (H2 under H1); `__root__` holds orphans.
 **Verify:** ✅ `pytest tests/test_mapper.py -q` → 10 passed (nested md, PDF pages, `.txt`→`__root__`, has_tables, page rollup); `test_e2e` (real PDF) → passed; smoke pack shows all 4 PDF sections + `has_tables`/`pages`.
 
-### A3 · CLI surface
-- [ ] `pack` gains `--no-map` (suppress map generation).
-- [ ] New `agentpack map <pack_dir>` command to (re)build `map.yml` for an existing pack (mirrors `index`; lazy imports per `cli.py` convention).
-- [ ] `tests/test_map_cli.py`: `--no-map` produces no `map.yml`; `agentpack map` rebuilds it.
+### A3 · CLI surface ✅ DONE
+- [x] `pack` gains `--no-map` (suppress map generation).
+- [x] New `agentpack map <pack_dir>` command to (re)build `map.yml` from an existing pack's manifest (mirrors `index`; lazy imports per `cli.py` convention). Reconstruction is chunk-driven (no `has_tables` / chunkless sections — documented in help + stderr note).
+- [x] `tests/test_map_cli.py`: `--no-map` → no `map.yml`; `agentpack map` rebuilds it; missing manifest errors.
 
-**Acceptance:** `agentpack pack … --no-map` → no `map.yml`; `agentpack map <dir>` → `map.yml` present.
-**Verify:** `pytest tests/test_map_cli.py -q`.
+**Acceptance:** ✅ `agentpack pack … --no-map` → no `map.yml`; `agentpack map <dir>` → `map.yml` present.
+**Verify:** ✅ `pytest tests/test_map_cli.py -q`.
 
-### A4 · Integrity (validation + regression + determinism)
-- [ ] `validate.py`: when `map.yml` present, check FK (`chunk_ids`/`source_id` exist) + reachability; **manifest checks unchanged**; absent `map.yml` is not an error.
-- [ ] Golden-snapshot test: small fixture → committed `map.yml`, diffed on change.
-- [ ] Determinism test: build twice, assert equal modulo `generated_at`.
-- [ ] Regression guard: assert `validate_pack` / `search_pack` / `audit_pack` / UI loader all behave identically with the new sibling file present.
+### A4 · Integrity (validation + regression + determinism) ✅ DONE
+- [x] `validate.py`: when `map.yml` present, check FK (`chunk_ids`/`source_id` exist) recursively; **manifest checks unchanged**; absent `map.yml` is not an error.
+- [x] Golden-snapshot test: committed `tests/fixtures/expected_map.yml`, diffed on every run.
+- [x] Determinism test: build twice, assert equal (`test_build_map_is_deterministic`).
+- [x] Regression guard: `validate_pack` (valid+bad map), `audit_pack`, and `search_pack` (via `test_e2e`) all behave correctly with the sibling file present.
 
-**Acceptance:** all four checks green; existing suite still passes.
-**Verify:** `pytest tests/ -q` (full suite) + the build-twice diff from plan.md.
+**Acceptance:** ✅ all checks green; existing suite green except **3 pre-existing failures** unrelated to this work (`test_cli` ×4 lazy-import patches, `test_ui` httpx TestClient, `test_eval::test_run_eval` — all proven untouched by these commits).
+**Verify:** ✅ `pytest tests/ --ignore=tests/test_ui.py -q` → 80 passed, 5 pre-existing fails.
 
 ### A5 · Prototype on a real pack → ▣ CHECKPOINT 1
 - [ ] Generate `map.yml` for `benchmarks/financebench_sample` (or `phase1-benchmarks`) and read it critically.

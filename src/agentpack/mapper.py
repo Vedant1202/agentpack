@@ -169,3 +169,51 @@ def build_map(pack_meta: dict, docs: List[SourceDocument], chunks: List[Chunk]) 
         documents=documents,
     )
     return corpus_map.model_dump()
+
+
+def build_map_from_manifest(pack_dir: str) -> dict:
+    """Rebuild map.yml for an existing pack from its manifest alone (no re-parse).
+
+    Lighter-weight than the during-pack map: the tree is reconstructed from chunk
+    citations (``section_path`` + ``page``), so it cannot recover ``has_tables`` or
+    sections that contain no chunks. Run ``agentpack pack`` for the full-fidelity map.
+    """
+    import yaml
+    from agentpack.models import SourceDocument, DocumentBlock
+
+    base = Path(pack_dir)
+    with open(base / "manifest.yml", "r", encoding="utf-8") as f:
+        manifest = yaml.safe_load(f) or {}
+
+    metas_by_source: "OrderedDict[str, list]" = OrderedDict()
+    for cm in manifest.get("chunks", []) or []:
+        metas_by_source.setdefault(cm.get("source_id"), []).append(cm)
+
+    docs: List[SourceDocument] = []
+    chunks: List[Chunk] = []
+    for src in manifest.get("sources", []) or []:
+        sid = src.get("id")
+        blocks: List[DocumentBlock] = []
+        for i, cm in enumerate(metas_by_source.get(sid, [])):
+            cit = cm.get("citation") or {}
+            section_path = cit.get("section_path")
+            if not section_path and cit.get("section"):
+                section_path = [cit["section"]]
+            blocks.append(DocumentBlock(
+                block_id=f"{sid}_pb{i:04d}", source_id=sid, type="paragraph",
+                text=" ", page=cit.get("page"), section_path=section_path or [],
+            ))
+            chunks.append(Chunk(
+                chunk_id=cm.get("id"), source_id=sid, path=cm.get("path", ""),
+                token_count=cm.get("token_count", 0), content="", metadata=cit,
+            ))
+        docs.append(SourceDocument(
+            source_id=sid, path=src.get("path", sid), type=src.get("type", "txt"),
+            checksum=src.get("checksum", ""), blocks=blocks, warnings=[],
+        ))
+
+    p = manifest.get("pack", {}) or {}
+    pack_meta = {"name": p.get("name", "corpus"),
+                 "generated_at": p.get("generated_at", ""),
+                 "manifest": "manifest.yml"}
+    return build_map(pack_meta, docs, chunks)

@@ -32,6 +32,7 @@ def pack(
     remove_empty_lines: bool = typer.Option(False, help="Remove blank lines from all text files"),
     fast: bool = typer.Option(False, "--fast", help="Fast mode: PyMuPDF parser + sqlite-vec backend"),
     fast_pdf: bool = typer.Option(False, "--fast-pdf", hidden=True, help="[Deprecated] Use --fast instead"),
+    no_map: bool = typer.Option(False, "--no-map", help="Skip building the hierarchical knowledge map (map.yml)"),
 ):
     """Pack documents into an agent-friendly context pack."""
     from agentpack.pack import write_pack
@@ -66,6 +67,7 @@ def pack(
         quiet=quiet,
         remove_empty_lines=effective_remove_empty,
         fast_pdf=effective_fast,
+        no_map=no_map,
     )
     
     if not quiet:
@@ -165,6 +167,33 @@ def index_cmd(
 
     if not quiet:
         typer.secho("Index build complete.", fg=typer.colors.GREEN)
+
+
+@app.command(name="map")
+def map_cmd(
+    pack_dir: str,
+    quiet: bool = typer.Option(False, help="Suppress progress output"),
+):
+    """(Re)build the hierarchical knowledge map (map.yml) for an existing pack."""
+    from pathlib import Path as _Path
+    import yaml as _yaml
+    from agentpack.mapper import build_map_from_manifest
+
+    base = _Path(pack_dir)
+    if not (base / "manifest.yml").exists():
+        typer.secho(f"No manifest.yml found at {pack_dir}", fg=typer.colors.RED)
+        raise typer.Exit(code=1)
+
+    if not quiet:
+        typer.echo(
+            "Rebuilding map.yml from manifest "
+            "(run `pack` for full-fidelity has_tables / chunkless sections)…"
+        )
+    map_obj = build_map_from_manifest(str(base))
+    with open(base / "map.yml", "w", encoding="utf-8") as f:
+        _yaml.dump(map_obj, f, default_flow_style=False, sort_keys=False)
+    if not quiet:
+        typer.secho("map.yml written.", fg=typer.colors.GREEN)
 
 
 @app.command(name="eval")

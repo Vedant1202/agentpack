@@ -64,4 +64,37 @@ def validate_pack(pack_dir: str) -> List[str]:
             if not full_path.exists():
                 errors.append(f"Table file missing: {full_path}")
 
+    # Validate the optional knowledge map (map.yml). Its absence is not an error.
+    map_path = base_path / "map.yml"
+    if map_path.exists():
+        chunk_ids = {c.get("id") for c in manifest.get("chunks", []) if c.get("id")}
+        errors.extend(_validate_map(map_path, source_ids, chunk_ids))
+
+    return errors
+
+
+def _validate_map(map_path: Path, source_ids: set, chunk_ids: set) -> List[str]:
+    """Validate map.yml referential integrity against the manifest."""
+    errors: List[str] = []
+    try:
+        with open(map_path, "r", encoding="utf-8") as f:
+            kmap = yaml.safe_load(f)
+    except Exception as e:
+        return [f"Failed to parse map.yml: {e}"]
+    if not kmap:
+        return ["map.yml is empty."]
+
+    def walk(nodes):
+        for node in nodes or []:
+            node_id = node.get("node_id", "<unknown>")
+            for cid in node.get("chunk_ids", []) or []:
+                if cid not in chunk_ids:
+                    errors.append(f"Map node '{node_id}' references unknown chunk_id '{cid}'")
+            walk(node.get("nodes", []))
+
+    for doc in kmap.get("documents", []) or []:
+        sid = doc.get("source_id")
+        if sid not in source_ids:
+            errors.append(f"Map document refers to unknown source_id '{sid}'")
+        walk(doc.get("sections", []))
     return errors

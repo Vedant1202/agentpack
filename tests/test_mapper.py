@@ -4,6 +4,7 @@ Tests the deterministic structural tree: corpus -> document -> (flat) section ->
 plus the chunker change that persists the full section_path into chunk metadata.
 """
 import yaml
+from pathlib import Path
 from agentpack.models import SourceDocument, DocumentBlock
 from agentpack.chunker import chunk_document
 
@@ -240,3 +241,22 @@ def test_pages_roll_up_over_subtree():
     chapter = m["documents"][0]["sections"][0]
     assert chapter["title"] == "Chapter"
     assert chapter["pages"] == [2, 7], "parent page span must include its subtree"
+
+
+def test_golden_map_snapshot():
+    """Structural regression guard: emitted map must match the committed snapshot."""
+    from agentpack.mapper import build_map
+    doc = _nested_doc()
+    chunks = chunk_document(doc, max_tokens=40)
+    actual = yaml.dump(
+        build_map({"name": "golden", "generated_at": "2026-01-01T00:00:00+00:00",
+                   "manifest": "manifest.yml"}, [doc], chunks),
+        default_flow_style=False, sort_keys=False,
+    )
+    snapshot = Path(__file__).parent / "fixtures" / "expected_map.yml"
+    if not snapshot.exists():
+        snapshot.write_text(actual)  # bootstrap once; commit the result
+    assert actual == snapshot.read_text(), (
+        "map structure changed vs tests/fixtures/expected_map.yml; "
+        "if intentional, delete that file to regenerate."
+    )
