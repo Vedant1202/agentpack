@@ -24,6 +24,7 @@ plugins:
 nav:
   - Home: index.md
   - Architecture & Internals: architecture.md
+  - Knowledge Map: knowledge-map.md
   - CLI Reference: cli-reference.md
   - Corpus Explorer UI: corpus-explorer-ui.md
   - Benchmark: benchmark.md

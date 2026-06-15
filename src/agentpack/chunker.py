@@ -60,6 +60,7 @@ def chunk_document(doc: SourceDocument, max_tokens: int = 800, overlap_percent: 
         # Update metadata before any splits so sub-blocks carry correct page/section
         if block.section_path:
             current_metadata["section"] = block.section_path[-1]
+            current_metadata["section_path"] = list(block.section_path)
         if block.page:
             current_metadata["page"] = block.page
         if block.row_range:
