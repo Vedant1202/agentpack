@@ -81,7 +81,8 @@ def write_pack(
     verbose: bool = False,
     quiet: bool = False,
     remove_empty_lines: bool = False,
-    fast_pdf: bool = False
+    fast_pdf: bool = False,
+    no_map: bool = False
 ):
     """
     Scans an input directory, parses supported files, chunks them, and generates a context pack.
@@ -229,4 +230,17 @@ def write_pack(
         f.write(f"- Sources: {len(sources)}\n")
         f.write(f"- Chunks: {len(all_chunks)}\n")
         
+    # Build the hierarchical knowledge map (sibling map.yml) unless suppressed.
+    if not no_map:
+        from agentpack.mapper import build_map
+        pack_meta = {
+            "name": in_path.name,
+            "generated_at": manifest["pack"]["generated_at"],
+            "manifest": "manifest.yml",
+        }
+        docs_ordered = [docs_by_index[i] for i, _ in indexed_files if i in docs_by_index]
+        map_obj = build_map(pack_meta, docs_ordered, all_chunks)
+        with open(out_path / "map.yml", "w", encoding="utf-8") as f:
+            yaml.dump(map_obj, f, default_flow_style=False, sort_keys=False)
+
     print(f"Pack generated at {out_path}")

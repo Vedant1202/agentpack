@@ -33,12 +33,14 @@ flowchart TD
         F[tables/*.md]
         G[(indexes/lexical_index.db\nSQLite FTS5)]
         V[(indexes/hnsw_index.bin\nHNSW vector index)]
+        M[map.yml\nhierarchical knowledge map]
 
         C --> D
         C --> E
         C --> F
         C --> G
         C --> V
+        C --> M
         CA <-->|"L3: sha256(chunk) + model_id"| V
     end
 
@@ -59,6 +61,7 @@ When you run `agentpack pack`, it generates a directory structure known as a **C
 ```text
 agentpack-output/
 ├── manifest.yml           # Registry: sources, chunks, tables, citations, pack version.
+├── map.yml                # Hierarchical knowledge map (corpus → document → section → chunk).
 ├── chunks/                # Agent-ready markdown files (one per chunk).
 ├── tables/                # Extracted tables in standalone Markdown format.
 ├── indexes/               # FTS and vector indexes.
@@ -73,7 +76,10 @@ agentpack-output/
 ```
 
 ### `manifest.yml`
-The registry for the pack. Maps original document sources to their chunks and maintains citation metadata (source path, page number, section) so every piece of text sent to an agent can be traced back to its origin. The `version` field reflects the installed package version.
+The registry for the pack. Maps original document sources to their chunks and maintains citation metadata (source path, page number, section, and the full `section_path`) so every piece of text sent to an agent can be traced back to its origin. The `version` field reflects the installed package version.
+
+### `map.yml`
+A hierarchical **knowledge map** — `corpus → document → section → chunk` — that an agent reads to locate *where* information lives, then pulls only the chunks it needs. The tree structure is reconstructed from the parsed section hierarchy; each section also carries deterministic, offline descriptors (YAKE `keyphrases` + a TextRank `gist`). The map is purely additive and **never enters the retrieval indexes**. Built by default (`--no-map` to skip; `agentpack map` to rebuild). See **[Knowledge Map](knowledge-map.md)** for the full schema and rationale.
 
 ### Security & Scanning Layer
 Before parsing, AgentPack acts as a firewall against context bloat and secret leakage:

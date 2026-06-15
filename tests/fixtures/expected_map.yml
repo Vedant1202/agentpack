@@ -1,0 +1,248 @@
+map_version: 1
+pack:
+  name: golden
+  generated_at: '2026-01-01T00:00:00+00:00'
+  manifest: manifest.yml
+corpus:
+  summary: 'Guide lorem ipsum dolor sit amet consectetur adipiscing elit lorem ipsum
+    dolor sit amet consectetur adipiscing elit lorem ipsum dolor sit amet consectetur
+    adipiscing elit lorem ipsum dolor sit amet consectetur adipiscing elit lorem ipsum
+    dolor sit amet consectetur adipiscing elit lorem ipsum dolor sit amet consectetur
+    adipiscing elit lorem ipsum dolor sit amet consectetur adipiscing elit lorem ipsum
+    dolor sit amet consectetur adipiscing elit lorem ipsum dolor sit amet consectetur
+    adipiscing elit lorem ipsum dolor sit amet consectetur adipiscing elit lorem ipsum
+    dolor sit amet consectetur adipiscing elit lorem ipsum dolor sit amet consectetur
+    adipiscing elit lorem ipsum dolor sit amet consectetur adipiscing elit lorem ipsum
+    dolor sit amet consectetur adipiscing elit lorem ipsum dolor sit amet consectetur
+    adipiscing elit lorem ipsum dolor sit amet consectetur adipiscing elit lorem ipsum
+    dolor sit amet consectetur adipiscing elit lorem ipsum dolor sit amet consectetur
+    adipiscing elit lorem ipsum dolor sit amet consectetur adipiscing elit lorem ipsum
+    dolor sit amet consectetur adipiscing elit lorem ipsum dolor sit amet consectetur
+    adipiscing elit lorem ipsum dolor sit amet consectetur adipiscing elit lorem ipsum
+    dolor sit amet consectetur adipiscing elit lorem ipsum dolor sit amet consectetur
+    adipiscing elit lorem ipsum dolor sit amet consectetur adipiscing elit  Setup
+    lorem ipsum dolor sit amet consectetur adipiscing elit lorem ipsum dolor sit amet
+    consectetur adipiscing elit lorem ipsum dolor sit amet consectetur adipiscing
+    elit lorem ipsum dolor sit amet consectetur adipiscing elit lorem ipsum dolor
+    sit amet consectetur adipiscing elit lorem ipsum dolor sit amet consectetur adipiscing
+    elit lorem ipsum dolor sit amet consectetur adipiscing elit lorem ipsum dolor
+    sit amet consectetur adipiscing elit lorem ipsum dolor sit amet consectetur adipiscing
+    elit lorem ipsum dolor sit amet consectetur adipiscing elit lorem ipsum dolor
+    sit amet consectetur adipiscing elit lorem ipsum dolor sit amet consectetur adipiscing
+    elit lorem ipsum dolor sit amet consectetur adipiscing elit lorem ipsum dolor
+    sit amet consectetur adipiscing elit lorem ipsum dolor sit amet consectetur adipiscing
+    elit lorem ipsum dolor sit amet consectetur adipiscing elit lorem ipsum dolor
+    sit amet consectetur adipiscing elit lorem ipsum dolor sit amet consectetur adipiscing
+    elit lorem ipsum dolor sit amet consectetur adipiscing elit lorem ipsum dolor
+    sit amet consectetur adipiscing elit lorem ipsum dolor sit amet consectetur adipiscing
+    elit lorem ipsum dolor sit amet consectetur adipiscing elit lorem ipsum dolor
+    sit amet consectetur adipiscing elit lorem ipsum dolor sit amet consectetur adipiscing
+    elit lorem ipsum dolor sit amet consectetur adipiscing elit  Usage | a | b |
+
+    |---|---|
+
+    | 1 | 2 | lorem ipsum dolor sit amet consectetur adipiscing elit lorem ipsum dolor
+    sit amet consectetur adipiscing elit lorem ipsum dolor sit amet consectetur adipiscing
+    elit lorem ipsum dolor sit amet consectetur adipiscing elit lorem ipsum dolor
+    sit amet consectetur adipiscing elit lorem ipsum dolor sit amet consectetur adipiscing
+    elit lorem ipsum dolor sit amet consectetur adipiscing elit lorem ipsum dolor
+    sit amet consectetur adipiscing elit lorem ipsum dolor sit amet consectetur adipiscing
+    elit lorem ipsum dolor sit amet consectetur adipiscing elit lorem ipsum dolor
+    sit amet consectetur adipiscing elit lorem ipsum dolor sit amet consectetur adipiscing
+    elit lorem ipsum dolor sit amet consectetur adipiscing elit lorem ipsum dolor
+    sit amet consectetur adipiscing elit lorem ipsum dolor sit amet consectetur adipiscing
+    elit lorem ipsum dolor sit amet consectetur adipiscing elit lorem ipsum dolor
+    sit amet consectetur adipiscing elit lorem ipsum dolor sit amet consectetur adipiscing
+    elit lorem ipsum dolor sit amet consectetur adipiscing elit lorem ipsum dolor
+    sit amet consectetur adipiscing elit lorem ipsum dolor sit amet consectetur adipiscing
+    elit lorem ipsum dolor sit amet consectetur adipiscing elit lorem ipsum dolor
+    sit amet consectetur adipiscing elit lorem ipsum dolor sit amet consectetur adipiscing
+    elit lorem ipsum dolor sit amet consectetur adipiscing elit'
+  stats:
+    documents: 1
+    sections: 3
+    tables: 1
+    chunks: 21
+documents:
+- source_id: src_000
+  path: guide.md
+  title: Guide
+  status: success
+  pages: null
+  summary: 'Guide lorem ipsum dolor sit amet consectetur adipiscing elit lorem ipsum
+    dolor sit amet consectetur adipiscing elit lorem ipsum dolor sit amet consectetur
+    adipiscing elit lorem ipsum dolor sit amet consectetur adipiscing elit lorem ipsum
+    dolor sit amet consectetur adipiscing elit lorem ipsum dolor sit amet consectetur
+    adipiscing elit lorem ipsum dolor sit amet consectetur adipiscing elit lorem ipsum
+    dolor sit amet consectetur adipiscing elit lorem ipsum dolor sit amet consectetur
+    adipiscing elit lorem ipsum dolor sit amet consectetur adipiscing elit lorem ipsum
+    dolor sit amet consectetur adipiscing elit lorem ipsum dolor sit amet consectetur
+    adipiscing elit lorem ipsum dolor sit amet consectetur adipiscing elit lorem ipsum
+    dolor sit amet consectetur adipiscing elit lorem ipsum dolor sit amet consectetur
+    adipiscing elit lorem ipsum dolor sit amet consectetur adipiscing elit lorem ipsum
+    dolor sit amet consectetur adipiscing elit lorem ipsum dolor sit amet consectetur
+    adipiscing elit lorem ipsum dolor sit amet consectetur adipiscing elit lorem ipsum
+    dolor sit amet consectetur adipiscing elit lorem ipsum dolor sit amet consectetur
+    adipiscing elit lorem ipsum dolor sit amet consectetur adipiscing elit lorem ipsum
+    dolor sit amet consectetur adipiscing elit lorem ipsum dolor sit amet consectetur
+    adipiscing elit lorem ipsum dolor sit amet consectetur adipiscing elit  Setup
+    lorem ipsum dolor sit amet consectetur adipiscing elit lorem ipsum dolor sit amet
+    consectetur adipiscing elit lorem ipsum dolor sit amet consectetur adipiscing
+    elit lorem ipsum dolor sit amet consectetur adipiscing elit lorem ipsum dolor
+    sit amet consectetur adipiscing elit lorem ipsum dolor sit amet consectetur adipiscing
+    elit lorem ipsum dolor sit amet consectetur adipiscing elit lorem ipsum dolor
+    sit amet consectetur adipiscing elit lorem ipsum dolor sit amet consectetur adipiscing
+    elit lorem ipsum dolor sit amet consectetur adipiscing elit lorem ipsum dolor
+    sit amet consectetur adipiscing elit lorem ipsum dolor sit amet consectetur adipiscing
+    elit lorem ipsum dolor sit amet consectetur adipiscing elit lorem ipsum dolor
+    sit amet consectetur adipiscing elit lorem ipsum dolor sit amet consectetur adipiscing
+    elit lorem ipsum dolor sit amet consectetur adipiscing elit lorem ipsum dolor
+    sit amet consectetur adipiscing elit lorem ipsum dolor sit amet consectetur adipiscing
+    elit lorem ipsum dolor sit amet consectetur adipiscing elit lorem ipsum dolor
+    sit amet consectetur adipiscing elit lorem ipsum dolor sit amet consectetur adipiscing
+    elit lorem ipsum dolor sit amet consectetur adipiscing elit lorem ipsum dolor
+    sit amet consectetur adipiscing elit lorem ipsum dolor sit amet consectetur adipiscing
+    elit lorem ipsum dolor sit amet consectetur adipiscing elit  Usage | a | b |
+
+    |---|---|
+
+    | 1 | 2 | lorem ipsum dolor sit amet consectetur adipiscing elit lorem ipsum dolor
+    sit amet consectetur adipiscing elit lorem ipsum dolor sit amet consectetur adipiscing
+    elit lorem ipsum dolor sit amet consectetur adipiscing elit lorem ipsum dolor
+    sit amet consectetur adipiscing elit lorem ipsum dolor sit amet consectetur adipiscing
+    elit lorem ipsum dolor sit amet consectetur adipiscing elit lorem ipsum dolor
+    sit amet consectetur adipiscing elit lorem ipsum dolor sit amet consectetur adipiscing
+    elit lorem ipsum dolor sit amet consectetur adipiscing elit lorem ipsum dolor
+    sit amet consectetur adipiscing elit lorem ipsum dolor sit amet consectetur adipiscing
+    elit lorem ipsum dolor sit amet consectetur adipiscing elit lorem ipsum dolor
+    sit amet consectetur adipiscing elit lorem ipsum dolor sit amet consectetur adipiscing
+    elit lorem ipsum dolor sit amet consectetur adipiscing elit lorem ipsum dolor
+    sit amet consectetur adipiscing elit lorem ipsum dolor sit amet consectetur adipiscing
+    elit lorem ipsum dolor sit amet consectetur adipiscing elit lorem ipsum dolor
+    sit amet consectetur adipiscing elit lorem ipsum dolor sit amet consectetur adipiscing
+    elit lorem ipsum dolor sit amet consectetur adipiscing elit lorem ipsum dolor
+    sit amet consectetur adipiscing elit lorem ipsum dolor sit amet consectetur adipiscing
+    elit lorem ipsum dolor sit amet consectetur adipiscing elit'
+  stats:
+    sections: 3
+    tables: 1
+    chunks: 21
+  sections:
+  - node_id: src_000_s00
+    title: Guide
+    pages: null
+    has_tables: false
+    keyphrases:
+    - ipsum dolor sit
+    - dolor sit amet
+    - sit amet consectetur
+    - amet consectetur adipiscing
+    - consectetur adipiscing elit
+    - lorem ipsum dolor
+    gist: Guide lorem ipsum dolor sit amet consectetur adipiscing elit lorem ipsum
+      dolor sit amet consectetur adipiscing elit lorem ipsum dolor sit amet consectetur
+      adipiscing elit lorem ipsum dolor sit amet consectetur adipiscing elit lorem
+      ipsum dolor sit amet consectetur adipiscing elit lorem ipsum dolor sit amet
+      consectetur adipiscing elit lorem ipsum dolor sit amet consectetur adipiscing
+      elit lorem ipsum dolor sit amet consectetur adipiscing elit lorem ipsum dolor
+      sit amet consectetur adipiscing elit lorem ipsum dolor sit amet consectetur
+      adipiscing elit lorem ipsum dolor sit amet consectetur adipiscing elit lorem
+      ipsum dolor sit amet consectetur adipiscing elit lorem ipsum dolor sit amet
+      consectetur adipiscing elit lorem ipsum dolor sit amet consectetur adipiscing
+      elit lorem ipsum dolor sit amet consectetur adipiscing elit lorem ipsum dolor
+      sit amet consectetur adipiscing elit lorem ipsum dolor sit amet consectetur
+      adipiscing elit lorem ipsum dolor sit amet consectetur adipiscing elit lorem
+      ipsum dolor sit amet consectetur adipiscing elit lorem ipsum dolor sit amet
+      consectetur adipiscing elit lorem ipsum dolor sit amet consectetur adipiscing
+      elit lorem ipsum dolor sit amet consectetur adipiscing elit lorem ipsum dolor
+      sit amet consectetur adipiscing elit lorem ipsum dolor sit amet consectetur
+      adipiscing elit lorem ipsum dolor sit amet consectetur adipiscing elit
+    chunk_ids:
+    - src_000_chunk_000
+    - src_000_chunk_001
+    - src_000_chunk_002
+    - src_000_chunk_003
+    - src_000_chunk_004
+    - src_000_chunk_005
+    - src_000_chunk_006
+    nodes:
+    - node_id: src_000_s00-00
+      title: Setup
+      pages: null
+      has_tables: false
+      keyphrases:
+      - ipsum dolor sit
+      - dolor sit amet
+      - sit amet consectetur
+      - amet consectetur adipiscing
+      - consectetur adipiscing elit
+      - lorem ipsum dolor
+      gist: Setup lorem ipsum dolor sit amet consectetur adipiscing elit lorem ipsum
+        dolor sit amet consectetur adipiscing elit lorem ipsum dolor sit amet consectetur
+        adipiscing elit lorem ipsum dolor sit amet consectetur adipiscing elit lorem
+        ipsum dolor sit amet consectetur adipiscing elit lorem ipsum dolor sit amet
+        consectetur adipiscing elit lorem ipsum dolor sit amet consectetur adipiscing
+        elit lorem ipsum dolor sit amet consectetur adipiscing elit lorem ipsum dolor
+        sit amet consectetur adipiscing elit lorem ipsum dolor sit amet consectetur
+        adipiscing elit lorem ipsum dolor sit amet consectetur adipiscing elit lorem
+        ipsum dolor sit amet consectetur adipiscing elit lorem ipsum dolor sit amet
+        consectetur adipiscing elit lorem ipsum dolor sit amet consectetur adipiscing
+        elit lorem ipsum dolor sit amet consectetur adipiscing elit lorem ipsum dolor
+        sit amet consectetur adipiscing elit lorem ipsum dolor sit amet consectetur
+        adipiscing elit lorem ipsum dolor sit amet consectetur adipiscing elit lorem
+        ipsum dolor sit amet consectetur adipiscing elit lorem ipsum dolor sit amet
+        consectetur adipiscing elit lorem ipsum dolor sit amet consectetur adipiscing
+        elit lorem ipsum dolor sit amet consectetur adipiscing elit lorem ipsum dolor
+        sit amet consectetur adipiscing elit lorem ipsum dolor sit amet consectetur
+        adipiscing elit lorem ipsum dolor sit amet consectetur adipiscing elit
+      chunk_ids:
+      - src_000_chunk_007
+      - src_000_chunk_008
+      - src_000_chunk_009
+      - src_000_chunk_010
+      - src_000_chunk_011
+      - src_000_chunk_012
+      - src_000_chunk_013
+      nodes: []
+  - node_id: src_000_s01
+    title: Usage
+    pages: null
+    has_tables: true
+    keyphrases:
+    - ipsum dolor sit
+    - dolor sit amet
+    - sit amet consectetur
+    - amet consectetur adipiscing
+    - lorem ipsum dolor
+    - consectetur adipiscing elit
+    gist: 'Usage | a | b |
+
+      |---|---|
+
+      | 1 | 2 | lorem ipsum dolor sit amet consectetur adipiscing elit lorem ipsum
+      dolor sit amet consectetur adipiscing elit lorem ipsum dolor sit amet consectetur
+      adipiscing elit lorem ipsum dolor sit amet consectetur adipiscing elit lorem
+      ipsum dolor sit amet consectetur adipiscing elit lorem ipsum dolor sit amet
+      consectetur adipiscing elit lorem ipsum dolor sit amet consectetur adipiscing
+      elit lorem ipsum dolor sit amet consectetur adipiscing elit lorem ipsum dolor
+      sit amet consectetur adipiscing elit lorem ipsum dolor sit amet consectetur
+      adipiscing elit lorem ipsum dolor sit amet consectetur adipiscing elit lorem
+      ipsum dolor sit amet consectetur adipiscing elit lorem ipsum dolor sit amet
+      consectetur adipiscing elit lorem ipsum dolor sit amet consectetur adipiscing
+      elit lorem ipsum dolor sit amet consectetur adipiscing elit lorem ipsum dolor
+      sit amet consectetur adipiscing elit lorem ipsum dolor sit amet consectetur
+      adipiscing elit lorem ipsum dolor sit amet consectetur adipiscing elit lorem
+      ipsum dolor sit amet consectetur adipiscing elit lorem ipsum dolor sit amet
+      consectetur adipiscing elit lorem ipsum dolor sit amet consectetur adipiscing
+      elit lorem ipsum dolor sit amet consectetur adipiscing elit lorem ipsum dolor
+      sit amet consectetur adipiscing elit lorem ipsum dolor sit amet consectetur
+      adipiscing elit lorem ipsum dolor sit amet consectetur adipiscing elit'
+    chunk_ids:
+    - src_000_chunk_014
+    - src_000_chunk_015
+    - src_000_chunk_016
+    - src_000_chunk_017
+    - src_000_chunk_018
+    - src_000_chunk_019
+    - src_000_chunk_020
+    nodes: []
