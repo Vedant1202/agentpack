@@ -2,34 +2,38 @@
 <urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">
     <url>
          <loc>https://vedant1202.github.io/agentpack/</loc>
-         <lastmod>2026-06-01</lastmod>
+         <lastmod>2026-06-15</lastmod>
     </url>
     <url>
          <loc>https://vedant1202.github.io/agentpack/architecture/</loc>
-         <lastmod>2026-06-01</lastmod>
+         <lastmod>2026-06-15</lastmod>
     </url>
     <url>
          <loc>https://vedant1202.github.io/agentpack/benchmark/</loc>
-         <lastmod>2026-06-01</lastmod>
+         <lastmod>2026-06-15</lastmod>
     </url>
     <url>
          <loc>https://vedant1202.github.io/agentpack/cli-reference/</loc>
-         <lastmod>2026-06-01</lastmod>
+         <lastmod>2026-06-15</lastmod>
     </url>
     <url>
          <loc>https://vedant1202.github.io/agentpack/corpus-explorer-ui/</loc>
-         <lastmod>2026-06-01</lastmod>
+         <lastmod>2026-06-15</lastmod>
+    </url>
+    <url>
+         <loc>https://vedant1202.github.io/agentpack/knowledge-map/</loc>
+         <lastmod>2026-06-15</lastmod>
     </url>
     <url>
          <loc>https://vedant1202.github.io/agentpack/api/core/</loc>
-         <lastmod>2026-06-01</lastmod>
+         <lastmod>2026-06-15</lastmod>
     </url>
     <url>
          <loc>https://vedant1202.github.io/agentpack/api/parsers/</loc>
-         <lastmod>2026-06-01</lastmod>
+         <lastmod>2026-06-15</lastmod>
     </url>
     <url>
          <loc>https://vedant1202.github.io/agentpack/specs/0001-parsing-and-retrieval-overhaul/</loc>
-         <lastmod>2026-06-01</lastmod>
+         <lastmod>2026-06-15</lastmod>
     </url>
 </urlset>
