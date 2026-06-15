@@ -56,12 +56,12 @@ Companion to [plan.md](plan.md). Phase A is actionable now. **B and C are gated*
 ## Phase B — Domain-agnostic descriptors ✅ DONE *(pending CHECKPOINT 2)*
 - [x] B0 · failed/empty sources annotated `status: failed` in the map.
 - [x] B1 · `yake` + `networkx` added to `pyproject.toml` (core deps); `enrich.py` scaffolded. *(Enrichment `.cache` deferred — descriptors are deterministic and dwarfed by the Docling parse; revisit only if pack-time matters.)*
-- [x] B2 · YAKE keyphrases at section + document + corpus tiers.
+- [x] B2 · YAKE keyphrases at the **section** tier (the topic signal). Synthesized doc/corpus topic *lists* were dropped — see note.
 - [x] B3 · TextRank (`networkx.pagerank`) extractive `gist` (section) + `summary` (document/corpus).
 - [x] B4 · structural `stats` {sections, tables, chunks}; wired into mapper (`enrich=True` default, `enrich=False` skips); offline-guard test (`test_enrichment_works_offline`); pack-time overhead « Docling parse (enrichment ~seconds, parse ~minutes).
 - [ ] ▣ CHECKPOINT 2 — review descriptor quality, overhead, install size.
 
-**Known refinement for the checkpoint:** document/corpus `topics` are noisier than section-level — YAKE over concatenated text surfaces repeated table-header phrases ("Twelve Months Ended"). Section-level descriptors are crisp. Options: aggregate section keyphrases up to doc/corpus instead of re-running YAKE on raw text, and/or a boilerplate filter.
+**Resolved:** synthesized document/corpus `topics` were **dropped** (not aggregated). Rolling many sections into one list is lossy and biases toward whatever repeats (boilerplate) or comes first; a boilerplate blocklist would be domain-specific (against the general-purpose principle). The topic signal now lives only at the **section** tier (`keyphrases`); doc/corpus keep an extractive `summary`. The map descriptors never enter the retrieval index, so this is purely about what an agent sees when navigating.
 
 ## Phase C — Opt-in LLM enrichment  ⛔ *gated by CHECKPOINT 2*
 - [ ] C1 · `--enrich-llm` flag; reuse `eval/baselines.py` LLM client; deterministic cache (node-text + model id, temperature 0).

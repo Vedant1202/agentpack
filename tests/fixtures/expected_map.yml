@@ -58,15 +58,6 @@ corpus:
     elit lorem ipsum dolor sit amet consectetur adipiscing elit lorem ipsum dolor
     sit amet consectetur adipiscing elit lorem ipsum dolor sit amet consectetur adipiscing
     elit lorem ipsum dolor sit amet consectetur adipiscing elit'
-  topics:
-  - ipsum dolor sit
-  - dolor sit amet
-  - sit amet consectetur
-  - amet consectetur adipiscing
-  - lorem ipsum dolor
-  - consectetur adipiscing elit
-  - adipiscing elit lorem
-  - elit lorem ipsum
   stats:
     documents: 1
     sections: 3
@@ -132,15 +123,6 @@ documents:
     elit lorem ipsum dolor sit amet consectetur adipiscing elit lorem ipsum dolor
     sit amet consectetur adipiscing elit lorem ipsum dolor sit amet consectetur adipiscing
     elit lorem ipsum dolor sit amet consectetur adipiscing elit'
-  topics:
-  - ipsum dolor sit
-  - dolor sit amet
-  - sit amet consectetur
-  - amet consectetur adipiscing
-  - lorem ipsum dolor
-  - consectetur adipiscing elit
-  - adipiscing elit lorem
-  - elit lorem ipsum
   stats:
     sections: 3
     tables: 1

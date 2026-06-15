@@ -50,7 +50,6 @@ class DocumentMap(BaseModel):
     status: str = "success"            # "failed" when the source did not parse / produced no chunks
     pages: Optional[List[int]] = None
     summary: Optional[str] = None       # [B] document-level extractive summary
-    topics: List[str] = []              # [B] document-level keyphrases
     stats: Dict[str, int] = {}
     sections: List[SectionNode] = []
 

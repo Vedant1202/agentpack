@@ -315,10 +315,11 @@ def test_map_nodes_carry_descriptors_by_default():
     m = build_map({"name": "c", "generated_at": "t", "manifest": "manifest.yml"}, [doc], chunks)
 
     d = m["documents"][0]
-    assert d["topics"], "document should carry topics"
-    assert d["summary"], "document should carry a summary"
-    assert _has_descriptor(d["sections"]), "at least one section node should carry descriptors"
-    assert m["corpus"]["topics"], "corpus should carry aggregated topics"
+    assert "topics" not in d, "synthesized doc topics were intentionally dropped (rollup bias)"
+    assert "topics" not in m["corpus"], "synthesized corpus topics were intentionally dropped"
+    assert d["summary"], "document should carry an extractive summary"
+    assert _has_descriptor(d["sections"]), "section nodes carry the keyphrase/gist signal"
+    assert m["corpus"]["summary"], "corpus should carry an extractive summary"
 
 
 def test_enrich_false_yields_no_descriptors():
@@ -329,6 +330,6 @@ def test_enrich_false_yields_no_descriptors():
                   [doc], chunks, enrich=False)
 
     d = m["documents"][0]
-    assert d["topics"] == [] and d["summary"] is None
-    assert "topics" not in m["corpus"] and "summary" not in m["corpus"]
+    assert d["summary"] is None
+    assert "summary" not in m["corpus"]
     assert _all_empty(d["sections"])

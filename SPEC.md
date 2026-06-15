@@ -43,25 +43,24 @@ pack:                                            # [A] link back to the manifest
   generated_at: '2026-06-14T...'
   manifest: manifest.yml
 corpus:
-  summary: "5 SEC filings (10-K/10-Q): JPMorgan, Amcor, 3M, CVS, AWK; FY2020–2023."  # [B]/[C]
-  topics: [capital expenditure, restructuring, liquidity, EBITDA, dividends]          # [B]
-  stats: {documents: 5, sections: 312, chunks: 5825, tokens: 1100000}                 # [A]
+  summary: "5 SEC filings (10-K/10-Q): JPMorgan, Amcor, 3M, CVS, AWK; FY2020–2023."  # [B]/[C] extractive
+  stats: {documents: 5, sections: 312, tables: 110, chunks: 5825}                      # [A]
 documents:
 - source_id: src_002                             # [A] FK → manifest.sources[].id
   path: AMCOR_2020_10K.pdf                        # [A]
   title: "Amcor 2020 Annual Report"               # [A] from first heading / filename
+  status: success                                 # [B] "failed" when the source did not parse
   pages: [1, 188]                                 # [A]
+  summary: "Packaging operations, segment results, balance sheet, restructuring."     # [B]/[C] extractive (TextRank)
   stats: {sections: 64, tables: 31, chunks: 980}  # [A] domain-agnostic structural signal
-  summary: "Packaging operations, segment results, balance sheet, restructuring."     # [B]/[C] TextRank
-  topics: [packaging, segment revenue, balance sheet, restructuring]                  # [B] YAKE (domain-agnostic)
   # entities: {ORG: [Amcor plc], DATE: ['2020']}  # [B-opt] only when the `[ner]` extra is installed
   sections:                                       # [A] recursive TOC tree
   - node_id: s_002_0007                           # [A] stable id
     title: "Item 8 — Consolidated Balance Sheets" # [A]
     pages: [96, 101]                              # [A]
     has_tables: true                              # [A] from block types
-    gist: "Current assets incl. net trade receivables; current liabilities."          # [B]/[C] (1 line)
-    keyphrases: [accounts receivable, inventory, current liabilities]                 # [B]
+    keyphrases: [accounts receivable, inventory, current liabilities]                 # [B] YAKE — the topic signal
+    gist: "Current assets incl. net trade receivables; current liabilities."          # [B]/[C] extractive (1 line)
     chunk_ids: [src_002_chunk_241, src_002_chunk_242]   # [A] leaves → manifest.chunks
     nodes: []                                     # [A] child sections (same shape, recursive)
 ```
@@ -70,6 +69,7 @@ Invariants:
 - Every `chunk_ids` entry exists in `manifest.chunks`; every non-orphan chunk is reachable from exactly one node. Orphans (no section) are listed under a synthetic `__root__` node per document.
 - `node_id` is stable & deterministic (derived from source_id + ordinal path), not content-hashed.
 - Phase A emits the tree with all `[A]` fields; `[B]`/`[C]` fields are simply absent until those phases run.
+- The topic signal lives at the **section** tier (`keyphrases`). Synthesized document/corpus topic *lists* are intentionally omitted: rolling many sections into one list is lossy and biases toward whatever repeats (boilerplate) or whatever comes first — so doc/corpus carry only an extractive `summary`. The agent reads section `keyphrases` on drill-down.
 
 ## 4. Phases, scope & acceptance criteria
 

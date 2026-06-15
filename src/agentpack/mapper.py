@@ -43,17 +43,6 @@ def _doc_title(doc: SourceDocument) -> str:
     return Path(doc.path).stem.replace("_", " ")
 
 
-def _dedupe(items: List[str]) -> List[str]:
-    """Order-preserving case-insensitive de-duplication."""
-    seen, out = set(), []
-    for it in items:
-        key = it.lower()
-        if key not in seen:
-            seen.add(key)
-            out.append(it)
-    return out
-
-
 def _build_tree(doc: SourceDocument, doc_chunks: List[Chunk]):
     """Return ``(roots, root_orphan)`` scratch trees for one document.
 
@@ -161,7 +150,6 @@ def build_map(pack_meta: dict, docs: List[SourceDocument], chunks: List[Chunk],
     documents: List[DocumentMap] = []
     total_sections = 0
     total_tables = 0
-    corpus_topics: List[str] = []
     doc_summaries: List[str] = []
 
     for doc in docs:
@@ -183,14 +171,12 @@ def build_map(pack_meta: dict, docs: List[SourceDocument], chunks: List[Chunk],
 
         doc_pages = [p for s in sections if s.pages for p in s.pages]
 
-        summary, topics = None, []
+        summary = None
         if enrich and status == "success":
             doc_text = " ".join(b.text for b in doc.blocks if b.text)[:_ENRICH_TEXT_CAP]
             summary = _gist(doc_text) or None
-            topics = _keyphrases(doc_text, top=8)
             if summary:
                 doc_summaries.append(summary)
-            corpus_topics.extend(topics)
 
         documents.append(DocumentMap(
             source_id=doc.source_id,
@@ -199,7 +185,6 @@ def build_map(pack_meta: dict, docs: List[SourceDocument], chunks: List[Chunk],
             status=status,
             pages=[min(doc_pages), max(doc_pages)] if doc_pages else None,
             summary=summary,
-            topics=topics,
             stats={"sections": n_sections, "tables": n_tables, "chunks": len(doc_chunks)},
             sections=sections,
         ))
@@ -207,7 +192,6 @@ def build_map(pack_meta: dict, docs: List[SourceDocument], chunks: List[Chunk],
     corpus: dict = {}
     if enrich:
         corpus["summary"] = _gist(" ".join(doc_summaries)[:_ENRICH_TEXT_CAP]) or None
-        corpus["topics"] = _dedupe(corpus_topics)[:10]
     corpus["stats"] = {
         "documents": len(documents),
         "sections": total_sections,
