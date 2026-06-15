@@ -1,5 +1,5 @@
 from pydantic import BaseModel
-from typing import Literal, Optional, List, Tuple
+from typing import Literal, Optional, List, Tuple, Dict
 
 class ExtractionWarning(BaseModel):
     """Represents a warning encountered during parsing (e.g. unreadable PDF page)."""
@@ -28,3 +28,34 @@ class SourceDocument(BaseModel):
     checksum: str
     blocks: List[DocumentBlock]
     warnings: List[ExtractionWarning]
+
+
+class SectionNode(BaseModel):
+    """A node in a document's hierarchical section tree (the knowledge map)."""
+    node_id: str
+    title: str
+    pages: Optional[List[int]] = None          # [start_page, end_page]
+    has_tables: bool = False
+    chunk_ids: List[str] = []
+    nodes: List["SectionNode"] = []            # child sections (recursive; flat in Phase A1)
+
+
+class DocumentMap(BaseModel):
+    """A single source document's entry in the map: metadata + its section tree."""
+    source_id: str
+    path: str
+    title: str
+    pages: Optional[List[int]] = None
+    stats: Dict[str, int] = {}
+    sections: List[SectionNode] = []
+
+
+class CorpusMap(BaseModel):
+    """Top-level hierarchical knowledge map written to map.yml."""
+    map_version: int = 1
+    pack: Dict
+    corpus: Dict
+    documents: List[DocumentMap] = []
+
+
+SectionNode.model_rebuild()
