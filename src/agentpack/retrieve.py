@@ -396,8 +396,12 @@ def _matches_filters(
     page_filter: int = None,
 ) -> bool:
     citation = result.get("citation", {})
-    if source_filter and source_filter.lower() not in result.get("source_id", "").lower():
-        return False
+    if source_filter:
+        needle = source_filter.lower()
+        source_id = result.get("source_id", "").lower()
+        source_path = (citation.get("source_path") or "").lower()
+        if needle not in source_id and needle not in source_path:
+            return False
     if section_filter:
         section = citation.get("section", "")
         if section_filter.lower() not in section.lower():
