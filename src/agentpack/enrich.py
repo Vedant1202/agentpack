@@ -6,6 +6,10 @@
 No LLM, no network, no model/data downloads. ``yake`` and ``networkx`` are heavy-import-free
 so they are imported lazily; if ``yake`` is unavailable, ``keyphrases`` degrades to ``[]`` rather
 than raising, so a pack can still build a structural map.
+
+Candidate text is filtered for layout noise before extraction — TOC dot-leader entries,
+markdown table debris, and mostly-punctuation/number spans — so summaries never surface
+table-of-contents rows (see ``_is_noise``/``_sentences``).
 """
 import math
 import re
@@ -14,11 +18,23 @@ from typing import List, Optional
 _WORD = re.compile(r"[A-Za-z0-9']+")
 _SENTENCE = re.compile(r"(?<=[.!?])\s+")
 _MIN_CHARS = 20
+_DOT_LEADER = re.compile(r"(?:\.\s?){4,}")
+
+
+def _is_noise(span: str) -> bool:
+    """Layout noise (TOC entries, table debris) that must never become a keyphrase or gist
+    candidate: dot-leader spans and spans that are mostly punctuation/numbers."""
+    if _DOT_LEADER.search(span):
+        return True
+    solid = [c for c in span if not c.isspace()]
+    if not solid:
+        return True
+    return sum(c.isalpha() for c in solid) < len(solid) / 2
 
 
 def keyphrases(text: Optional[str], top: int = 6, max_ngram: int = 3) -> List[str]:
     """Top salient keyphrases for a block of text (YAKE; lower internal score = more salient)."""
-    text = (text or "").strip()
+    text = " ".join(_sentences(text or ""))
     if len(text) < _MIN_CHARS:
         return []
     try:
@@ -30,7 +46,20 @@ def keyphrases(text: Optional[str], top: int = 6, max_ngram: int = 3) -> List[st
 
 
 def _sentences(text: str) -> List[str]:
-    return [s.strip() for s in _SENTENCE.split(text) if s.strip()]
+    """Candidate sentences for enrichment, with layout noise dropped.
+
+    Splitting runs per line, then per markdown table cell (``|``), then on sentence
+    punctuation — so a TOC/table fragment glued onto a prose span (block texts are
+    space-joined upstream) is discarded on its own, without taking the prose with it.
+    """
+    out = []
+    for line in text.splitlines():
+        for cell in line.split("|"):
+            for s in _SENTENCE.split(cell):
+                s = s.strip()
+                if s and not _is_noise(s):
+                    out.append(s)
+    return out
 
 
 def _similarity(a: set, b: set) -> float:
@@ -45,8 +74,7 @@ def _similarity(a: set, b: set) -> float:
 
 def gist(text: Optional[str], max_sentences: int = 1) -> str:
     """A short extractive summary: the most central sentence(s) by TextRank, in original order."""
-    text = (text or "").strip()
-    sentences = _sentences(text)
+    sentences = _sentences((text or "").strip())
     if len(sentences) <= max_sentences:
         return " ".join(sentences)
 
