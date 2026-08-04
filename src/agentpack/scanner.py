@@ -3,7 +3,7 @@ from pathlib import Path
 from typing import List, Optional
 import pathspec
 
-SUPPORTED_EXTENSIONS = {".txt", ".md", ".csv", ".pdf"}
+SUPPORTED_EXTENSIONS = {".txt", ".md", ".csv", ".pdf", ".docx", ".pptx", ".xlsx", ".html", ".htm"}
 
 DEFAULT_IGNORES = [
     ".git/",

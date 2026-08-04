@@ -24,7 +24,7 @@ class SourceDocument(BaseModel):
     """Represents a fully parsed document normalized into the Canonical Document Model."""
     source_id: str
     path: str
-    type: Literal["pdf", "markdown", "txt", "csv"]
+    type: Literal["pdf", "markdown", "txt", "csv", "docx", "pptx", "xlsx", "html", "htm"]
     checksum: str
     blocks: List[DocumentBlock]
     warnings: List[ExtractionWarning]
