@@ -1,4 +1,5 @@
 import os
+import pytest
 import yaml
 import shutil
 import tempfile
@@ -43,6 +44,38 @@ def test_write_pack(mock_txt_file, mock_md_file, mock_csv_file):
         # Assert tables were written (stored as .md — content is markdown table format)
         tables = list((out_path / "tables").glob("*.md"))
         assert len(tables) == 1
+
+
+def test_write_pack_html_end_to_end(tmp_path):
+    """An .html file must be scanned, parsed via DoclingParser, chunked, and recorded with type 'html'."""
+    pytest.importorskip("docling")
+
+    in_dir = tmp_path / "corpus"
+    in_dir.mkdir()
+    (in_dir / "guide.html").write_text(
+        "<html><body>"
+        "<h1>User Guide</h1>"
+        "<p>This guide explains how to install and configure the product.</p>"
+        "<h2>Installation</h2>"
+        "<p>Run the installer and follow the prompts to complete setup.</p>"
+        "</body></html>"
+    )
+    out_dir = tmp_path / "out"
+
+    write_pack(str(in_dir), str(out_dir), quiet=True)
+
+    with open(out_dir / "manifest.yml") as f:
+        manifest = yaml.safe_load(f)
+
+    assert len(manifest["sources"]) == 1
+    source = manifest["sources"][0]
+    assert source["type"] == "html"
+    assert source["status"] == "success"
+
+    html_chunks = [c for c in manifest["chunks"] if c["source_id"] == source["id"]]
+    assert len(html_chunks) > 0
+    for chunk in html_chunks:
+        assert (out_dir / chunk["path"]).exists()
 
 
 def test_pack_version_in_manifest(tmp_path):

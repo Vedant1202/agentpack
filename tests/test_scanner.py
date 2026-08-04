@@ -25,6 +25,22 @@ def test_scanner_ignores_hidden_and_defaults():
         assert "secret.md" not in names
         assert "lib.txt" not in names
 
+def test_scanner_includes_docling_formats():
+    """Office/HTML formats handled by DoclingParser must survive the extension filter."""
+    with tempfile.TemporaryDirectory() as temp_dir:
+        temp_path = Path(temp_dir)
+        for name in ["a.docx", "b.pptx", "c.xlsx", "d.html", "e.htm", "f.exe"]:
+            (temp_path / name).touch()
+
+        names = [f.name for f in scan_directory(temp_dir)]
+
+        assert "a.docx" in names
+        assert "b.pptx" in names
+        assert "c.xlsx" in names
+        assert "d.html" in names
+        assert "e.htm" in names
+        assert "f.exe" not in names
+
 def test_scanner_includes_and_excludes():
     with tempfile.TemporaryDirectory() as temp_dir:
         temp_path = Path(temp_dir)
