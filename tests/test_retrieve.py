@@ -311,6 +311,50 @@ def test_metadata_filter(tmp_path):
     )
 
 
+def test_source_filter_matches_filename(tmp_path):
+    """source_filter must match source file names (citation.source_path), not just internal ids."""
+    from agentpack.pack import write_pack
+    from agentpack.retrieve import search_pack
+
+    corpus_dir = tmp_path / "corpus"
+    corpus_dir.mkdir()
+    (corpus_dir / "medicare-payment-value-of-care.md").write_text(
+        "Medicare payment adjustments for hospital value of care programs."
+    )
+    (corpus_dir / "annual-report.md").write_text(
+        "Annual report on hospital payment trends and budgets."
+    )
+
+    pack_dir = tmp_path / "pack"
+    write_pack(
+        input_dir=str(corpus_dir),
+        output_dir=str(pack_dir),
+        quiet=True,
+    )
+
+    # Filtering by a filename fragment must return only chunks from that file.
+    results = search_pack(
+        str(pack_dir), "payment", top_k=5, mode="fts",
+        source_filter="medicare-payment",
+    )
+    assert results, "filtering by filename fragment returned no results"
+    assert all(
+        "medicare-payment" in r["citation"]["source_path"] for r in results
+    ), f"unexpected sources: {[r['citation'].get('source_path') for r in results]}"
+
+    # Filtering by internal source id must keep working.
+    sid = results[0]["source_id"]
+    by_id = search_pack(
+        str(pack_dir), "payment", top_k=5, mode="fts", source_filter=sid,
+    )
+    assert by_id and all(r["source_id"] == sid for r in by_id)
+
+    # A fragment matching neither ids nor filenames returns nothing.
+    assert search_pack(
+        str(pack_dir), "payment", top_k=5, mode="fts", source_filter="no-such-file",
+    ) == []
+
+
 def test_fts_and_precision(tmp_path):
     """AND query must exclude chunks that match only some query terms."""
     import yaml
