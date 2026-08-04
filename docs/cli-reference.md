@@ -73,7 +73,7 @@ agentpack retrieve <pack_dir> "<query>" --top-k 5 --mode hybrid
 - `<query>`: The search term.
 - `--top-k`: Number of results to return (default: 5).
 - `--mode`: Search mode — `hybrid` (default), `vector`, or `fts`.
-- `--source`: Filter results to chunks whose `source_id` contains this string (substring match).
+- `--source`: Filter results to chunks whose source file name (or `source_id`) contains this string (substring match).
 - `--section`: Filter results to chunks whose `citation.section` contains this string (substring match).
 - `--page`: Filter results to chunks from this page number.
 
