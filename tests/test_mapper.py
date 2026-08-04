@@ -333,3 +333,62 @@ def test_enrich_false_yields_no_descriptors():
     assert d["summary"] is None
     assert "summary" not in m["corpus"]
     assert _all_empty(d["sections"])
+
+
+# --- Regression: TOC dot-leader noise must not become a summary/gist ---
+
+TOC_TABLE = (
+    "| Evaluation & Management Services.................................................. 4 |\n"
+    "|------------------------------------------------------------------------------------|\n"
+    "| Initial Hospital Inpatient or Observation Care ......................11             |\n"
+    "| Prolonged Hospital Inpatient or Observation Care Services...........13             |"
+)
+TOC_PROSE = ("Medicare pays for evaluation and management services under revised CPT codes. "
+             "Practitioners must document the level of care provided at each visit. ") * 20
+
+
+def _toc_doc():
+    """A booklet-style document whose table of contents parsed as a dot-leader markdown table
+    (the shape produced for ember_demo_docs/mln006764-evaluation-management-services.pdf)."""
+    return SourceDocument(
+        source_id="src_000",
+        path="booklet.pdf",
+        type="pdf",
+        checksum="abc",
+        blocks=[
+            DocumentBlock(block_id="b0", source_id="src_000", type="heading",
+                          text="Table of Contents", page=2,
+                          section_path=["Table of Contents"]),
+            DocumentBlock(block_id="b1", source_id="src_000", type="table",
+                          text=TOC_TABLE, page=2, section_path=["Table of Contents"]),
+            DocumentBlock(block_id="b2", source_id="src_000", type="heading",
+                          text="Overview", page=4, section_path=["Overview"]),
+            DocumentBlock(block_id="b3", source_id="src_000", type="paragraph",
+                          text=TOC_PROSE, page=4, section_path=["Overview"]),
+        ],
+        warnings=[],
+    )
+
+
+def _walk(nodes):
+    for n in nodes:
+        yield n
+        yield from _walk(n["nodes"])
+
+
+def test_map_summaries_and_gists_skip_toc_noise():
+    from agentpack.mapper import build_map
+    doc = _toc_doc()
+    chunks = chunk_document(doc, max_tokens=60)
+    m = build_map({"name": "c", "generated_at": "t", "manifest": "manifest.yml"}, [doc], chunks)
+
+    d = m["documents"][0]
+    assert d["summary"], "document should still get a summary from the prose"
+    assert m["corpus"]["summary"], "corpus should still get a summary from the prose"
+    for s in (d["summary"], m["corpus"]["summary"]):
+        assert "|" not in s and "...." not in s, s
+    for node in _walk(d["sections"]):
+        if node["gist"]:
+            assert "|" not in node["gist"] and "...." not in node["gist"], node["gist"]
+        for kp in node["keyphrases"]:
+            assert "|" not in kp and "...." not in kp, kp
