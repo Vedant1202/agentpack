@@ -28,6 +28,7 @@ nav:
   - CLI Reference: cli-reference.md
   - Corpus Explorer UI: corpus-explorer-ui.md
   - Benchmark: benchmark.md
+  - Changelog: changelog.md
   - API Reference:
     - Core: api/core.md
     - Parsers: api/parsers.md
