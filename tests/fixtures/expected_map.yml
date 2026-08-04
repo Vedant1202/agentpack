@@ -4,7 +4,7 @@ pack:
   generated_at: '2026-01-01T00:00:00+00:00'
   manifest: manifest.yml
 corpus:
-  summary: 'Guide lorem ipsum dolor sit amet consectetur adipiscing elit lorem ipsum
+  summary: Guide lorem ipsum dolor sit amet consectetur adipiscing elit lorem ipsum
     dolor sit amet consectetur adipiscing elit lorem ipsum dolor sit amet consectetur
     adipiscing elit lorem ipsum dolor sit amet consectetur adipiscing elit lorem ipsum
     dolor sit amet consectetur adipiscing elit lorem ipsum dolor sit amet consectetur
@@ -37,27 +37,7 @@ corpus:
     sit amet consectetur adipiscing elit lorem ipsum dolor sit amet consectetur adipiscing
     elit lorem ipsum dolor sit amet consectetur adipiscing elit lorem ipsum dolor
     sit amet consectetur adipiscing elit lorem ipsum dolor sit amet consectetur adipiscing
-    elit lorem ipsum dolor sit amet consectetur adipiscing elit  Usage | a | b |
-
-    |---|---|
-
-    | 1 | 2 | lorem ipsum dolor sit amet consectetur adipiscing elit lorem ipsum dolor
-    sit amet consectetur adipiscing elit lorem ipsum dolor sit amet consectetur adipiscing
-    elit lorem ipsum dolor sit amet consectetur adipiscing elit lorem ipsum dolor
-    sit amet consectetur adipiscing elit lorem ipsum dolor sit amet consectetur adipiscing
-    elit lorem ipsum dolor sit amet consectetur adipiscing elit lorem ipsum dolor
-    sit amet consectetur adipiscing elit lorem ipsum dolor sit amet consectetur adipiscing
-    elit lorem ipsum dolor sit amet consectetur adipiscing elit lorem ipsum dolor
-    sit amet consectetur adipiscing elit lorem ipsum dolor sit amet consectetur adipiscing
-    elit lorem ipsum dolor sit amet consectetur adipiscing elit lorem ipsum dolor
-    sit amet consectetur adipiscing elit lorem ipsum dolor sit amet consectetur adipiscing
-    elit lorem ipsum dolor sit amet consectetur adipiscing elit lorem ipsum dolor
-    sit amet consectetur adipiscing elit lorem ipsum dolor sit amet consectetur adipiscing
-    elit lorem ipsum dolor sit amet consectetur adipiscing elit lorem ipsum dolor
-    sit amet consectetur adipiscing elit lorem ipsum dolor sit amet consectetur adipiscing
-    elit lorem ipsum dolor sit amet consectetur adipiscing elit lorem ipsum dolor
-    sit amet consectetur adipiscing elit lorem ipsum dolor sit amet consectetur adipiscing
-    elit lorem ipsum dolor sit amet consectetur adipiscing elit'
+    elit lorem ipsum dolor sit amet consectetur adipiscing elit  Usage
   stats:
     documents: 1
     sections: 3
@@ -69,7 +49,7 @@ documents:
   title: Guide
   status: success
   pages: null
-  summary: 'Guide lorem ipsum dolor sit amet consectetur adipiscing elit lorem ipsum
+  summary: Guide lorem ipsum dolor sit amet consectetur adipiscing elit lorem ipsum
     dolor sit amet consectetur adipiscing elit lorem ipsum dolor sit amet consectetur
     adipiscing elit lorem ipsum dolor sit amet consectetur adipiscing elit lorem ipsum
     dolor sit amet consectetur adipiscing elit lorem ipsum dolor sit amet consectetur
@@ -102,27 +82,7 @@ documents:
     sit amet consectetur adipiscing elit lorem ipsum dolor sit amet consectetur adipiscing
     elit lorem ipsum dolor sit amet consectetur adipiscing elit lorem ipsum dolor
     sit amet consectetur adipiscing elit lorem ipsum dolor sit amet consectetur adipiscing
-    elit lorem ipsum dolor sit amet consectetur adipiscing elit  Usage | a | b |
-
-    |---|---|
-
-    | 1 | 2 | lorem ipsum dolor sit amet consectetur adipiscing elit lorem ipsum dolor
-    sit amet consectetur adipiscing elit lorem ipsum dolor sit amet consectetur adipiscing
-    elit lorem ipsum dolor sit amet consectetur adipiscing elit lorem ipsum dolor
-    sit amet consectetur adipiscing elit lorem ipsum dolor sit amet consectetur adipiscing
-    elit lorem ipsum dolor sit amet consectetur adipiscing elit lorem ipsum dolor
-    sit amet consectetur adipiscing elit lorem ipsum dolor sit amet consectetur adipiscing
-    elit lorem ipsum dolor sit amet consectetur adipiscing elit lorem ipsum dolor
-    sit amet consectetur adipiscing elit lorem ipsum dolor sit amet consectetur adipiscing
-    elit lorem ipsum dolor sit amet consectetur adipiscing elit lorem ipsum dolor
-    sit amet consectetur adipiscing elit lorem ipsum dolor sit amet consectetur adipiscing
-    elit lorem ipsum dolor sit amet consectetur adipiscing elit lorem ipsum dolor
-    sit amet consectetur adipiscing elit lorem ipsum dolor sit amet consectetur adipiscing
-    elit lorem ipsum dolor sit amet consectetur adipiscing elit lorem ipsum dolor
-    sit amet consectetur adipiscing elit lorem ipsum dolor sit amet consectetur adipiscing
-    elit lorem ipsum dolor sit amet consectetur adipiscing elit lorem ipsum dolor
-    sit amet consectetur adipiscing elit lorem ipsum dolor sit amet consectetur adipiscing
-    elit lorem ipsum dolor sit amet consectetur adipiscing elit'
+    elit lorem ipsum dolor sit amet consectetur adipiscing elit  Usage
   stats:
     sections: 3
     tables: 1
@@ -213,30 +173,9 @@ documents:
     - dolor sit amet
     - sit amet consectetur
     - amet consectetur adipiscing
-    - lorem ipsum dolor
     - consectetur adipiscing elit
-    gist: 'Usage | a | b |
-
-      |---|---|
-
-      | 1 | 2 | lorem ipsum dolor sit amet consectetur adipiscing elit lorem ipsum
-      dolor sit amet consectetur adipiscing elit lorem ipsum dolor sit amet consectetur
-      adipiscing elit lorem ipsum dolor sit amet consectetur adipiscing elit lorem
-      ipsum dolor sit amet consectetur adipiscing elit lorem ipsum dolor sit amet
-      consectetur adipiscing elit lorem ipsum dolor sit amet consectetur adipiscing
-      elit lorem ipsum dolor sit amet consectetur adipiscing elit lorem ipsum dolor
-      sit amet consectetur adipiscing elit lorem ipsum dolor sit amet consectetur
-      adipiscing elit lorem ipsum dolor sit amet consectetur adipiscing elit lorem
-      ipsum dolor sit amet consectetur adipiscing elit lorem ipsum dolor sit amet
-      consectetur adipiscing elit lorem ipsum dolor sit amet consectetur adipiscing
-      elit lorem ipsum dolor sit amet consectetur adipiscing elit lorem ipsum dolor
-      sit amet consectetur adipiscing elit lorem ipsum dolor sit amet consectetur
-      adipiscing elit lorem ipsum dolor sit amet consectetur adipiscing elit lorem
-      ipsum dolor sit amet consectetur adipiscing elit lorem ipsum dolor sit amet
-      consectetur adipiscing elit lorem ipsum dolor sit amet consectetur adipiscing
-      elit lorem ipsum dolor sit amet consectetur adipiscing elit lorem ipsum dolor
-      sit amet consectetur adipiscing elit lorem ipsum dolor sit amet consectetur
-      adipiscing elit lorem ipsum dolor sit amet consectetur adipiscing elit'
+    - lorem ipsum dolor
+    gist: Usage
     chunk_ids:
     - src_000_chunk_014
     - src_000_chunk_015
