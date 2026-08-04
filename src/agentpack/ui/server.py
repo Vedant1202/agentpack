@@ -82,7 +82,11 @@ def build_human_readable_title(source_id: str, citation: dict) -> str:
             title += f" > {section_path[-2]} > {section_path[-1]}"
         else:
             title += f" > {section_path[-1]}"
-            
+
+    row_range = citation.get('row_range')
+    if row_range:
+        title += f" > rows {row_range[0]}-{row_range[1]}"
+
     return title
 
 def resolve_source_file_path(base_path: Path, citation: dict) -> Optional[str]:

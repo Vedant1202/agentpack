@@ -129,10 +129,13 @@ def retrieve(
         source = res['citation'].get('source_path', res['source_id'])
         section = res['citation'].get('section', '')
         page = res['citation'].get('page', '')
-        
+        row_range = res['citation'].get('row_range')
+
         cite_str = source
         if page:
             cite_str += f", page {page}"
+        if row_range:
+            cite_str += f", rows {row_range[0]}-{row_range[1]}"
         if section:
             cite_str += f", {section}"
             
