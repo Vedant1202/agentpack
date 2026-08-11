@@ -202,7 +202,7 @@ communities:
 
 Unchanged from T1–T5's already-recorded findings on this corpus (zero concepts: no real keyphrase overlap across 4 topically-unrelated documents, confirmed at T2 even with `df_cap` fully loosened; zero references: all 33 markdown links in this corpus are external URLs, confirmed at T3 by grep) — T8 reconfirms the same result end-to-end through the real CLI rather than in-test fixtures, which is its whole point.
 
-**Commit:** `<pending>`.
+**Commit:** `d4ee236` (docs-only task — no separate implementation commit; this entry's own commit).
 
 ---
 
