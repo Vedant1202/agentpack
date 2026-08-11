@@ -430,7 +430,7 @@ def test_api_graph_valid(monkeypatch, tmp_path):
     assert data["communities"][0]["label"] == "a.md"
 
 
-def test_api_graph_corrupt_degrades_gracefully(monkeypatch, tmp_path):
+def test_api_graph_corrupt_degrades_gracefully(monkeypatch, tmp_path, capsys):
     pack_dir = tmp_path / "agentpack_output"
     pack_dir.mkdir()
     write_minimal_manifest(pack_dir)
@@ -442,6 +442,7 @@ def test_api_graph_corrupt_degrades_gracefully(monkeypatch, tmp_path):
     response = client.get("/api/graph")
     assert response.status_code == 200
     assert response.json() == {"available": False}
+    assert capsys.readouterr().err
 
 
 def test_serve_static(monkeypatch, tmp_path):

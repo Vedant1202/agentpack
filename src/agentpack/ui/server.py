@@ -1,5 +1,6 @@
 import os
 import json
+import sys
 import yaml
 import sqlite3
 import numpy as np
@@ -79,7 +80,8 @@ def get_graph():
     try:
         with open(graph_path, "r", encoding="utf-8") as f:
             graph = yaml.safe_load(f)
-    except Exception:
+    except Exception as e:
+        print(f"[agentpack] Warning: failed to parse graph.yml ({e}).", file=sys.stderr)
         return {"available": False}
     if not graph:
         return {"available": False}
@@ -396,7 +398,6 @@ def submit_feedback(fb: Feedback):
     return {"status": "success"}
 
 from fastapi.responses import FileResponse
-import sys
 
 # Try to find the dist directory robustly
 possible_web_dirs = [
