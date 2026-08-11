@@ -216,6 +216,56 @@ def _extract_references(base: Path, sources: List[dict], chunks: List[dict]) -> 
     return edges
 
 
+def _community_label(members, node_by_id: Dict[str, GraphNode], degrees: Dict[str, int]) -> str:
+    """Highest-degree CONCEPT member's label; ties broken by node id
+    (ascending). Falls back to the highest-degree member of any kind if the
+    community has no concept nodes at all."""
+    concept_ids = [nid for nid in members if node_by_id[nid].kind == "concept"]
+    candidates = concept_ids or list(members)
+    best_id = sorted(candidates, key=lambda nid: (-degrees.get(nid, 0), nid))[0]
+    return node_by_id[best_id].label
+
+
+def _compute_communities(nodes: List[GraphNode], edges: List[GraphEdge]) -> List[dict]:
+    """Seeded Louvain over the full node set, with determinism hardening
+    (spec §3, verified live against the installed networkx 3.6.1): a FRESH
+    graph built with sorted node/edge insertion, then communities re-indexed
+    by size desc with a tuple(sorted(members)) tiebreak so community ids
+    never churn run-to-run -- networkx's own output order for
+    otherwise-identical runs is not itself guaranteed stable.
+
+    Mutates each node's `.community` field in place (pydantic models here
+    are plain mutable objects -- verified live, not assumed). Returns the
+    communities: summary list, ordered by id.
+
+    Isolated nodes each land in their own singleton community -- verified
+    live that louvain_communities does this on its own; nothing extra
+    needed here.
+    """
+    import networkx as nx  # lazy: heavy-import-free, matches enrich.py's yake/networkx precedent
+
+    node_by_id = {n.id: n for n in nodes}
+    G = nx.Graph()
+    G.add_nodes_from(sorted(node_by_id.keys()))
+    for e in sorted(edges, key=lambda e: (e.source, e.target, e.relation)):
+        G.add_edge(e.source, e.target)
+
+    raw_communities = nx.community.louvain_communities(G, seed=42)
+    ordered = sorted(raw_communities, key=lambda c: (-len(c), tuple(sorted(c))))
+    degrees = dict(G.degree())
+
+    summaries: List[dict] = []
+    for cid, members in enumerate(ordered):
+        for node_id in members:
+            node_by_id[node_id].community = cid
+        summaries.append({
+            "id": cid,
+            "label": _community_label(members, node_by_id, degrees),
+            "size": len(members),
+        })
+    return summaries
+
+
 def _load_yaml(path: Path) -> Optional[dict]:
     if not path.exists():
         return None
@@ -281,6 +331,8 @@ def _build_graph_inner(base: Path, params: Dict) -> Optional[dict]:
     chunks = manifest.get("chunks", []) or []
     edges.extend(_extract_references(base, sources, chunks))
 
+    communities = _compute_communities(nodes, edges)
+
     nodes.sort(key=lambda n: (n.kind, n.id))
     edges.sort(key=lambda e: (e.source, e.target, e.relation))
 
@@ -295,7 +347,7 @@ def _build_graph_inner(base: Path, params: Dict) -> Optional[dict]:
         params=params,
         nodes=nodes,
         edges=edges,
-        communities=[],
+        communities=communities,
     )
     return graph.model_dump()
 

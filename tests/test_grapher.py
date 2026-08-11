@@ -557,3 +557,120 @@ def test_reference_edges_deterministic(tmp_path):
     a["pack"]["generated_at"] = "REDACTED"
     b["pack"]["generated_at"] = "REDACTED"
     assert yaml.dump(a, sort_keys=False) == yaml.dump(b, sort_keys=False)
+
+
+# --- T4: communities (seeded Louvain + determinism hardening) --------------
+
+
+def _two_cluster_pack(pack_dir):
+    """4 docs, 2 structurally disconnected clusters -- A/B share a concept,
+    C/D share a different concept, nothing connects the two pairs. A
+    disconnected component can never split across communities regardless
+    of modularity optimization, so this is a safe, unambiguous fixture."""
+    sources = [
+        {"id": "src_000", "path": "a.md", "status": "success"},
+        {"id": "src_001", "path": "b.md", "status": "success"},
+        {"id": "src_002", "path": "c.md", "status": "success"},
+        {"id": "src_003", "path": "d.md", "status": "success"},
+    ]
+    map_documents = [
+        {"source_id": "src_000", "sections": [_section("src_000_s00", "A", ["cluster one topic"])]},
+        {"source_id": "src_001", "sections": [_section("src_001_s00", "B", ["cluster one topic"])]},
+        {"source_id": "src_002", "sections": [_section("src_002_s00", "C", ["cluster two topic"])]},
+        {"source_id": "src_003", "sections": [_section("src_003_s00", "D", ["cluster two topic"])]},
+    ]
+    _write_synthetic_pack(pack_dir, sources, map_documents)
+
+
+def test_disconnected_clusters_land_in_different_communities(tmp_path):
+    _two_cluster_pack(tmp_path)
+    from agentpack.grapher import build_graph
+    graph = build_graph(str(tmp_path), params=_DEFAULT_PARAMS)
+
+    community_by_id = {n["id"]: n["community"] for n in graph["nodes"]}
+    assert all(cid is not None for cid in community_by_id.values())
+    assert community_by_id["src_000"] == community_by_id["src_001"]
+    assert community_by_id["src_002"] == community_by_id["src_003"]
+    assert community_by_id["src_000"] != community_by_id["src_002"]
+    assert len(graph["communities"]) >= 2
+    # communities: block ordered by id, sizes match actual membership counts
+    ids = [c["id"] for c in graph["communities"]]
+    assert ids == sorted(ids)
+    for c in graph["communities"]:
+        assert c["size"] == sum(1 for cid in community_by_id.values() if cid == c["id"])
+
+
+def test_community_ids_stable_across_repeated_builds(tmp_path):
+    _two_cluster_pack(tmp_path)
+    from agentpack.grapher import build_graph
+    a = build_graph(str(tmp_path), params=_DEFAULT_PARAMS)
+    b = build_graph(str(tmp_path), params=_DEFAULT_PARAMS)
+
+    a_by_id = {n["id"]: n["community"] for n in a["nodes"]}
+    b_by_id = {n["id"]: n["community"] for n in b["nodes"]}
+    assert a_by_id == b_by_id
+    assert a["communities"] == b["communities"]
+
+
+def test_community_label_prefers_highest_degree_concept():
+    from agentpack.grapher import _community_label
+    from agentpack.models import GraphNode
+    node_by_id = {
+        "c_low": GraphNode(id="c_low", kind="concept", label="low degree concept"),
+        "c_high": GraphNode(id="c_high", kind="concept", label="high degree concept"),
+        "s_1": GraphNode(id="s_1", kind="section", label="Some Section", doc="src_000"),
+    }
+    # s_1 has the highest RAW degree, but the label rule prefers the
+    # highest-degree CONCEPT specifically -- c_high, not s_1.
+    degrees = {"c_low": 1, "c_high": 5, "s_1": 10}
+    label = _community_label({"c_low", "c_high", "s_1"}, node_by_id, degrees)
+    assert label == "high degree concept"
+
+
+def test_community_label_falls_back_to_highest_degree_node_when_no_concept():
+    from agentpack.grapher import _community_label
+    from agentpack.models import GraphNode
+    node_by_id = {
+        "src_000": GraphNode(id="src_000", kind="document", label="a.md"),
+        "s_1": GraphNode(id="s_1", kind="section", label="Some Section", doc="src_000"),
+    }
+    degrees = {"src_000": 3, "s_1": 1}
+    label = _community_label({"src_000", "s_1"}, node_by_id, degrees)
+    assert label == "a.md"
+
+
+def test_community_label_ties_broken_by_node_id():
+    from agentpack.grapher import _community_label
+    from agentpack.models import GraphNode
+    node_by_id = {
+        "c_zebra": GraphNode(id="c_zebra", kind="concept", label="Zebra Concept"),
+        "c_alpha": GraphNode(id="c_alpha", kind="concept", label="Alpha Concept"),
+    }
+    degrees = {"c_zebra": 2, "c_alpha": 2}  # tied degree -> tie-break by id
+    label = _community_label({"c_zebra", "c_alpha"}, node_by_id, degrees)
+    assert label == "Alpha Concept"  # "c_alpha" < "c_zebra"
+
+
+def test_isolated_node_forms_singleton_community(tmp_path):
+    """A document with zero sections -- zero edges of any kind, a genuinely
+    isolated node, not merely a small disconnected component -- must still
+    land in a community of its own, not be left unassigned."""
+    sources = [
+        {"id": "src_000", "path": "a.md", "status": "success"},
+        {"id": "src_001", "path": "b.md", "status": "success"},
+    ]
+    map_documents = [
+        {"source_id": "src_000", "sections": []},  # no sections -> no contains edge -> truly isolated
+        {"source_id": "src_001", "sections": [_section("src_001_s00", "B", [])]},
+    ]
+    _write_synthetic_pack(tmp_path, sources, map_documents)
+    from agentpack.grapher import build_graph
+    graph = build_graph(str(tmp_path), params=_DEFAULT_PARAMS)
+    community_by_id = {n["id"]: n["community"] for n in graph["nodes"]}
+    assert community_by_id["src_000"] is not None
+    assert community_by_id["src_001"] is not None
+    assert community_by_id["src_000"] != community_by_id["src_001"]
+
+    singleton = next(c for c in graph["communities"] if c["id"] == community_by_id["src_000"])
+    assert singleton["size"] == 1
+    assert singleton["label"] == "a.md"  # no concept members -> falls back to its own label
