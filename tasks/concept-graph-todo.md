@@ -126,13 +126,15 @@ Bare `python -m pytest` hits the anaconda base environment (old fastapi/starlett
 ```
 **Commit:** `a1d3f80`.
 
-### T6 · CLI surface
-- [ ] `pack`: `--no-graph` flag mirroring `--no-map` (cli.py:35); effective value = CLI flag OR NOT toml `enabled` (precedence per spec §4a, matching the `effective_fast` pattern at cli.py:47); thread through `write_pack(no_graph=…)`.
-- [ ] New `agentpack graph <pack_dir>` command mirroring `map_cmd` (cli.py:175-199): lazy imports, red error + exit 1 when `manifest.yml` missing, green confirmation. Uses **recorded `params:`** from an existing `graph.yml` when present; falls back to defaults when absent. No `--config` override (deferred, spec §4a).
-- [ ] Tests (`tests/test_graph_cli.py`, mirror `test_map_cli.py`): `--no-graph` → no graph.yml; toml `enabled=false` in input dir → no graph.yml; `--no-graph` beats toml `enabled=true`; rebuild parity — `agentpack graph` output byte-identical to pack-time modulo `generated_at`; rebuild with a **conflicting toml in CWD** still uses recorded params.
+### T6 · CLI surface ✅ DONE
+- [x] `pack`: `--no-graph` flag mirroring `--no-map` (cli.py:35); effective value = CLI flag OR NOT toml `enabled` (precedence per spec §4a, matching the `effective_fast` pattern at cli.py:47); threaded through `write_pack(no_graph=effective_no_graph, graph_params=cfg["graph"])`.
+- [x] New `agentpack graph <pack_dir>` command mirroring `map_cmd` (cli.py:175-199): lazy imports, red error + exit 1 when `manifest.yml` missing, green confirmation. Uses **recorded `params:`** read directly off an existing `graph.yml` (not `load_config`/any ambient `agentpack.toml` — the rebuild command never consults toml at all, only the dict already recorded in `graph.yml`'s own `params:` block); falls back to `write_graph`'s own `params=None` → `_GRAPH_DEFAULTS` handling when no `graph.yml` exists yet, or an existing one fails to parse (caught, yellow warning naming the exception, degrades to defaults — never raises). No `--config` override (deferred, spec §4a).
+- [x] A `written=False` return from `write_graph` (too-few-successful-sources, or missing map.yml) is reported as a **yellow non-fatal skip**, not a CLI error — only a missing `manifest.yml` (checked explicitly before calling `write_graph` at all, mirroring `map_cmd`'s own explicit check) is exit-code 1.
 
-**Acceptance:** all five CLI tests pass; full suite = baseline.
-**Verify:** `PYTHONPATH="$PWD/src" ./venv/bin/python -m pytest tests/test_graph_cli.py -v`; full suite.
+**Acceptance:** ✅ all CLI tests pass; full suite = baseline.
+**Verify:** ✅ RED confirmed first (all 9 new tests failed — `--no-graph`/`graph` subcommand didn't exist yet, `NoSuchOption`/`typer` usage errors) against the pre-change `cli.py`. `PYTHONPATH="$PWD/src" ./venv/bin/python -m pytest tests/test_graph_cli.py -v` → **9 passed** (5 todo-required + 4 extra: builds-by-default sanity check, missing-manifest error, corrupt-existing-graph.yml fallback-to-defaults, and the parity test split cleanly from the "uses recorded params" test). Full suite: `PYTHONPATH="$PWD/src" ./venv/bin/python -m pytest tests/ -q` → **266 passed, 1 pre-existing failure** (`test_run_eval`) — exactly 257 (T5 baseline) + 9 new, zero regressions.
+- **Adversarial test placement, worth recording:** the "rebuild uses recorded params, not toml" test places the *conflicting* `agentpack.toml` directly **inside the pack output directory itself** (`out/agentpack.toml`), not just somewhere unrelated in CWD — the most tempting place a buggy implementation might mistakenly look, since it sits right next to `manifest.yml`/`graph.yml`. A rebuild against that directory still reproduces the originally-recorded `df_cap=1.0`/`min_docs=2`, not the conflicting toml's `df_cap=0.01`/`min_docs=99` — proving `graph_cmd` never calls `load_config` at all, by construction, not just "CWD happens to win."
+**Commit:** `2145cc7`.
 
 ### T7 · Validation
 - [ ] `validate.py`: when `graph.yml` present, FK-check — every node `doc` ref ∈ manifest source_ids; every section node id ∈ map node_ids; every edge endpoint ∈ graph node ids; every node `community` ∈ communities ids. Absent `graph.yml` is not an error. Mirror `_validate_map` (validate.py:76-100): separate `_validate_graph` helper, errors as strings.
