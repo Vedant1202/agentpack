@@ -7,9 +7,9 @@ docs/specs/0003-corpus-concept-graph.md §3) -- this is what makes
 code path, so rebuild parity holds by construction.
 
 T1 scope: document + section nodes and `contains` edges. T2 adds concept
-promotion and `mentions` edges. `references` (T3) and communities (T4)
-extend _build_graph_inner in later tasks without touching this module's
-public surface.
+promotion and `mentions` edges. T3 adds `references` edges. Communities
+(T4) extend _build_graph_inner without touching this module's public
+surface.
 """
 import re
 import sys
@@ -17,6 +17,7 @@ from collections import Counter
 from datetime import datetime, timezone
 from pathlib import Path
 from typing import Dict, List, Optional, Tuple
+from urllib.parse import urlparse
 
 import yaml
 
@@ -134,6 +135,87 @@ def _promote_concepts(
     return new_nodes, new_edges
 
 
+# Markdown link forms (spec §4). The inline pattern's capture group already
+# excludes ')', '#', '?', and whitespace, so titles/anchors/queries never
+# enter the capture; the reference-style and wikilink forms don't have that
+# exclusion built in and are cleaned up uniformly in _resolve_target instead.
+_INLINE_LINK_RE = re.compile(r"\[[^\]]*\]\(([^)#?\s]+)[^)]*\)")
+_REFERENCE_LINK_RE = re.compile(r"^\s*\[[^\]]+\]:\s*(\S+)", re.MULTILINE)
+_WIKILINK_RE = re.compile(r"\[\[([^\]|]+)(?:\|[^\]]*)?\]\]")
+
+
+def _extract_link_targets(text: str) -> List[str]:
+    """Raw (unresolved) link targets from one blob of markdown text --
+    inline [x](target), reference-style [x]: target, and [[wikilink]]."""
+    return (
+        _INLINE_LINK_RE.findall(text)
+        + _REFERENCE_LINK_RE.findall(text)
+        + _WIKILINK_RE.findall(text)
+    )
+
+
+def _is_external(target: str) -> bool:
+    """A target with an explicit scheme (http:, mailto:, ...) is external --
+    verified live that urlparse gives an empty scheme for relative paths and
+    bare filenames, and a real scheme for actual URLs/mailto links."""
+    return bool(urlparse(target).scheme)
+
+
+def _resolve_target(target: str, path_to_source_id: Dict[str, str]) -> Optional[str]:
+    """Resolve a raw link target to a manifest source_id by filename match.
+    Returns None for external links or anything that doesn't match a packed
+    source's path -- both cases are dropped silently by the caller."""
+    if _is_external(target):
+        return None
+    # Strip anchor/query defensively for every form, not just inline (whose
+    # own capture group already excludes them) -- reference-style and
+    # wikilink targets can still carry a trailing #anchor.
+    target = target.split("#", 1)[0].split("?", 1)[0]
+    basename = target.rsplit("/", 1)[-1].strip()
+    if not basename:
+        return None
+    return path_to_source_id.get(basename)
+
+
+def _extract_references(base: Path, sources: List[dict], chunks: List[dict]) -> List[GraphEdge]:
+    """One `references` edge per (source_doc, target_doc) pair with at least
+    one resolvable link between them -- deduped, no self-loops, basis=structural.
+    Reads chunk text off disk (spec §2: raw markdown survives into chunks/*.md
+    unchanged), not the parser -- this module never imports parsers/chunker."""
+    path_to_source_id = {
+        s.get("path"): s.get("id") for s in sources if s.get("path") and s.get("id")
+    }
+    chunks_by_source: Dict[str, List[dict]] = {}
+    for c in chunks:
+        sid = c.get("source_id")
+        if sid:
+            chunks_by_source.setdefault(sid, []).append(c)
+
+    edges: List[GraphEdge] = []
+    for source_id, doc_chunks in chunks_by_source.items():
+        seen_targets: set = set()
+        for chunk in doc_chunks:
+            chunk_path = chunk.get("path")
+            if not chunk_path:
+                continue
+            full_path = base / chunk_path
+            if not full_path.exists():
+                continue
+            with open(full_path, "r", encoding="utf-8") as f:
+                text = f.read()
+            for raw_target in _extract_link_targets(text):
+                target_source_id = _resolve_target(raw_target, path_to_source_id)
+                if not target_source_id or target_source_id == source_id:
+                    continue
+                seen_targets.add(target_source_id)
+        for target_source_id in sorted(seen_targets):
+            edges.append(GraphEdge(
+                source=source_id, target=target_source_id,
+                relation="references", basis="structural",
+            ))
+    return edges
+
+
 def _load_yaml(path: Path) -> Optional[dict]:
     if not path.exists():
         return None
@@ -195,6 +277,9 @@ def _build_graph_inner(base: Path, params: Dict) -> Optional[dict]:
     concept_nodes, concept_edges = _promote_concepts(map_docs_by_id, existing_section_ids, params)
     nodes.extend(concept_nodes)
     edges.extend(concept_edges)
+
+    chunks = manifest.get("chunks", []) or []
+    edges.extend(_extract_references(base, sources, chunks))
 
     nodes.sort(key=lambda n: (n.kind, n.id))
     edges.sort(key=lambda e: (e.source, e.target, e.relation))

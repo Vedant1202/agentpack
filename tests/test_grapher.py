@@ -403,3 +403,157 @@ def test_concept_promotion_end_to_end_real_yake(tmp_path):
         graph = yaml.safe_load(f)
     concept_ids = {n["id"] for n in graph["nodes"] if n["kind"] == "concept"}
     assert "c_accounts_receivable" in concept_ids
+
+
+# --- T3: references edges from markdown links ------------------------------
+#
+# Unlike T2's gate tests, these go through the real write_pack() pipeline --
+# the whole point of T3 is that link syntax survives verbatim into chunk
+# text on disk (spec §2), so testing against real parsed/chunked output is
+# the natural, direct way to prove that, not an approximation of it.
+
+
+def test_extract_link_targets_all_three_forms():
+    from agentpack.grapher import _extract_link_targets
+    text = (
+        "[inline](./b.md) and [ref][1] and [[wiki.md]]\n\n"
+        "[1]: ./ref-target.md\n"
+    )
+    targets = _extract_link_targets(text)
+    assert "./b.md" in targets
+    assert "./ref-target.md" in targets
+    assert "wiki.md" in targets
+
+
+def test_is_external():
+    from agentpack.grapher import _is_external
+    assert _is_external("https://example.com") is True
+    assert _is_external("mailto:x@y.com") is True
+    assert _is_external("./b.md") is False
+    assert _is_external("b.md") is False
+
+
+def test_reference_inline_link_creates_edge(tmp_path):
+    in_dir = tmp_path / "corpus"
+    in_dir.mkdir()
+    (in_dir / "a.md").write_text(
+        "# Doc A\n\nSee [the other doc](./b.md) for more details on this topic.\n"
+    )
+    (in_dir / "b.md").write_text("# Doc B\n\nSome unrelated content lives here instead.\n")
+    out_dir = tmp_path / "out"
+    write_pack(str(in_dir), str(out_dir), quiet=True)
+
+    with open(out_dir / "manifest.yml") as f:
+        manifest = yaml.safe_load(f)
+    id_by_path = {s["path"]: s["id"] for s in manifest["sources"]}
+
+    with open(out_dir / "graph.yml") as f:
+        graph = yaml.safe_load(f)
+    refs = [e for e in graph["edges"] if e["relation"] == "references"]
+    assert len(refs) == 1
+    assert refs[0]["source"] == id_by_path["a.md"]
+    assert refs[0]["target"] == id_by_path["b.md"]
+    assert refs[0]["basis"] == "structural"
+
+
+def test_reference_style_and_wikilink_forms_resolved(tmp_path):
+    in_dir = tmp_path / "corpus"
+    in_dir.mkdir()
+    (in_dir / "a.md").write_text(
+        "# Doc A\n\n"
+        "See [the reference link][ref] for background context on this topic.\n\n"
+        "[ref]: ./b.md\n"
+    )
+    (in_dir / "c.md").write_text(
+        "# Doc C\n\nAlso see [[b.md]] using wikilink syntax for cross-referencing.\n"
+    )
+    (in_dir / "b.md").write_text("# Doc B\n\nSome unrelated content lives here instead.\n")
+    out_dir = tmp_path / "out"
+    write_pack(str(in_dir), str(out_dir), quiet=True)
+
+    with open(out_dir / "manifest.yml") as f:
+        manifest = yaml.safe_load(f)
+    id_by_path = {s["path"]: s["id"] for s in manifest["sources"]}
+
+    with open(out_dir / "graph.yml") as f:
+        graph = yaml.safe_load(f)
+    ref_pairs = {(e["source"], e["target"]) for e in graph["edges"] if e["relation"] == "references"}
+    assert (id_by_path["a.md"], id_by_path["b.md"]) in ref_pairs
+    assert (id_by_path["c.md"], id_by_path["b.md"]) in ref_pairs
+
+
+def test_reference_external_url_dropped(tmp_path):
+    in_dir = tmp_path / "corpus"
+    in_dir.mkdir()
+    (in_dir / "a.md").write_text(
+        "# Doc A\n\nCheck out [this external site](https://example.com/page) for context.\n"
+    )
+    (in_dir / "b.md").write_text("# Doc B\n\nSome unrelated content lives here instead.\n")
+    out_dir = tmp_path / "out"
+    write_pack(str(in_dir), str(out_dir), quiet=True)
+    with open(out_dir / "graph.yml") as f:
+        graph = yaml.safe_load(f)
+    assert [e for e in graph["edges"] if e["relation"] == "references"] == []
+
+
+def test_reference_unresolved_target_dropped(tmp_path):
+    in_dir = tmp_path / "corpus"
+    in_dir.mkdir()
+    (in_dir / "a.md").write_text(
+        "# Doc A\n\nSee [something](./not_in_this_corpus.md) for background reading.\n"
+    )
+    (in_dir / "b.md").write_text("# Doc B\n\nSome unrelated content lives here instead.\n")
+    out_dir = tmp_path / "out"
+    write_pack(str(in_dir), str(out_dir), quiet=True)
+    with open(out_dir / "graph.yml") as f:
+        graph = yaml.safe_load(f)
+    assert [e for e in graph["edges"] if e["relation"] == "references"] == []
+
+
+def test_reference_three_links_same_target_dedupe_to_one_edge(tmp_path):
+    in_dir = tmp_path / "corpus"
+    in_dir.mkdir()
+    (in_dir / "a.md").write_text(
+        "# Doc A\n\n"
+        "First mention [here](./b.md) in the introduction section.\n\n"
+        "Second mention [again](./b.md) later on in this document.\n\n"
+        "Third mention [once more](./b.md#specific-section) near the end.\n"
+    )
+    (in_dir / "b.md").write_text("# Doc B\n\nSome unrelated content lives here instead.\n")
+    out_dir = tmp_path / "out"
+    write_pack(str(in_dir), str(out_dir), quiet=True)
+    with open(out_dir / "graph.yml") as f:
+        graph = yaml.safe_load(f)
+    refs = [e for e in graph["edges"] if e["relation"] == "references"]
+    assert len(refs) == 1
+
+
+def test_reference_self_link_no_self_loop(tmp_path):
+    in_dir = tmp_path / "corpus"
+    in_dir.mkdir()
+    (in_dir / "a.md").write_text(
+        "# Doc A\n\nSee [this same document](./a.md) for the full table of contents.\n"
+    )
+    (in_dir / "b.md").write_text("# Doc B\n\nSome unrelated content lives here instead.\n")
+    out_dir = tmp_path / "out"
+    write_pack(str(in_dir), str(out_dir), quiet=True)
+    with open(out_dir / "graph.yml") as f:
+        graph = yaml.safe_load(f)
+    assert [e for e in graph["edges"] if e["relation"] == "references"] == []
+
+
+def test_reference_edges_deterministic(tmp_path):
+    in_dir = tmp_path / "corpus"
+    in_dir.mkdir()
+    (in_dir / "a.md").write_text("# Doc A\n\nSee [other](./b.md) and [third](./c.md) docs for more.\n")
+    (in_dir / "b.md").write_text("# Doc B\n\nSome content lives here for this test.\n")
+    (in_dir / "c.md").write_text("# Doc C\n\nSome other content lives here too.\n")
+    out_dir = tmp_path / "out"
+    write_pack(str(in_dir), str(out_dir), quiet=True)
+
+    from agentpack.grapher import build_graph
+    a = build_graph(str(out_dir))
+    b = build_graph(str(out_dir))
+    a["pack"]["generated_at"] = "REDACTED"
+    b["pack"]["generated_at"] = "REDACTED"
+    assert yaml.dump(a, sort_keys=False) == yaml.dump(b, sort_keys=False)
