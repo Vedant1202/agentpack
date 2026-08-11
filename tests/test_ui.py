@@ -2,9 +2,10 @@ import pytest
 import os
 import json
 import sqlite3
+import asyncio
 import numpy as np
+import httpx
 from pathlib import Path
-from fastapi.testclient import TestClient
 from typer.testing import CliRunner
 from unittest.mock import patch
 
@@ -12,7 +13,38 @@ from agentpack.cli import app as cli_app
 from agentpack.ui.server import app as fastapi_app
 
 runner = CliRunner()
-client = TestClient(fastapi_app)
+
+
+class ASGITestClient:
+    """Minimal synchronous test client for an ASGI app.
+
+    Starlette's bundled TestClient forwards an ``app=`` kwarg that httpx >=0.28
+    no longer accepts, so we drive the app through httpx's ASGITransport
+    instead. ASGITransport is async-only, so a thin asyncio bridge keeps the
+    existing synchronous test bodies unchanged.
+    """
+
+    def __init__(self, app):
+        self._app = app
+
+    def _request(self, method, url, **kwargs):
+        async def _send():
+            transport = httpx.ASGITransport(app=self._app)
+            async with httpx.AsyncClient(
+                transport=transport, base_url="http://testserver"
+            ) as ac:
+                return await ac.request(method, url, **kwargs)
+
+        return asyncio.run(_send())
+
+    def get(self, url, **kwargs):
+        return self._request("GET", url, **kwargs)
+
+    def post(self, url, **kwargs):
+        return self._request("POST", url, **kwargs)
+
+
+client = ASGITestClient(fastapi_app)
 
 
 def write_minimal_manifest(pack_dir: Path):
@@ -124,6 +156,13 @@ def test_api_chunks_valid(monkeypatch, tmp_path):
     assert chunk["id"] == "c1"
 
 def test_api_umap_missing(monkeypatch, tmp_path):
+    # The /api/umap endpoint imports umap before the manifest check, so without
+    # umap-learn it returns 500 instead of the 404 this test exercises. Guard
+    # consistently with the other umap tests below.
+    try:
+        import umap.umap_
+    except ImportError:
+        pytest.skip("umap-learn not installed")
     import agentpack.ui.server as server
     monkeypatch.setattr(server, "PACK_DIR", tmp_path)
     response = client.get("/api/umap")
@@ -344,6 +383,66 @@ def test_api_feedback(monkeypatch, tmp_path):
         data = json.load(f)
         assert len(data) == 1
         assert data[0]["chunk_id"] == "c1"
+
+def test_api_graph_manifest_not_found(monkeypatch, tmp_path):
+    import agentpack.ui.server as server
+    monkeypatch.setattr(server, "PACK_DIR", tmp_path)
+    response = client.get("/api/graph")
+    assert response.status_code == 404
+
+
+def test_api_graph_absent_returns_available_false(monkeypatch, tmp_path):
+    pack_dir = tmp_path / "agentpack_output"
+    pack_dir.mkdir()
+    write_minimal_manifest(pack_dir)
+
+    import agentpack.ui.server as server
+    monkeypatch.setattr(server, "PACK_DIR", pack_dir)
+
+    response = client.get("/api/graph")
+    assert response.status_code == 200
+    assert response.json() == {"available": False}
+
+
+def test_api_graph_valid(monkeypatch, tmp_path):
+    pack_dir = tmp_path / "agentpack_output"
+    pack_dir.mkdir()
+    write_minimal_manifest(pack_dir)
+    (pack_dir / "graph.yml").write_text(
+        "graph_version: 1\n"
+        "pack:\n  name: test_pack\n  generated_at: '2026-01-01T00:00:00Z'\n  manifest: manifest.yml\n"
+        "params:\n  df_cap: 0.3\n"
+        "nodes:\n  - id: src_000\n    kind: document\n    label: a.md\n    doc: null\n    community: 0\n"
+        "edges: []\n"
+        "communities:\n  - id: 0\n    label: a.md\n    size: 1\n",
+        encoding="utf-8",
+    )
+
+    import agentpack.ui.server as server
+    monkeypatch.setattr(server, "PACK_DIR", pack_dir)
+
+    response = client.get("/api/graph")
+    assert response.status_code == 200
+    data = response.json()
+    assert data["available"] is True
+    assert data["graph_version"] == 1
+    assert data["nodes"][0]["id"] == "src_000"
+    assert data["communities"][0]["label"] == "a.md"
+
+
+def test_api_graph_corrupt_degrades_gracefully(monkeypatch, tmp_path):
+    pack_dir = tmp_path / "agentpack_output"
+    pack_dir.mkdir()
+    write_minimal_manifest(pack_dir)
+    (pack_dir / "graph.yml").write_text(":\n  - not: [valid, yaml", encoding="utf-8")
+
+    import agentpack.ui.server as server
+    monkeypatch.setattr(server, "PACK_DIR", pack_dir)
+
+    response = client.get("/api/graph")
+    assert response.status_code == 200
+    assert response.json() == {"available": False}
+
 
 def test_serve_static(monkeypatch, tmp_path):
     import agentpack.ui.server as server
