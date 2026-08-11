@@ -674,3 +674,185 @@ def test_isolated_node_forms_singleton_community(tmp_path):
     singleton = next(c for c in graph["communities"] if c["id"] == community_by_id["src_000"])
     assert singleton["size"] == 1
     assert singleton["label"] == "a.md"  # no concept members -> falls back to its own label
+
+
+# --- T5: reports/graph_report.md --------------------------------------------
+#
+# _top_concepts/_bridge_concepts/_isolated_documents are tested directly with
+# hand-built node/edge dicts (matching graph.yml's already-serialized plain-
+# dict shape, not pydantic objects -- write_graph derives the report from
+# build_graph()'s dict return, not from live GraphNode/GraphEdge instances).
+# Bridge concepts specifically need exact community assignments to test
+# precisely, which depending on Louvain's actual clustering choices on a
+# real fixture would make the test probabilistic rather than exact.
+
+
+def test_top_concepts_ranks_by_degree_then_id():
+    from agentpack.grapher import _top_concepts
+    nodes = [
+        {"id": "c_mid", "kind": "concept", "label": "mid"},
+        {"id": "c_high", "kind": "concept", "label": "high"},
+        {"id": "c_tie_b", "kind": "concept", "label": "tie b"},
+        {"id": "c_tie_a", "kind": "concept", "label": "tie a"},
+    ]
+    edges = (
+        [{"source": f"s{i}", "target": "c_high", "relation": "mentions"} for i in range(3)]
+        + [{"source": "s10", "target": "c_mid", "relation": "mentions"}]
+        + [{"source": f"s{i}", "target": "c_tie_a", "relation": "mentions"} for i in range(20, 22)]
+        + [{"source": f"s{i}", "target": "c_tie_b", "relation": "mentions"} for i in range(30, 32)]
+    )
+    top = _top_concepts(nodes, edges, top_n=10)
+    assert [c["id"] for c, _ in top] == ["c_high", "c_tie_a", "c_tie_b", "c_mid"]
+    assert [d for _, d in top] == [3, 2, 2, 1]
+
+
+def test_top_concepts_respects_top_n_limit():
+    from agentpack.grapher import _top_concepts
+    nodes = [{"id": f"c_{i}", "kind": "concept", "label": f"concept {i}"} for i in range(15)]
+    edges = [{"source": "s0", "target": f"c_{i}", "relation": "mentions"} for i in range(15)]
+    top = _top_concepts(nodes, edges, top_n=10)
+    assert len(top) == 10
+
+
+def test_bridge_concepts_identifies_cross_community_concept():
+    from agentpack.grapher import _bridge_concepts
+    nodes = [
+        {"id": "c_bridge", "kind": "concept", "label": "bridge topic"},
+        {"id": "c_local", "kind": "concept", "label": "local topic"},
+        {"id": "s_a", "kind": "section", "label": "A", "community": 0},
+        {"id": "s_b", "kind": "section", "label": "B", "community": 1},
+        {"id": "s_c", "kind": "section", "label": "C", "community": 0},
+    ]
+    edges = [
+        {"source": "s_a", "target": "c_bridge", "relation": "mentions"},
+        {"source": "s_b", "target": "c_bridge", "relation": "mentions"},  # different community -> bridge
+        {"source": "s_c", "target": "c_local", "relation": "mentions"},  # only community 0 -> not a bridge
+    ]
+    bridges = _bridge_concepts(nodes, edges)
+    assert [c["id"] for c, _comms in bridges] == ["c_bridge"]
+
+
+def test_bridge_concepts_empty_when_no_concept_spans_multiple_communities():
+    from agentpack.grapher import _bridge_concepts
+    nodes = [
+        {"id": "c_local", "kind": "concept", "label": "local topic"},
+        {"id": "s_a", "kind": "section", "label": "A", "community": 0},
+        {"id": "s_c", "kind": "section", "label": "C", "community": 0},
+    ]
+    edges = [
+        {"source": "s_a", "target": "c_local", "relation": "mentions"},
+        {"source": "s_c", "target": "c_local", "relation": "mentions"},
+    ]
+    assert _bridge_concepts(nodes, edges) == []
+
+
+def test_isolated_documents_identifies_disconnected_doc():
+    from agentpack.grapher import _isolated_documents
+    nodes = [
+        {"id": "src_000", "kind": "document", "label": "a.md"},
+        {"id": "src_001", "kind": "document", "label": "b.md"},
+        {"id": "src_002", "kind": "document", "label": "isolated.md"},
+    ]
+    edges = [
+        {"source": "src_000", "target": "src_001", "relation": "references"},
+    ]
+    isolated = _isolated_documents(nodes, edges)
+    assert [d["id"] for d in isolated] == ["src_002"]
+
+
+def test_isolated_documents_excludes_concept_connected_doc():
+    from agentpack.grapher import _isolated_documents
+    nodes = [
+        {"id": "src_000", "kind": "document", "label": "a.md"},
+        {"id": "src_001", "kind": "document", "label": "b.md"},
+        {"id": "s_a", "kind": "section", "label": "A", "doc": "src_000"},
+        {"id": "s_b", "kind": "section", "label": "B", "doc": "src_001"},
+        {"id": "c_shared", "kind": "concept", "label": "shared topic"},
+    ]
+    edges = [
+        {"source": "s_a", "target": "c_shared", "relation": "mentions"},
+        {"source": "s_b", "target": "c_shared", "relation": "mentions"},
+    ]
+    assert _isolated_documents(nodes, edges) == []  # both docs share a concept -> neither isolated
+
+
+def test_isolated_documents_concept_mentioned_by_only_one_doc_stays_isolated():
+    """A concept mentioned only by sections of ONE document doesn't connect
+    that document to anyone else -- shouldn't arise post-gates (min_docs>=1
+    can make this legitimate, per spec Q4), but the report's own logic must
+    not silently assume a >=2-document invariant it doesn't itself enforce."""
+    from agentpack.grapher import _isolated_documents
+    nodes = [
+        {"id": "src_000", "kind": "document", "label": "a.md"},
+        {"id": "s_a1", "kind": "section", "label": "A1", "doc": "src_000"},
+        {"id": "s_a2", "kind": "section", "label": "A2", "doc": "src_000"},
+        {"id": "c_solo", "kind": "concept", "label": "solo topic"},
+    ]
+    edges = [
+        {"source": "s_a1", "target": "c_solo", "relation": "mentions"},
+        {"source": "s_a2", "target": "c_solo", "relation": "mentions"},
+    ]
+    assert [d["id"] for d in _isolated_documents(nodes, edges)] == ["src_000"]
+
+
+def test_graph_report_written_with_all_sections(tmp_path):
+    _two_cluster_pack(tmp_path)
+    from agentpack.grapher import write_graph
+    assert write_graph(str(tmp_path), params=_DEFAULT_PARAMS) is True
+    report_path = tmp_path / "reports" / "graph_report.md"
+    assert report_path.exists()
+    text = report_path.read_text()
+    for header in ("## Top Concepts", "## Bridge Concepts", "## Isolated Documents", "## Communities"):
+        assert header in text
+
+
+def test_graph_report_lists_promoted_concept(tmp_path):
+    sources = [
+        {"id": "src_000", "path": "a.md", "status": "success"},
+        {"id": "src_001", "path": "b.md", "status": "success"},
+    ]
+    map_documents = [
+        {"source_id": "src_000", "sections": [_section("src_000_s00", "One", ["accounts receivable"])]},
+        {"source_id": "src_001", "sections": [_section("src_001_s00", "Two", ["accounts receivable"])]},
+    ]
+    _write_synthetic_pack(tmp_path, sources, map_documents)
+    from agentpack.grapher import write_graph
+    write_graph(str(tmp_path), params=_DEFAULT_PARAMS)
+    text = (tmp_path / "reports" / "graph_report.md").read_text()
+    assert "accounts receivable" in text
+
+
+def test_graph_report_lists_isolated_document(tmp_path):
+    sources = [
+        {"id": "src_000", "path": "a.md", "status": "success"},
+        {"id": "src_001", "path": "b.md", "status": "success"},
+        {"id": "src_002", "path": "lonely.md", "status": "success"},
+    ]
+    map_documents = [
+        {"source_id": "src_000", "sections": [_section("src_000_s00", "One", ["shared topic"])]},
+        {"source_id": "src_001", "sections": [_section("src_001_s00", "Two", ["shared topic"])]},
+        {"source_id": "src_002", "sections": [_section("src_002_s00", "Three", ["nobody else has this"])]},
+    ]
+    _write_synthetic_pack(tmp_path, sources, map_documents)
+    from agentpack.grapher import write_graph
+    write_graph(str(tmp_path), params=_DEFAULT_PARAMS)
+    text = (tmp_path / "reports" / "graph_report.md").read_text()
+    isolated_section = text.split("## Isolated Documents")[1].split("##")[0]
+    assert "lonely.md" in isolated_section
+    assert "a.md" not in isolated_section
+    assert "b.md" not in isolated_section
+
+
+def test_graph_report_deterministic_modulo_generated_at(tmp_path):
+    _two_cluster_pack(tmp_path)
+    from agentpack.grapher import write_graph
+
+    write_graph(str(tmp_path), params=_DEFAULT_PARAMS)
+    first = (tmp_path / "reports" / "graph_report.md").read_text()
+    write_graph(str(tmp_path), params=_DEFAULT_PARAMS)
+    second = (tmp_path / "reports" / "graph_report.md").read_text()
+
+    def _strip_generated_at(text):
+        return "\n".join(line for line in text.splitlines() if not line.startswith("Generated at:"))
+
+    assert _strip_generated_at(first) == _strip_generated_at(second)

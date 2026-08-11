@@ -266,6 +266,150 @@ def _compute_communities(nodes: List[GraphNode], edges: List[GraphEdge]) -> List
     return summaries
 
 
+# --- reports/graph_report.md -----------------------------------------------
+#
+# Deterministic, no LLM (spec §4). Operates on the ALREADY-SERIALIZED plain
+# dicts from build_graph()'s return (graph_obj["nodes"]/["edges"]), the same
+# way audit.py/validate.py work on plain manifest dicts rather than live
+# pydantic objects -- write_graph() is the caller, after build_graph() has
+# already produced the dict form.
+
+
+def _concept_degree(concept_id: str, edges: List[dict]) -> int:
+    """A concept's degree is exactly its mentions-edge count: concepts never
+    appear as an edge source, and no other relation targets one."""
+    return sum(1 for e in edges if e["relation"] == "mentions" and e["target"] == concept_id)
+
+
+def _top_concepts(nodes: List[dict], edges: List[dict], top_n: int = 10) -> List[Tuple[dict, int]]:
+    concepts = [n for n in nodes if n["kind"] == "concept"]
+    scored = [(n, _concept_degree(n["id"], edges)) for n in concepts]
+    scored.sort(key=lambda pair: (-pair[1], pair[0]["id"]))
+    return scored[:top_n]
+
+
+def _bridge_concepts(nodes: List[dict], edges: List[dict]) -> List[Tuple[dict, set]]:
+    """A concept is a bridge if the sections mentioning it span >=2 distinct
+    communities -- regardless of which community the concept node itself
+    landed in. This can genuinely happen even though directly-connected
+    nodes tend to cluster together: a concept mentioned by many otherwise-
+    unrelated documents ends up in whichever cluster pulls hardest, while
+    still neighboring sections left in other, more tightly-bound clusters."""
+    node_by_id = {n["id"]: n for n in nodes}
+    concepts = [n for n in nodes if n["kind"] == "concept"]
+    bridges: List[Tuple[dict, set]] = []
+    for concept in concepts:
+        neighbor_communities: set = set()
+        for e in edges:
+            if e["relation"] == "mentions" and e["target"] == concept["id"]:
+                section = node_by_id.get(e["source"])
+                if section is not None and section.get("community") is not None:
+                    neighbor_communities.add(section["community"])
+        if len(neighbor_communities) >= 2:
+            bridges.append((concept, neighbor_communities))
+    bridges.sort(key=lambda pair: (-len(pair[1]), pair[0]["id"]))
+    return bridges
+
+
+def _isolated_documents(nodes: List[dict], edges: List[dict]) -> List[dict]:
+    """A document is isolated iff it has neither kind of cross-document
+    connection: no `references` edge in either direction, AND no concept it
+    mentions is also mentioned by a DIFFERENT document. Doesn't assume the
+    >=2-document concept-promotion invariant -- computed from the edges
+    actually present, so it stays correct even at params["min_docs"]=1
+    (spec §10 Q4's documented legitimate opt-in)."""
+    documents = [n for n in nodes if n["kind"] == "document"]
+    node_by_id = {n["id"]: n for n in nodes}
+
+    referenced_docs: set = set()
+    for e in edges:
+        if e["relation"] == "references":
+            referenced_docs.add(e["source"])
+            referenced_docs.add(e["target"])
+
+    concept_docs: Dict[str, set] = {}
+    for e in edges:
+        if e["relation"] == "mentions":
+            section = node_by_id.get(e["source"])
+            if section is not None and section.get("doc"):
+                concept_docs.setdefault(e["target"], set()).add(section["doc"])
+    concept_connected_docs = {
+        doc_id for docs in concept_docs.values() if len(docs) >= 2 for doc_id in docs
+    }
+
+    isolated = [
+        doc for doc in documents
+        if doc["id"] not in referenced_docs and doc["id"] not in concept_connected_docs
+    ]
+    isolated.sort(key=lambda n: n["id"])
+    return isolated
+
+
+def _render_report(
+    pack_name: str,
+    generated_at: str,
+    nodes: List[dict],
+    edges: List[dict],
+    communities: List[dict],
+) -> str:
+    documents = [n for n in nodes if n["kind"] == "document"]
+    concepts = [n for n in nodes if n["kind"] == "concept"]
+
+    lines = [
+        f"# Corpus Concept Graph Report for '{pack_name}'",
+        f"Generated at: {generated_at}",
+        "",
+        "## Statistics",
+        f"- **Documents:** {len(documents)}",
+        f"- **Concepts:** {len(concepts)}",
+        f"- **Communities:** {len(communities)}",
+        "",
+        "## Top Concepts",
+    ]
+    top = _top_concepts(nodes, edges)
+    if top:
+        for concept, degree in top:
+            lines.append(f"- **{concept['label']}** ({degree} mention(s))")
+    else:
+        lines.append("- No concepts were promoted for this corpus.")
+    lines.append("")
+
+    lines.append("## Bridge Concepts")
+    bridges = _bridge_concepts(nodes, edges)
+    if bridges:
+        community_label_by_id = {c["id"]: c["label"] for c in communities}
+        for concept, comm_ids in bridges:
+            names = ", ".join(community_label_by_id.get(cid, str(cid)) for cid in sorted(comm_ids))
+            lines.append(f"- **{concept['label']}** — spans {len(comm_ids)} communities: {names}")
+    else:
+        lines.append("- No bridge concepts found.")
+    lines.append("")
+
+    lines.append("## Isolated Documents")
+    isolated = _isolated_documents(nodes, edges)
+    if isolated:
+        for doc in isolated:
+            lines.append(f"- {doc['label']}")
+    else:
+        lines.append("- No isolated documents.")
+    lines.append("")
+
+    lines.append("## Communities")
+    member_kind_counts: Dict[int, Counter] = {}
+    for n in nodes:
+        if n.get("community") is not None:
+            member_kind_counts.setdefault(n["community"], Counter())[n["kind"]] += 1
+    for c in communities:
+        counts = member_kind_counts.get(c["id"], Counter())
+        lines.append(f"### {c['label']} (community {c['id']}) — {c['size']} member(s)")
+        lines.append(f"- Documents: {counts.get('document', 0)}")
+        lines.append(f"- Sections: {counts.get('section', 0)}")
+        lines.append(f"- Concepts: {counts.get('concept', 0)}")
+        lines.append("")
+
+    return "\n".join(lines).rstrip() + "\n"
+
+
 def _load_yaml(path: Path) -> Optional[dict]:
     if not path.exists():
         return None
@@ -372,13 +516,36 @@ def build_graph(pack_dir: str, params: Optional[Dict] = None) -> Optional[dict]:
 
 
 def write_graph(pack_dir: str, params: Optional[Dict] = None) -> bool:
-    """Build the graph and write graph.yml next to manifest.yml. Returns True
-    if graph.yml was written, False if the build was skipped or failed (see
-    build_graph -- this function itself never raises either)."""
+    """Build the graph and write graph.yml + reports/graph_report.md next to
+    manifest.yml. Returns True if graph.yml was written, False if the build
+    was skipped or failed (see build_graph -- this function itself never
+    raises either). The report is a secondary artifact: a failure rendering
+    or writing it is caught and warned on separately, and does not undo an
+    already-successful graph.yml write -- reusing graph.yml's own
+    generated_at rather than stamping a second, slightly different one a
+    few microseconds later, so the two sibling files agree."""
     graph_obj = build_graph(pack_dir, params)
     if graph_obj is None:
         return False
-    out = Path(pack_dir) / "graph.yml"
+    base = Path(pack_dir)
+    out = base / "graph.yml"
     with open(out, "w", encoding="utf-8") as f:
         yaml.dump(graph_obj, f, default_flow_style=False, sort_keys=False)
+
+    try:
+        report_text = _render_report(
+            graph_obj["pack"].get("name", base.name),
+            graph_obj["pack"].get("generated_at", ""),
+            graph_obj["nodes"], graph_obj["edges"], graph_obj["communities"],
+        )
+        reports_dir = base / "reports"
+        reports_dir.mkdir(exist_ok=True)
+        with open(reports_dir / "graph_report.md", "w", encoding="utf-8") as f:
+            f.write(report_text)
+    except Exception as e:
+        print(
+            f"[agentpack] Warning: graph.yml written, but graph_report.md failed ({e}).",
+            file=sys.stderr,
+        )
+
     return True
