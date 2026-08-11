@@ -16,6 +16,9 @@ from agentpack.parsers.docling_parser import DoclingParser
 from agentpack.chunker import chunk_document, Chunk
 from agentpack.models import SourceDocument
 from agentpack.cache import cache_get, cache_set, make_key
+from agentpack.trust import check_zip_safety, scan_for_hidden_content
+
+_ZIP_BASED_SUFFIXES = {".docx", ".pptx", ".xlsx"}
 
 
 def _get_pack_version() -> str:
@@ -40,6 +43,21 @@ def _parse_one(
     parser = get_parser(file_path.suffix, fast_pdf=fast_pdf)
     if parser is None:
         return None
+
+    if file_path.suffix.lower() in _ZIP_BASED_SUFFIXES:
+        zip_warning = check_zip_safety(file_path, source_id)
+        if zip_warning is not None:
+            with open(file_path, "rb") as _f:
+                checksum = hashlib.sha256(_f.read()).hexdigest()
+            return SourceDocument(
+                source_id=source_id,
+                path=file_path.name,
+                type=file_path.suffix.lstrip(".").lower(),
+                checksum=checksum,
+                blocks=[],
+                warnings=[zip_warning],
+            )
+
     if hasattr(parser, "remove_empty_lines"):
         parser.remove_empty_lines = remove_empty_lines
     with open(file_path, "rb") as _f:
@@ -53,6 +71,10 @@ def _parse_one(
             cache_set(cache_dir, cache_key, doc)
     else:
         doc.source_id = source_id
+
+    # Runs after the cache block on every call, hit or miss, so trust warnings
+    # are never pickled into the L1 cache and always carry the current source_id.
+    doc.warnings.extend(scan_for_hidden_content(file_path, doc.type, source_id, doc.blocks))
     return doc
 
 
