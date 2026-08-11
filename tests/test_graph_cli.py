@@ -120,6 +120,63 @@ def test_graph_rebuild_uses_recorded_params_not_any_toml(tmp_path):
     assert rebuilt["params"]["min_docs"] == 2
 
 
+def test_graph_with_similarity_flag_refreshes_edges(tmp_path):
+    """--with-similarity computes similar_to edges from an already-built
+    vector index. A constant embedding for every chunk means every
+    cross-document section pair comes out at cosine=1.0, so the flag's
+    effect (edges appear) is observable without depending on real fastembed
+    output or specific similarity values -- those are covered precisely at
+    the grapher.py unit level (tests/test_grapher.py)."""
+    from unittest.mock import patch, MagicMock
+
+    in_dir = _two_doc_corpus(tmp_path)
+    out = tmp_path / "out"
+    res = runner.invoke(app, ["pack", str(in_dir), "--out", str(out), "--quiet"])
+    assert res.exit_code == 0, res.output
+
+    mock_embed = MagicMock()
+    mock_embed.embed.side_effect = lambda texts, **_: iter([[1.0, 0.0]] * len(texts))
+    with patch("agentpack.retrieve._get_embedding_model", return_value=mock_embed):
+        res = runner.invoke(app, ["index", str(out), "--quiet"])
+    assert res.exit_code == 0, res.output
+
+    # build_vector_index's own append-only hook already ran similarity once;
+    # confirm the explicit --with-similarity path also works standalone by
+    # clearing any similar_to edges first, then re-running through the CLI.
+    graph_path = out / "graph.yml"
+    g = yaml.safe_load(graph_path.read_text())
+    g["edges"] = [e for e in g["edges"] if e["relation"] != "similar_to"]
+    with open(graph_path, "w") as f:
+        yaml.dump(g, f)
+
+    res = runner.invoke(app, ["graph", str(out), "--with-similarity", "--quiet"])
+    assert res.exit_code == 0, res.output
+    rebuilt = yaml.safe_load(graph_path.read_text())
+    assert any(e["relation"] == "similar_to" for e in rebuilt["edges"])
+
+
+def test_graph_without_similarity_flag_leaves_existing_similar_to_edges_alone(tmp_path):
+    """Omitting --with-similarity must not touch a pre-existing similar_to
+    edge (write_graph rebuilds the structural graph; only add_similarity_edges
+    owns the similar_to relation, and it's only called when the flag is set)."""
+    in_dir = _two_doc_corpus(tmp_path)
+    out = tmp_path / "out"
+    runner.invoke(app, ["pack", str(in_dir), "--out", str(out), "--quiet"])
+
+    graph_path = out / "graph.yml"
+    g = yaml.safe_load(graph_path.read_text())
+    planted = {"source": "zzz_planted_a", "target": "zzz_planted_b", "relation": "similar_to", "basis": "embedding"}
+    g["edges"].append(planted)
+    with open(graph_path, "w") as f:
+        yaml.dump(g, f)
+
+    res = runner.invoke(app, ["graph", str(out), "--quiet"])  # no --with-similarity
+    assert res.exit_code == 0, res.output
+    rebuilt = yaml.safe_load(graph_path.read_text())
+    assert planted not in rebuilt["edges"]  # write_graph rebuilds edges from scratch each time
+    assert [e for e in rebuilt["edges"] if e["relation"] == "similar_to"] == []
+
+
 def test_graph_rebuild_falls_back_to_defaults_when_existing_graph_corrupt(tmp_path):
     in_dir = _two_doc_corpus(tmp_path)
     out = tmp_path / "out"

@@ -11,6 +11,7 @@ promotion and `mentions` edges. T3 adds `references` edges. Communities
 (T4) extend _build_graph_inner without touching this module's public
 surface.
 """
+import json
 import re
 import sys
 from collections import Counter
@@ -19,6 +20,7 @@ from pathlib import Path
 from typing import Dict, List, Optional, Tuple
 from urllib.parse import urlparse
 
+import numpy as np
 import yaml
 
 from agentpack.config import _GRAPH_DEFAULTS
@@ -549,3 +551,159 @@ def write_graph(pack_dir: str, params: Optional[Dict] = None) -> bool:
         )
 
     return True
+
+
+# --- Phase B1: similar_to edges from already-built embeddings --------------
+#
+# Reads ONLY what's already on disk: an existing graph.yml (to merge into)
+# and an existing indexes/vector_index.npy + vector_meta.json (the exact
+# on-disk contract build_vector_index writes -- retrieve.py -- already-
+# L2-normalized per-chunk vectors, row i of the array corresponds to
+# meta[i]). Never builds either itself and never imports retrieve.py or
+# calls an embedding model: this stays a pure post-processor over pack
+# output, same as the rest of grapher.py (spec §3).
+
+
+def _section_centroid(chunk_ids, chunk_row_by_id: Dict[str, int], embeddings: np.ndarray) -> Optional[np.ndarray]:
+    """Mean of a section's own chunks' vectors, re-normalized to unit length
+    -- the mean of several unit vectors isn't itself unit length, so a plain
+    dot product between two centroids wouldn't be a true cosine similarity
+    without this (verified live). Returns None if none of the section's
+    chunk_ids are present in the vector index (a purely structural section,
+    or chunks embedded after this section was mapped)."""
+    rows = [chunk_row_by_id[cid] for cid in chunk_ids if cid in chunk_row_by_id]
+    if not rows:
+        return None
+    centroid = embeddings[rows].mean(axis=0)
+    norm = np.linalg.norm(centroid)
+    if norm == 0:
+        return None
+    return centroid / norm
+
+
+def _compute_similarity_edges(
+    map_obj: dict, chunk_row_by_id: Dict[str, int], embeddings: np.ndarray, threshold: float,
+) -> List[GraphEdge]:
+    """All section-pair `similar_to` edges at or above threshold, across
+    DIFFERENT documents only (same-document proximity is already captured
+    structurally by `contains`/hierarchy, and would otherwise dominate as
+    noise). Sorted, so the result is deterministic regardless of dict
+    iteration order upstream."""
+    section_doc: Dict[str, str] = {}
+    centroids: Dict[str, np.ndarray] = {}
+    for doc in map_obj.get("documents", []) or []:
+        source_id = doc.get("source_id")
+        for section, sid in _iter_all_sections(doc.get("sections"), source_id):
+            node_id = section.get("node_id")
+            if not node_id:
+                continue
+            section_doc[node_id] = sid
+            centroid = _section_centroid(section.get("chunk_ids") or [], chunk_row_by_id, embeddings)
+            if centroid is not None:
+                centroids[node_id] = centroid
+
+    edges: List[GraphEdge] = []
+    node_ids = sorted(centroids.keys())
+    for i, a in enumerate(node_ids):
+        for b in node_ids[i + 1:]:
+            if section_doc.get(a) == section_doc.get(b):
+                continue
+            similarity = float(np.dot(centroids[a], centroids[b]))
+            if similarity >= threshold:
+                edges.append(GraphEdge(source=a, target=b, relation="similar_to", basis="embedding"))
+    edges.sort(key=lambda e: (e.source, e.target, e.relation))
+    return edges
+
+
+def _add_similarity_edges_inner(base: Path, params: Optional[Dict]) -> bool:
+    graph_path = base / "graph.yml"
+    graph_obj = _load_yaml(graph_path)
+    if graph_obj is None:
+        print(
+            "[agentpack] Note: no graph.yml found; skipping similarity edges.",
+            file=sys.stderr,
+        )
+        return False
+
+    # Recorded params win, same principle as the `agentpack graph` rebuild
+    # command (cli.py) -- an explicit params argument overrides, otherwise
+    # reuse what's already recorded in this graph.yml, falling back to
+    # defaults only if that's also missing.
+    if params is None:
+        params = dict(graph_obj.get("params") or _GRAPH_DEFAULTS)
+
+    indexes_dir = base / "indexes"
+    vector_path = indexes_dir / "vector_index.npy"
+    meta_path = indexes_dir / "vector_meta.json"
+    if not vector_path.exists() or not meta_path.exists():
+        print(
+            "[agentpack] Note: no vector index found; skipping similarity edges.",
+            file=sys.stderr,
+        )
+        return False
+
+    embeddings = np.load(vector_path)
+    with open(meta_path, "r", encoding="utf-8") as f:
+        meta = json.load(f)
+    chunk_row_by_id = {m["chunk_id"]: i for i, m in enumerate(meta) if m.get("chunk_id")}
+
+    map_obj = _load_yaml(base / "map.yml") or {}
+    new_edges = _compute_similarity_edges(
+        map_obj, chunk_row_by_id, embeddings, params["similarity_threshold"],
+    )
+
+    # This function owns the entire similar_to relation: strip any prior
+    # similar_to edges before inserting the freshly computed set, so
+    # re-running never accumulates duplicates even if the embeddings
+    # themselves changed between runs (a keyed upsert couldn't detect a
+    # since-removed edge; a wholesale replace always converges).
+    kept_edges = [GraphEdge(**e) for e in (graph_obj.get("edges") or []) if e.get("relation") != "similar_to"]
+    all_edges = sorted(kept_edges + new_edges, key=lambda e: (e.source, e.target, e.relation))
+
+    nodes = [GraphNode(**n) for n in (graph_obj.get("nodes") or [])]
+    communities = _compute_communities(nodes, all_edges)
+
+    graph_obj["nodes"] = [n.model_dump() for n in nodes]
+    graph_obj["edges"] = [e.model_dump() for e in all_edges]
+    graph_obj["communities"] = communities
+
+    with open(graph_path, "w", encoding="utf-8") as f:
+        yaml.dump(graph_obj, f, default_flow_style=False, sort_keys=False)
+
+    try:
+        report_text = _render_report(
+            graph_obj["pack"].get("name", base.name),
+            graph_obj["pack"].get("generated_at", ""),
+            graph_obj["nodes"], graph_obj["edges"], graph_obj["communities"],
+        )
+        reports_dir = base / "reports"
+        reports_dir.mkdir(exist_ok=True)
+        with open(reports_dir / "graph_report.md", "w", encoding="utf-8") as f:
+            f.write(report_text)
+    except Exception as e:
+        print(
+            f"[agentpack] Warning: similarity edges written, but graph_report.md refresh failed ({e}).",
+            file=sys.stderr,
+        )
+
+    return True
+
+
+def add_similarity_edges(pack_dir: str, params: Optional[Dict] = None) -> bool:
+    """Compute section-to-section `similar_to` edges from an already-built
+    vector index and merge them into an existing graph.yml, recomputing
+    communities afterward. Returns True if graph.yml was updated, False if
+    skipped (no graph.yml, no vector index) or on any failure -- never
+    raises, mirroring build_graph's posture. Idempotent: re-running always
+    recomputes the full similar_to edge set and replaces the prior one
+    wholesale, so repeated runs (e.g. `agentpack index` run twice) never
+    accumulate duplicate edges.
+    """
+    try:
+        return _add_similarity_edges_inner(Path(pack_dir), params)
+    except Exception as e:
+        print(
+            f"[agentpack] Warning: similarity edge build failed, graph.yml left unchanged ({e}).",
+            file=sys.stderr,
+        )
+        return False

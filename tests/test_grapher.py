@@ -178,12 +178,12 @@ def _write_synthetic_pack(pack_dir, sources, map_documents):
         yaml.dump(map_obj, f)
 
 
-def _section(node_id, title="Section", keyphrases=None, nodes=None):
+def _section(node_id, title="Section", keyphrases=None, nodes=None, chunk_ids=None):
     return {
         "node_id": node_id,
         "title": title,
         "keyphrases": keyphrases or [],
-        "chunk_ids": [],
+        "chunk_ids": chunk_ids or [],
         "nodes": nodes or [],
     }
 
@@ -856,3 +856,240 @@ def test_graph_report_deterministic_modulo_generated_at(tmp_path):
         return "\n".join(line for line in text.splitlines() if not line.startswith("Generated at:"))
 
     assert _strip_generated_at(first) == _strip_generated_at(second)
+
+
+# --- B1: similar_to edges from already-built embeddings --------------------
+#
+# add_similarity_edges is a pure reader of whatever's already on disk: an
+# existing graph.yml (to merge into) and an existing indexes/vector_index.npy
+# + vector_meta.json (already-normalized per-chunk vectors, the exact
+# contract build_vector_index writes -- retrieve.py:200-208, verified live).
+# It never calls an embedding model itself, so these tests hand-write
+# controlled vectors rather than depend on real fastembed output -- the
+# same gate-boundary-precision rationale as T2's synthetic manifest/map.yml
+# fixtures. One real end-to-end test at the bottom proves the actual
+# build_vector_index wiring (the append-only hook), mirroring T2/T3's
+# real-pipeline tests.
+
+import json
+import numpy as np
+
+
+def _write_vector_index(pack_dir, chunk_vectors):
+    """Write a synthetic indexes/vector_index.npy + vector_meta.json.
+    chunk_vectors is {chunk_id: [already-normalized vector components]},
+    mirroring build_vector_index's real on-disk contract exactly."""
+    indexes_dir = pack_dir / "indexes"
+    indexes_dir.mkdir(parents=True, exist_ok=True)
+    chunk_ids = list(chunk_vectors.keys())
+    embeddings = np.array([chunk_vectors[cid] for cid in chunk_ids], dtype=np.float32)
+    np.save(indexes_dir / "vector_index.npy", embeddings)
+    meta = [
+        {"chunk_id": cid, "source_id": None, "path": None, "token_count": 0, "citation": {}}
+        for cid in chunk_ids
+    ]
+    with open(indexes_dir / "vector_meta.json", "w") as f:
+        json.dump(meta, f)
+
+
+def _two_section_similarity_pack(tmp_path, vec_a, vec_b, same_doc=False):
+    """Two sections (in different documents unless same_doc=True), one
+    chunk each, with caller-supplied vectors -- lets each test dial in an
+    exact, known cosine similarity rather than depending on real content."""
+    if same_doc:
+        # A second, unrelated document is required even though it plays no
+        # part in the similarity check itself -- _MIN_SUCCESSFUL_SOURCES=2
+        # (T1) refuses to build any graph at all for a single-document
+        # corpus, structurally independent of this test's actual point.
+        sources = [
+            {"id": "src_000", "path": "a.md", "status": "success"},
+            {"id": "src_001", "path": "b.md", "status": "success"},
+        ]
+        map_documents = [
+            {"source_id": "src_000", "sections": [
+                _section("src_000_s00", "One", chunk_ids=["c_a"]),
+                _section("src_000_s01", "Two", chunk_ids=["c_b"]),
+            ]},
+            {"source_id": "src_001", "sections": [_section("src_001_s00", "Other", chunk_ids=[])]},
+        ]
+    else:
+        sources = [
+            {"id": "src_000", "path": "a.md", "status": "success"},
+            {"id": "src_001", "path": "b.md", "status": "success"},
+        ]
+        map_documents = [
+            {"source_id": "src_000", "sections": [_section("src_000_s00", "One", chunk_ids=["c_a"])]},
+            {"source_id": "src_001", "sections": [_section("src_001_s00", "Two", chunk_ids=["c_b"])]},
+        ]
+    _write_synthetic_pack(tmp_path, sources, map_documents)
+    _write_vector_index(tmp_path, {"c_a": vec_a, "c_b": vec_b})
+
+
+def _similar_to_edges(graph):
+    return [e for e in graph["edges"] if e["relation"] == "similar_to"]
+
+
+def test_similarity_edge_created_for_near_identical_sections(tmp_path):
+    from agentpack.grapher import write_graph, add_similarity_edges
+    _two_section_similarity_pack(tmp_path, [1.0, 0.0], [1.0, 0.0])  # cosine = 1.0
+    write_graph(str(tmp_path), params=_DEFAULT_PARAMS)
+
+    assert add_similarity_edges(str(tmp_path), params=_DEFAULT_PARAMS) is True
+    graph = yaml.safe_load((tmp_path / "graph.yml").read_text())
+    edges = _similar_to_edges(graph)
+    assert len(edges) == 1
+    assert {edges[0]["source"], edges[0]["target"]} == {"src_000_s00", "src_001_s00"}
+    assert edges[0]["basis"] == "embedding"
+
+
+def test_similarity_edge_not_created_for_unrelated_sections(tmp_path):
+    from agentpack.grapher import write_graph, add_similarity_edges
+    _two_section_similarity_pack(tmp_path, [1.0, 0.0], [0.0, 1.0])  # cosine = 0.0
+    write_graph(str(tmp_path), params=_DEFAULT_PARAMS)
+
+    add_similarity_edges(str(tmp_path), params=_DEFAULT_PARAMS)
+    graph = yaml.safe_load((tmp_path / "graph.yml").read_text())
+    assert _similar_to_edges(graph) == []
+
+
+def test_similarity_threshold_from_params_honored(tmp_path):
+    """cosine = 0.6 (verified live: dot([1,0], [0.6,0.8]) == 0.6) -- rejected
+    at the default 0.8 threshold, admitted once params lowers it to 0.5."""
+    from agentpack.grapher import write_graph, add_similarity_edges
+    _two_section_similarity_pack(tmp_path, [1.0, 0.0], [0.6, 0.8])
+    write_graph(str(tmp_path), params=_DEFAULT_PARAMS)
+
+    add_similarity_edges(str(tmp_path), params=_DEFAULT_PARAMS)  # threshold 0.8
+    graph = yaml.safe_load((tmp_path / "graph.yml").read_text())
+    assert _similar_to_edges(graph) == []
+
+    add_similarity_edges(str(tmp_path), params={**_DEFAULT_PARAMS, "similarity_threshold": 0.5})
+    graph = yaml.safe_load((tmp_path / "graph.yml").read_text())
+    assert len(_similar_to_edges(graph)) == 1
+
+
+def test_similarity_excludes_same_document_sections(tmp_path):
+    from agentpack.grapher import write_graph, add_similarity_edges
+    _two_section_similarity_pack(tmp_path, [1.0, 0.0], [1.0, 0.0], same_doc=True)
+    write_graph(str(tmp_path), params=_DEFAULT_PARAMS)
+
+    add_similarity_edges(str(tmp_path), params=_DEFAULT_PARAMS)
+    graph = yaml.safe_load((tmp_path / "graph.yml").read_text())
+    assert _similar_to_edges(graph) == []
+
+
+def test_similarity_idempotent_no_duplicate_edges_on_rerun(tmp_path):
+    from agentpack.grapher import write_graph, add_similarity_edges
+    _two_section_similarity_pack(tmp_path, [1.0, 0.0], [1.0, 0.0])
+    write_graph(str(tmp_path), params=_DEFAULT_PARAMS)
+
+    add_similarity_edges(str(tmp_path), params=_DEFAULT_PARAMS)
+    first = yaml.safe_load((tmp_path / "graph.yml").read_text())
+    add_similarity_edges(str(tmp_path), params=_DEFAULT_PARAMS)
+    second = yaml.safe_load((tmp_path / "graph.yml").read_text())
+
+    assert len(_similar_to_edges(first)) == 1
+    assert len(_similar_to_edges(second)) == 1
+    first["pack"]["generated_at"] = second["pack"]["generated_at"] = "REDACTED"
+    assert first == second
+
+
+def test_similarity_recomputes_communities_not_stale_passthrough(tmp_path):
+    """Communities must be freshly recomputed from the CURRENT edge set, not
+    carried over from whatever graph.yml already had -- proven by planting
+    an obviously-stale communities block before merging, then confirming the
+    output reflects the real topology instead of the stale stub.
+
+    Deliberately not asserted here: that bridging two small components with
+    one similar_to edge merges them into the same community. Verified live
+    (networkx 3.6.1, seed=42) that Louvain keeps two 2-node pairs in
+    SEPARATE communities even after a single edge connects them into one
+    path graph -- a real resolution-limit effect on small graphs, not a bug
+    in this feature, so asserting a specific merge outcome would be testing
+    Louvain's optimization choice rather than this code."""
+    from agentpack.grapher import write_graph, add_similarity_edges
+    _two_section_similarity_pack(tmp_path, [1.0, 0.0], [0.0, 1.0])  # cosine 0 -> no new edge
+    write_graph(str(tmp_path), params=_DEFAULT_PARAMS)
+
+    graph_path = tmp_path / "graph.yml"
+    corrupted = yaml.safe_load(graph_path.read_text())
+    for n in corrupted["nodes"]:
+        n["community"] = 99
+    stale_block = [{"id": 99, "label": "STALE", "size": len(corrupted["nodes"])}]
+    corrupted["communities"] = stale_block
+    with open(graph_path, "w") as f:
+        yaml.dump(corrupted, f)
+
+    add_similarity_edges(str(tmp_path), params=_DEFAULT_PARAMS)
+    after = yaml.safe_load(graph_path.read_text())
+    assert after["communities"] != stale_block
+    assert any(n["community"] != 99 for n in after["nodes"])
+
+
+def test_similarity_no_op_when_no_graph_yml(tmp_path, capsys):
+    from agentpack.grapher import add_similarity_edges
+    _two_section_similarity_pack(tmp_path, [1.0, 0.0], [1.0, 0.0])
+    # no write_graph() call -- graph.yml never created
+    assert add_similarity_edges(str(tmp_path), params=_DEFAULT_PARAMS) is False
+    assert not (tmp_path / "graph.yml").exists()
+    assert capsys.readouterr().err
+
+
+def test_similarity_no_op_when_no_vector_index(tmp_path, capsys):
+    from agentpack.grapher import write_graph, add_similarity_edges
+    sources = [
+        {"id": "src_000", "path": "a.md", "status": "success"},
+        {"id": "src_001", "path": "b.md", "status": "success"},
+    ]
+    map_documents = [
+        {"source_id": "src_000", "sections": [_section("src_000_s00", "One", chunk_ids=["c_a"])]},
+        {"source_id": "src_001", "sections": [_section("src_001_s00", "Two", chunk_ids=["c_b"])]},
+    ]
+    _write_synthetic_pack(tmp_path, sources, map_documents)
+    write_graph(str(tmp_path), params=_DEFAULT_PARAMS)
+    before = (tmp_path / "graph.yml").read_text()
+
+    assert add_similarity_edges(str(tmp_path), params=_DEFAULT_PARAMS) is False
+    assert (tmp_path / "graph.yml").read_text() == before  # left untouched
+    assert capsys.readouterr().err
+
+
+def test_similarity_graph_without_similarity_still_validates(tmp_path):
+    """graph.yml built at pack-time, never touched by add_similarity_edges,
+    must still pass validate_pack -- the merge step is purely additive."""
+    from agentpack.grapher import write_graph
+    from agentpack.validate import validate_pack
+    _two_cluster_pack(tmp_path)
+    write_graph(str(tmp_path), params=_DEFAULT_PARAMS)
+    assert validate_pack(str(tmp_path)) == []
+
+
+def test_similarity_end_to_end_via_build_vector_index(tmp_path):
+    """Real write_pack + real (mocked-embedding) build_vector_index -- proves
+    the append-only hook at the end of build_vector_index (retrieve.py)
+    actually calls into grapher.py, not just that the pure function works
+    in isolation. A constant embedding vector for every chunk means every
+    cross-document section pair comes out at cosine=1.0."""
+    from unittest.mock import patch, MagicMock
+    from agentpack.pack import write_pack
+    from agentpack.retrieve import build_vector_index
+
+    in_dir = tmp_path / "corpus"
+    in_dir.mkdir()
+    (in_dir / "a.md").write_text("# Doc A\n\nSome real content for chunking and embedding here.\n")
+    (in_dir / "b.md").write_text("# Doc B\n\nDifferent real content for this second document.\n")
+    out_dir = tmp_path / "out"
+    write_pack(str(in_dir), str(out_dir), quiet=True, graph_params=_DEFAULT_PARAMS)
+    assert (out_dir / "graph.yml").exists()
+
+    mock_embed = MagicMock()
+    mock_embed.embed.side_effect = lambda texts, **_: iter([[1.0, 0.0]] * len(texts))
+    indexes_dir = out_dir / "indexes"
+    indexes_dir.mkdir(exist_ok=True)
+    with patch("agentpack.retrieve._get_embedding_model", return_value=mock_embed):
+        build_vector_index(out_dir, indexes_dir / "vector_index.npy", indexes_dir / "vector_meta.json")
+
+    graph = yaml.safe_load((out_dir / "graph.yml").read_text())
+    edges = _similar_to_edges(graph)
+    assert edges  # the hook ran and found at least the cross-doc section pair
+    assert all(e["basis"] == "embedding" for e in edges)

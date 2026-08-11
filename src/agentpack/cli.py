@@ -207,6 +207,10 @@ def map_cmd(
 def graph_cmd(
     pack_dir: str,
     quiet: bool = typer.Option(False, help="Suppress progress output"),
+    with_similarity: bool = typer.Option(
+        False, "--with-similarity",
+        help="Also (re)compute similar_to edges from an already-built vector index",
+    ),
 ):
     """(Re)build the corpus concept graph (graph.yml) for an existing pack."""
     from pathlib import Path as _Path
@@ -247,6 +251,22 @@ def graph_cmd(
                 "graph.yml skipped (too few successfully parsed sources, or missing map.yml).",
                 fg=typer.colors.YELLOW,
             )
+
+    if with_similarity:
+        from agentpack.grapher import add_similarity_edges
+
+        # No params passed explicitly -- add_similarity_edges reads them back
+        # from the graph.yml write_graph just produced, which already holds
+        # exactly the params resolved above (recorded params, or defaults).
+        sim_written = add_similarity_edges(str(base))
+        if not quiet:
+            if sim_written:
+                typer.secho("similar_to edges refreshed.", fg=typer.colors.GREEN)
+            else:
+                typer.secho(
+                    "similarity edges skipped (no graph.yml, or no vector index built yet).",
+                    fg=typer.colors.YELLOW,
+                )
 
 
 @app.command(name="eval")

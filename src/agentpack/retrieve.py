@@ -219,6 +219,13 @@ def build_vector_index(pack_dir: Path, vector_path: Path, meta_path: Path):
     hash_path = vector_path.parent / "vector_index.hash"
     hash_path.write_text(_manifest_hash(pack_dir))
 
+    # Refresh similar_to edges in graph.yml (if present) using the embeddings
+    # just built -- additive, append-only (spec 0003 §B1). add_similarity_edges
+    # never raises internally, mirroring write_graph's own posture at the
+    # pack.py call site, so no extra try/except is needed here.
+    from agentpack.grapher import add_similarity_edges
+    add_similarity_edges(str(pack_dir))
+
 def search_fts(pack_dir: str, query: str, top_k: int = 5) -> List[Dict]:
     base_path = Path(pack_dir)
     indexes_dir = base_path / "indexes"
