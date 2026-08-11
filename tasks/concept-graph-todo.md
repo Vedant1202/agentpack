@@ -33,18 +33,24 @@ Bare `python -m pytest` hits the anaconda base environment (old fastapi/starlett
 
 ## Phase 0 — Independent leaves
 
-### T0.1 · `[graph]` config section
-- [ ] `config.py`: add `_GRAPH_DEFAULTS = {"enabled": True, "df_cap": 0.30, "min_docs": 2, "similarity_threshold": 0.80}` and a `[graph]` section read parallel to the existing `[pack]` read (config.py:31-42). Do **not** merge graph keys into the `[pack]` namespace. Return shape: extend the returned dict with a `"graph"` sub-dict (existing `[pack]` keys stay top-level so no existing caller changes).
-- [ ] Range validation with warn-and-fallback (spec §4a): `df_cap` ∈ (0,1], `min_docs` ≥ 1, `similarity_threshold` ∈ (0,1]; out-of-range → one stderr warning naming the key, value falls back to default, never a raise. `min_docs = 1` is valid (deliberate opt-in), not an error.
+### T0.1 · `[graph]` config section ✅ DONE
+- [x] `config.py`: added `_GRAPH_DEFAULTS = {"enabled": True, "df_cap": 0.30, "min_docs": 2, "similarity_threshold": 0.80}` and a `[graph]` section read parallel to `[pack]`. Returned dict gets a `"graph"` sub-dict; existing `[pack]` top-level keys untouched (verified by a dedicated namespace-independence test).
+- [x] Range validation via `_validate_graph_settings` + `_is_number` (excludes `bool`, since `bool` subclasses `int` in Python and TOML `true`/`false` must not silently pass a numeric range check — caught this before it became a bug, not after): `df_cap` ∈ (0,1], `min_docs` ≥ 1 (real int, not bool), `similarity_threshold` ∈ (0,1]. Out-of-range/wrong-type → one stderr warning naming the key + offending value, falls back to default, never raises. `min_docs = 1` explicitly tested as **valid**, not an error.
 
-**Acceptance:** defaults returned when no toml / no `[graph]` section; overrides honored; out-of-range → warning + default; existing `[pack]` keys unaffected.
-**Verify:** `PYTHONPATH="$PWD/src" ./venv/bin/python -m pytest tests/test_config.py -v` (extend the existing file); full suite = baseline.
+**Acceptance:** ✅ defaults when no toml/no `[graph]` section; overrides honored (including partial sections — unset keys keep their default); boundary values tested precisely (`df_cap=1.0` valid, `df_cap=0` invalid); bool-as-int rejected for `min_docs`; `[pack]` keys provably independent of `[graph]`.
+**Verify:** ✅ TDD — 11 new tests written first and confirmed RED (`KeyError: 'graph'`) against the pre-change `config.py`, then GREEN after implementation. `PYTHONPATH="$PWD/src" ./venv/bin/python -m pytest tests/test_config.py -v` → **14 passed** (3 pre-existing + 11 new). Full suite: `PYTHONPATH="$PWD/src" ./venv/bin/python -m pytest tests/ -q` → **213 passed, 1 pre-existing failure** (`test_run_eval`) — exactly baseline (202) + 11 new, zero regressions. Module import + `agentpack --version` sanity-checked directly.
+**Commits:** `df688ef` (spec/plan/todo docs), `99efeb5` (implementation).
 
-### T0.2 · Graph pydantic models
-- [ ] `models.py`: add `GraphNode` (`id`, `kind: Literal["document","section","concept"]`, `label`, `doc: Optional[str]`, `community: Optional[int]`), `GraphEdge` (`source`, `target`, `relation`, `basis: Literal["structural","keyphrase","embedding"]`), `CorpusGraph` (`graph_version: int = 1`, `pack: Dict`, `params: Dict`, `nodes`, `edges`, `communities: List[Dict]`). Mirror the style of the `SectionNode`/`DocumentMap`/`CorpusMap` block (models.py:33-62). Additive only — touch nothing else in the file.
+### T0.2 · Graph pydantic models ✅ DONE
+- [x] `models.py`: added `GraphNode` (`id`, `kind: Literal["document","section","concept"]`, `label`, `doc: Optional[str]`, `community: Optional[int]`), `GraphEdge` (`source`, `target`, `relation: str`, `basis: Literal["structural","keyphrase","embedding"]`), `CorpusGraph` (`graph_version: int = 1`, `pack: Dict`, `params: Dict`, `nodes`, `edges`, `communities: List[Dict]`). Placed after `CorpusMap`, mirroring its style exactly. **`relation` deliberately left as plain `str`, not a `Literal`** (unlike `basis`) — `basis` is a fixed 3-value set the spec already closes (structural/keyphrase/embedding); `relation` values arrive incrementally as T1 (`contains`) → T2 (`mentions`) → T3 (`references`) → B1 (`similar_to`) land, and constraining it now would mean editing `models.py` again every phase — which the task itself says not to do ("additive only — touch nothing else"). Zero changes to any existing class.
 
-**Acceptance:** models import cleanly; no existing test breaks.
-**Verify:** full suite = baseline (models are exercised for real starting T1).
+**Acceptance:** ✅ models import cleanly; `Literal` constraints verified live — a bad `kind` and a bad `basis` both correctly raise `pydantic.ValidationError`, not silently accepted; no existing test broken.
+**Verify:** ✅ RED confirmed first (`ImportError: cannot import name 'GraphNode'` against the pre-change file) — no dedicated test file was added, per this task's own scope ("no tests of their own — exercised by T1") and matching the repo's existing convention (`SectionNode`/`DocumentMap`/`CorpusMap` have no dedicated test file either; they're validated indirectly through `test_mapper.py`, the same role `test_grapher.py` will play here). GREEN confirmed via direct construction + validation checks (shown above). Full suite: `PYTHONPATH="$PWD/src" ./venv/bin/python -m pytest tests/ -q` → **213 passed, 1 pre-existing failure** (`test_run_eval`) — identical to the T0.1 count, zero new tests as expected, zero regressions.
+**Commit:** `af615a9`.
+
+---
+
+**Phase 0 complete.** Both leaves land clean; `grapher.py` (T1) can now import validated config and models.
 
 ---
 
