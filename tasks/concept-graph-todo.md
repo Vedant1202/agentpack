@@ -103,12 +103,28 @@ Bare `python -m pytest` hits the anaconda base environment (old fastapi/starlett
 - **Real-corpus check:** `demo_corpus` produces 4 communities, one per document, each labeled by fallback (its own document name — no concept members exist anywhere in this corpus, consistent with T2/T3's already-established findings that this corpus has zero shared concepts and zero cross-document references). Correct and expected given the underlying graph structure, not a new finding requiring investigation — a direct, verified consequence of the T2/T3 results.
 **Commit:** `16c7bdb`.
 
-### T5 · `reports/graph_report.md`
-- [ ] Deterministic report (spec §4): Top concepts by degree (top 10), Bridge concepts (neighbors span ≥2 communities), Isolated documents (no cross-document edge), Communities (label + member counts). Written by the same builder call, standalone file, `audit` untouched.
-- [ ] Tests: report exists and contains the four sections; a doc with no cross-doc edges appears under Isolated; byte-determinism modulo date.
+### T5 · `reports/graph_report.md` ✅ DONE
+- [x] Four deterministic sections, all operating on `build_graph()`'s already-serialized plain dicts (matching how `audit.py`/`validate.py` already read manifest data — plain dicts, not live pydantic objects; `write_graph()` is the only caller with access to both forms and it calls `build_graph()` first): **Top concepts** — ranked by mentions-edge count (a concept's exact graph degree; concepts never appear as an edge source and no other relation targets one), ties by id, capped at 10. **Bridge concepts** — a concept whose mentioning sections span ≥2 *distinct* communities, regardless of which community the concept itself landed in — a genuine, non-obvious pattern worth naming precisely: a concept shared by many otherwise-unrelated documents ends up assigned to whichever cluster pulls hardest, while still neighboring sections left behind in other clusters. **Isolated documents** — no `references` edge in either direction AND no concept shared with a *different* document; computed from the edges actually present rather than assuming the ≥2-document promotion invariant, so it stays correct even at `params["min_docs"]=1` (§10 Q4's documented legitimate opt-in). **Communities** — label + document/section/concept membership breakdown.
+- [x] Report treated as a **secondary artifact**: `write_graph()` wraps its render+write in its own try/except so a report failure can never undo an already-successful `graph.yml` write. Reuses `graph.yml`'s own `generated_at` rather than stamping a second, microseconds-later timestamp — the two sibling files agree on when they were produced.
+- [x] `reports/` directory creation kept defensive (`mkdir(exist_ok=True)`) inside `write_graph()` itself rather than assumed present, mirroring `audit.py`'s own defensive pattern — matters for the future `agentpack graph` rebuild command (T6) run against a pack that might not already have a `reports/` dir.
 
-**Acceptance:** report renders on the T2/T4 fixtures; full suite = baseline.
-**Verify:** `PYTHONPATH="$PWD/src" ./venv/bin/python -m pytest tests/test_grapher.py -v -k report`; full suite.
+**Acceptance:** ✅ report renders correctly on real T2/T4-shaped fixtures — verified by actually reading the generated file's content in every test, not just checking section headers exist.
+**Verify:** ✅ RED confirmed first (11 of 11 new tests failed — `ImportError` for the three new pure helpers, `FileNotFoundError` for the report file; a 12th match in the same `-k` run was a pre-existing, already-passing T4 test caught by the broad filter, not a new test). `PYTHONPATH="$PWD/src" ./venv/bin/python -m pytest tests/test_grapher.py -v -k "report or bridge or isolated_document or top_concept"` → **11 passed**; full file → **44 passed** (33 T1–T4 + 11 T5). Full suite: **257 passed, 1 pre-existing failure** (`test_run_eval`) — exactly 246 (T4 baseline) + 11 new, zero regressions.
+- **Testing approach:** `_top_concepts`/`_bridge_concepts`/`_isolated_documents` each tested directly against hand-built node/edge dicts, not only through a full graph build — bridge concepts specifically need *exact*, controlled community assignments to test precisely; letting real Louvain clustering decide the split on a constructed fixture would make the test probabilistic (dependent on modularity optimization actually finding the split I intended) rather than exact. Four end-to-end tests through the real `write_graph()` call prove the wiring itself, including report-vs-report determinism with the `Generated at:` line excluded.
+- **Real-corpus check, read in full, not spot-checked:** the actual rendered report on `demo_corpus` — clean output, honest "No concepts were promoted"/"No bridge concepts found" messaging (not silently blank sections), and all 4 documents correctly listed under Isolated Documents — directly consistent with T2/T3's already-established finding that this specific corpus has zero shared concepts and zero cross-document references. Pasted in full below for the eventual checkpoint reviewer.
+
+```
+# Corpus Concept Graph Report for 'demo_corpus'
+## Statistics
+- Documents: 4 · Concepts: 0 · Communities: 4
+## Top Concepts / Bridge Concepts
+- (none — corpus has no cross-document overlap, per T2/T3 findings)
+## Isolated Documents
+- React_Architecture.md, 3M_2018_10K.pdf, organizations-100.csv, AgentPack_Benchmark.md
+## Communities
+- One per document (2 members each: the doc + its one top-level section), labeled by fallback
+```
+**Commit:** `a1d3f80`.
 
 ### T6 · CLI surface
 - [ ] `pack`: `--no-graph` flag mirroring `--no-map` (cli.py:35); effective value = CLI flag OR NOT toml `enabled` (precedence per spec §4a, matching the `effective_fast` pattern at cli.py:47); thread through `write_pack(no_graph=…)`.
