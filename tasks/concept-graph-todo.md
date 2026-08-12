@@ -250,6 +250,47 @@ Unchanged from T1–T5's already-recorded findings on this corpus (zero concepts
 
 ---
 
+## T9 · Concept-quality tuning — generic fixes (checkpoint follow-up) ✅ DONE
+
+Not part of the original Phase A/B scope — a direct follow-up to the checkpoint's concept-quality
+finding (mostly SEC boilerplate / YAKE artifacts, only 2 of 19 concepts were real topics). Explicitly
+scoped in conversation to **mechanism-level, corpus-agnostic fixes only** — a hand-picked
+financebench vocabulary stoplist was considered and rejected as overfitting; see commit `b8fe9f8` for
+the full design reasoning.
+
+- [x] `_dedup_key()` (`grapher.py`): groups concept slugs by token **set** (order/repetition
+  independent) before gating, so YAKE's overlapping n-gram windows over one repeated phrase count as
+  one concept's evidence, not several weaker ones. A concept's actual id/label still always derives
+  from `_slug()` on the winning surface form — a single-variant concept gets the exact id it had
+  before this existed. **Known, deliberate gap:** does not collapse plurals (`year`/`years`) — a
+  cheap trailing-s stemmer risks false singularization on words that are their own singular despite
+  ending in 's' (`status`, `bonus`, `focus`), a real cross-corpus false-positive risk not worth taking.
+- [x] `_is_self_reference()` (`grapher.py`): excludes a keyphrase from promotion evidence, **per
+  document**, when it reduces to nothing but that document's own `map.yml` title plus optionally a
+  generic corporate suffix (Incorporated/Corp/LLC/...). A strict full-token-subset check, not a
+  substring match, specifically so a phrase merely *starting* with the entity name (`Corning Display
+  Technologies`) survives while the bare self-reference (`CORNING`, `CORNING INCORPORATED`) doesn't.
+  Per-document, not a global ban — a genuine cross-reference from a *different* document still counts
+  (dedicated test). **Known, deliberate gap:** filename-derived titles can mismatch the body text's
+  own hyphenation (`COCACOLA` vs `Coca-Cola`), so not every self-reference is caught — not chased with
+  fuzzier matching, which would risk new false positives against genuine concepts.
+
+**Acceptance:** ✅ both fixes are demonstrably generic — neither contains any financebench-specific
+string; verified live before implementation that the token-set/subset mechanics produce the intended
+result on real examples (`FISCAL YEAR` family merges; `CORNING` filters; `Corning Display Technologies`
+does not). Re-run against **both** `demo_corpus` and financebench, not just the corpus that motivated
+the fix.
+**Verify:** ✅ RED confirmed first (6 of 7 new tests failed — `ImportError` for `_dedup_key`/
+`_is_self_reference`, or the merge/filter behavior not yet existing; one self-title test initially
+passed **vacuously** — caught before treating it as done — because its two phrase variants each only
+appeared in one document, so `min_docs` alone rejected them regardless of any self-title logic;
+redesigned to use the identical phrase in both documents so it actually exercises the filter).
+`PYTHONPATH="$PWD/src" ./venv/bin/python -m pytest tests/test_grapher.py -v -k "dedup_key or near_duplicate or self_title or is_self_reference"` → **7 passed**. Full file → **61 passed** (54 prior + 7 new), zero regressions to any existing gate-boundary test. Full suite: **296 passed, 1 pre-existing failure** (`test_run_eval`) — exactly 289 (post-G1/G2/G3 baseline) + 7 new.
+- **Real-corpus result, both corpora:** `demo_corpus` rebuilt — **still 0 concepts**, nothing incorrectly suppressed (the regression-safety check this corpus is actually good for, since it never promoted anything to begin with). Financebench subset rebuilt — **19 → 15 concepts**. Removed: `CORNING`, `CORNING INCORPORATED` (self-reference), `Fiscal Year Fiscal`, `Year Fiscal Year` (merged into the pre-existing `FISCAL YEAR` entry). Both real findings from the original checkpoint — `Corning Display Technologies`, `Amcor Flexibles North` — **survived unchanged**, exactly as designed. Remaining noise, honestly still present and explicitly not chased by these two fixes: `year ended December`/`years ended December` (plural split), `Coca-Cola Company February` (self-ref missed due to filename/body hyphenation mismatch), `Domestic International Total` (a raw table-column-header fragment — a different failure mode entirely, not a duplicate-slug or self-title problem), `UNITED STATES`/`Company Annual Report`/`Consolidated Financial`/`Financial Statements`/`Chief Financial Officer` (generic SEC-filing-header vocabulary — the kind of thing a domain-specific stoplist *would* catch, deliberately not built here). `agentpack validate` clean on the rebuilt pack.
+**Commit:** `b8fe9f8`.
+
+---
+
 ## Deferred (Phase C — not yours; see spec §5/§9)
-- RRF third contributor in `search_hybrid` — retrieval behavior change, **ask-first**, gated on `agentpack eval` lift.
-- LLM concept enrichment; UI rendering; PDF `cites` edges; chunk-level similarity.
+- RRF third contributor in `search_hybrid` — retrieval behavior change, **ask-first**, gated on `agentpack eval` lift. Sequencing note from checkpoint follow-up discussion: run this *after* T9 (done) had a chance to reduce concept-graph noise, not before — feeding a boilerplate-heavy graph into retrieval would very likely regress the eval rather than lift it.
+- LLM concept enrichment (explicitly the more-generic-but-costs-real-API-money alternative to T9's free fixes — discussed at length, not started; would need explicit spend approval); UI rendering (shipped separately, see `tasks/graph-ui-todo.md`); PDF `cites` edges; chunk-level similarity.
