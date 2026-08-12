@@ -58,11 +58,21 @@ When you click on a chunk, the right-hand panel instantly updates to show:
 ### Concept Graph View
 The header carries a **Universe ⇄ Concepts** toggle. The Universe view is the chunk map described above; the Concepts view renders the pack's [concept graph](concept-graph.md) — how documents relate to each other, rather than what is inside each one.
 
+![The Concept Graph view, colored by community](./assets/concepts_overview.png)
+*Nodes colored by community, sized document > section > concept. This is the same four-file example corpus used throughout the [Concept Graph guide](concept-graph.md).*
+
 - **Nodes are colored by community**, so Louvain clusters are visible at a glance. Documents and sections render as circles (sized document > section), concepts as diamonds.
 - **Edges are styled by relation:** `contains`, `mentions`, and `references` draw solid; `similar_to` draws dashed, since it is the one relation derived from embeddings rather than structure.
-- **Relation checkboxes** in the legend hide any edge type on the spot. This matters on corpora where one relation dominates — a PDF-heavy corpus can produce a `similar_to` edge between nearly every pair of documents, and hiding it in one click exposes the real structural graph underneath.
+- **Relation checkboxes** in the legend hide any edge type on the spot. This matters on corpora where one relation dominates — a PDF-heavy corpus can produce a `similar_to` edge between nearly every pair of documents, and hiding it in one click exposes the real structural graph underneath:
+
+![Similar_to hidden, exposing the real structural graph](./assets/concepts_similarity_toggle.png)
+*A 21-document financial-filing corpus with `similar_to` unchecked. Left unchecked, this pack's structural clusters — like the `Amcor Flexibles North` and `Corning Display Technologies` communities visible here — are buried under a near-complete `similar_to` hairball; see [Concept Graph: Limitations](concept-graph.md#limitations) for why that happens on PDF-heavy corpora.*
+
 - **Clicking a node** opens a detail panel tailored to its kind: a concept shows its bridge status and the sections that mention it; a document shows its section count and whether it is isolated; a section shows its parent document and the concepts it mentions. Every listed item is clickable, so you can walk concept → section → its other concepts without leaving the view.
 - **With nothing selected**, the panel lists every community with its label and member count.
+
+![Node detail panel for a document node](./assets/concepts_node_detail.png)
+*Clicking any node opens this panel. Documents show section count and cross-document status (here, "Connected" — this one shares a reference or concept with another document); concepts show bridge status and their mentioning sections instead.*
 
 If the pack has no `graph.yml` — packed with `--no-graph`, or a single-document corpus — the toggle is disabled and explains how to build one (`agentpack graph <pack_dir>`). The Universe view is unaffected.
 

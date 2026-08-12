@@ -141,6 +141,8 @@ Every pack also writes `reports/graph_report.md`, a plain-language read on the c
 
 That report answers questions retrieval alone cannot: *is this corpus actually about what I assumed?* and *is any document disconnected from the rest* — either off-topic, or a sign the document that would connect it is missing.
 
+![The Concept Graph view in the Corpus Explorer, colored by community](./docs/assets/concepts_overview.png)
+
 ```bash
 agentpack graph ./agentpack-output                     # (re)build graph.yml
 agentpack graph ./agentpack-output --with-similarity   # add embedding-based similarity edges
