@@ -187,3 +187,46 @@ def test_incremental_pack_skips_unchanged(tmp_path):
     assert call_count[0] == 1, (
         f"parser.parse called {call_count[0]} times; expected 1 (cache hit on second pack)"
     )
+
+
+def test_trust_warnings_correct_source_id_on_cache_hit(tmp_path):
+    """Regression guard for docs/specs/0002-ingestion-trust-layer.md §2: trust
+    warnings must always carry the CURRENT source_id, even when the underlying
+    SourceDocument is served from the L1 parse cache under a different index
+    than the run that originally populated it — e.g. because the corpus
+    changed shape between packs and this file's position shifted. This is the
+    exact bug class pack.py:55's doc.source_id reassignment does NOT fully fix
+    for warnings embedded before caching; trust warnings sidestep it entirely
+    by being computed fresh, after the cache block, on every call."""
+    import fitz
+    from agentpack.pack import _parse_one
+
+    pdf_path = tmp_path / "doc.pdf"
+    doc = fitz.open()
+    page = doc.new_page()
+    page.insert_text((72, 72), "hidden instruction", render_mode=3)
+    doc.save(pdf_path)
+    doc.close()
+
+    cache_dir = tmp_path / ".cache"
+
+    # First "pack": this file is assigned src_000 — cache miss, populates the cache.
+    first = _parse_one(pdf_path, "src_000", fast_pdf=True, remove_empty_lines=False, cache_dir=cache_dir)
+    first_hidden = [w for w in first.warnings if w.type == "hidden_text"]
+    assert len(first_hidden) == 1
+    assert first_hidden[0].source_id == "src_000"
+
+    # Second "pack": same file (same content -> same cache key), but the
+    # corpus reshuffled so it's now assigned a different index. Cache HIT.
+    second = _parse_one(pdf_path, "src_005", fast_pdf=True, remove_empty_lines=False, cache_dir=cache_dir)
+    second_hidden = [w for w in second.warnings if w.type == "hidden_text"]
+
+    assert second.source_id == "src_005"
+    assert len(second_hidden) == 1
+    assert second_hidden[0].source_id == "src_005", (
+        "trust warning carried a stale source_id from the cached run instead "
+        "of the current one"
+    )
+    # Same underlying finding both times (deterministic, recomputed fresh).
+    assert second_hidden[0].page == first_hidden[0].page
+    assert second_hidden[0].message == first_hidden[0].message

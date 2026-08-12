@@ -1,5 +1,21 @@
 import yaml
+from collections import defaultdict
 from pathlib import Path
+
+# Types that indicate a source failed to produce usable output at all —
+# listed first/most prominent so they can't be lost in a scroll of lower-
+# severity findings (e.g. many benign hidden_text warnings from OCR'd PDFs).
+_PRIORITY_WARNING_TYPES = ["parse_error", "import_error"]
+
+
+def _ordered_warning_types(present_types) -> list:
+    """Priority types first (only if present), then everything else sorted
+    alphabetically — deterministic regardless of file-scan order."""
+    present = set(present_types)
+    ordered = [t for t in _PRIORITY_WARNING_TYPES if t in present]
+    remaining = sorted(present - set(_PRIORITY_WARNING_TYPES))
+    return ordered + remaining
+
 
 def audit_pack(pack_dir: str) -> str:
     """Generates an audit report for an agentpack output directory."""
@@ -31,11 +47,12 @@ def audit_pack(pack_dir: str) -> str:
             max_chunk_size = chunk.get("token_count", 0)
             largest_chunk_id = chunk.get("id")
             
-    warnings = []
+    warnings_by_type = defaultdict(list)
     for source in sources:
         for warning in source.get("warnings", []):
-            warnings.append(f"Source {source.get('id')}: [{warning.get('type')}] {warning.get('message')}")
-            
+            wtype = warning.get("type", "unknown")
+            warnings_by_type[wtype].append(f"Source {source.get('id')}: {warning.get('message')}")
+
     # Format report
     report = [
         f"# AgentPack Audit Report for '{manifest.get('pack', {}).get('name', 'Unknown')}'",
@@ -48,10 +65,13 @@ def audit_pack(pack_dir: str) -> str:
         f"- **Largest Chunk:** {max_chunk_size} tokens (ID: {largest_chunk_id})\n",
         "## Extraction Warnings",
     ]
-    
-    if warnings:
-        for warning in warnings:
-            report.append(f"- {warning}")
+
+    if warnings_by_type:
+        for wtype in _ordered_warning_types(warnings_by_type.keys()):
+            entries = warnings_by_type[wtype]
+            report.append(f"\n### {wtype} ({len(entries)})")
+            for entry in entries:
+                report.append(f"- {entry}")
     else:
         report.append("- No extraction warnings.")
         
