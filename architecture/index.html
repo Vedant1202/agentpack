@@ -340,6 +340,17 @@
 </li>
         
           <li class="md-nav__item">
+  <a href="#graphyml" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        graph.yml
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
   <a href="#security-scanning-layer" class="md-nav__link">
     <span class="md-ellipsis">
       
@@ -433,6 +444,33 @@
     
   
     Knowledge Map
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../concept-graph/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Concept Graph
   
 
     
@@ -568,10 +606,10 @@
       
         
         
-        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_8" >
+        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_9" >
         
           
-          <label class="md-nav__link" for="__nav_8" id="__nav_8_label" tabindex="0">
+          <label class="md-nav__link" for="__nav_9" id="__nav_9_label" tabindex="0">
             
   
   
@@ -589,8 +627,8 @@
             <span class="md-nav__icon md-icon"></span>
           </label>
         
-        <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_8_label" aria-expanded="false">
-          <label class="md-nav__title" for="__nav_8">
+        <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_9_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_9">
             <span class="md-nav__icon md-icon"></span>
             
   
@@ -735,6 +773,17 @@
 </li>
         
           <li class="md-nav__item">
+  <a href="#graphyml" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        graph.yml
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
   <a href="#security-scanning-layer" class="md-nav__link">
     <span class="md-ellipsis">
       
@@ -854,6 +903,7 @@
         G[(indexes/lexical_index.db\nSQLite FTS5)]
         V[(indexes/hnsw_index.bin\nHNSW vector index)]
         M[map.yml\nhierarchical knowledge map]
+        GR[graph.yml\ncorpus concept graph]
 
         C --&gt; D
         C --&gt; E
@@ -861,6 +911,9 @@
         C --&gt; G
         C --&gt; V
         C --&gt; M
+        D --&gt; GR
+        M --&gt; GR
+        V -.-&gt;|"similar_to edges (index time)"| GR
         CA &lt;--&gt;|"L3: sha256(chunk) + model_id"| V
     end
 
@@ -877,6 +930,7 @@
 <div class="highlight"><pre><span></span><code>agentpack-output/
 ├── manifest.yml           # Registry: sources, chunks, tables, citations, pack version.
 ├── map.yml                # Hierarchical knowledge map (corpus → document → section → chunk).
+├── graph.yml              # Corpus concept graph (documents ↔ sections ↔ concepts).
 ├── chunks/                # Agent-ready markdown files (one per chunk).
 ├── tables/                # Extracted tables in standalone Markdown format.
 ├── indexes/               # FTS and vector indexes.
@@ -887,12 +941,16 @@
 │   └── vector_index.hash  # Content hash for invalidation.
 ├── .cache/
 │   └── cache.db           # Content-addressed cache (L1/L3/L5 layers).
-└── reports/               # Audit and validation reports.
+└── reports/               # Audit, validation, and concept-graph reports.
+    └── graph_report.md    # Top concepts, bridge concepts, isolated documents.
 </code></pre></div>
 <h3 id="manifestyml"><code>manifest.yml</code></h3>
 <p>The registry for the pack. Maps original document sources to their chunks and maintains citation metadata (source path, page number, section, and the full <code>section_path</code>) so every piece of text sent to an agent can be traced back to its origin. The <code>version</code> field reflects the installed package version.</p>
 <h3 id="mapyml"><code>map.yml</code></h3>
 <p>A hierarchical <strong>knowledge map</strong> — <code>corpus → document → section → chunk</code> — that an agent reads to locate <em>where</em> information lives, then pulls only the chunks it needs. The tree structure is reconstructed from the parsed section hierarchy; each section also carries deterministic, offline descriptors (YAKE <code>keyphrases</code> + a TextRank <code>gist</code>). The map is purely additive and <strong>never enters the retrieval indexes</strong>. Built by default (<code>--no-map</code> to skip; <code>agentpack map</code> to rebuild). See <strong><a href="../knowledge-map/">Knowledge Map</a></strong> for the full schema and rationale.</p>
+<h3 id="graphyml"><code>graph.yml</code></h3>
+<p>A <strong>corpus concept graph</strong> — where <code>map.yml</code> describes one document at a time, <code>graph.yml</code> describes how documents relate to each other. Documents, sections, and promoted concepts are nodes; <code>contains</code>, <code>mentions</code>, <code>references</code>, and (at index time) <code>similar_to</code> are edges. Louvain communities, bridge concepts, and isolated documents are derived from it and rendered to <code>reports/graph_report.md</code>.</p>
+<p>It is built by a <strong>pure post-processor</strong> (<code>grapher.py</code>) that reads <code>manifest.yml</code> and <code>map.yml</code> back off disk and imports nothing from the parsing or chunking pipeline. That is what makes pack-time construction and the <code>agentpack graph</code> rebuild the same code path — a rebuild reproduces the original byte-for-byte apart from its timestamp. Like the map, it is purely additive and <strong>never enters the retrieval indexes</strong>. Built by default (<code>--no-graph</code> to skip). See <strong><a href="../concept-graph/">Concept Graph</a></strong>.</p>
 <h3 id="security-scanning-layer">Security &amp; Scanning Layer</h3>
 <p>Before parsing, AgentPack acts as a firewall against context bloat and secret leakage:
 1. <strong>Filtering Engine:</strong> Uses <code>pathspec</code> to respect <code>.gitignore</code> and <code>.agentpackignore</code> rules, ensuring irrelevant files (like <code>node_modules/</code> or test suites) never reach the LLM. Hidden directories are excluded by default.

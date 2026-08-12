@@ -1,0 +1,1180 @@
+
+<!doctype html>
+<html lang="en" class="no-js">
+  <head>
+    
+      <meta charset="utf-8">
+      <meta name="viewport" content="width=device-width,initial-scale=1">
+      
+      
+      
+        <link rel="canonical" href="https://vedant1202.github.io/agentpack/specs/0003-corpus-concept-graph/">
+      
+      
+      
+      
+        
+      
+      
+      <link rel="icon" href="../../assets/images/favicon.png">
+      <meta name="generator" content="mkdocs-1.6.1, mkdocs-material-9.7.6">
+    
+    
+      
+        <title>Spec: Corpus Concept Graph (graph.yml) - AgentPack Documentation</title>
+      
+    
+    
+      <link rel="stylesheet" href="../../assets/stylesheets/main.484c7ddc.min.css">
+      
+        
+        <link rel="stylesheet" href="../../assets/stylesheets/palette.ab4e12ef.min.css">
+      
+      
+
+
+    
+    
+      
+    
+    
+      
+        
+        
+        <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+        <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Roboto:300,300i,400,400i,700,700i%7CRoboto+Mono:400,400i,700,700i&display=fallback">
+        <style>:root{--md-text-font:"Roboto";--md-code-font:"Roboto Mono"}</style>
+      
+    
+    
+      <link rel="stylesheet" href="../../assets/_mkdocstrings.css">
+    
+    <script>__md_scope=new URL("../..",location),__md_hash=e=>[...e].reduce(((e,_)=>(e<<5)-e+_.charCodeAt(0)),0),__md_get=(e,_=localStorage,t=__md_scope)=>JSON.parse(_.getItem(t.pathname+"."+e)),__md_set=(e,_,t=localStorage,a=__md_scope)=>{try{t.setItem(a.pathname+"."+e,JSON.stringify(_))}catch(e){}}</script>
+    
+      
+
+    
+    
+  </head>
+  
+  
+    
+    
+    
+    
+    
+    <body dir="ltr" data-md-color-scheme="slate" data-md-color-primary="indigo" data-md-color-accent="indigo">
+  
+    
+    <input class="md-toggle" data-md-toggle="drawer" type="checkbox" id="__drawer" autocomplete="off">
+    <input class="md-toggle" data-md-toggle="search" type="checkbox" id="__search" autocomplete="off">
+    <label class="md-overlay" for="__drawer"></label>
+    <div data-md-component="skip">
+      
+        
+        <a href="#spec-corpus-concept-graph-graphyml" class="md-skip">
+          Skip to content
+        </a>
+      
+    </div>
+    <div data-md-component="announce">
+      
+    </div>
+    
+    
+      
+
+  
+
+<header class="md-header md-header--shadow" data-md-component="header">
+  <nav class="md-header__inner md-grid" aria-label="Header">
+    <a href="../.." title="AgentPack Documentation" class="md-header__button md-logo" aria-label="AgentPack Documentation" data-md-component="logo">
+      
+  
+  <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M12 8a3 3 0 0 0 3-3 3 3 0 0 0-3-3 3 3 0 0 0-3 3 3 3 0 0 0 3 3m0 3.54C9.64 9.35 6.5 8 3 8v11c3.5 0 6.64 1.35 9 3.54 2.36-2.19 5.5-3.54 9-3.54V8c-3.5 0-6.64 1.35-9 3.54"/></svg>
+
+    </a>
+    <label class="md-header__button md-icon" for="__drawer">
+      
+      <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M3 6h18v2H3zm0 5h18v2H3zm0 5h18v2H3z"/></svg>
+    </label>
+    <div class="md-header__title" data-md-component="header-title">
+      <div class="md-header__ellipsis">
+        <div class="md-header__topic">
+          <span class="md-ellipsis">
+            AgentPack Documentation
+          </span>
+        </div>
+        <div class="md-header__topic" data-md-component="header-topic">
+          <span class="md-ellipsis">
+            
+              Spec: Corpus Concept Graph (graph.yml)
+            
+          </span>
+        </div>
+      </div>
+    </div>
+    
+      
+    
+    
+    
+    
+      
+      
+        <label class="md-header__button md-icon" for="__search">
+          
+          <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M9.5 3A6.5 6.5 0 0 1 16 9.5c0 1.61-.59 3.09-1.56 4.23l.27.27h.79l5 5-1.5 1.5-5-5v-.79l-.27-.27A6.52 6.52 0 0 1 9.5 16 6.5 6.5 0 0 1 3 9.5 6.5 6.5 0 0 1 9.5 3m0 2C7 5 5 7 5 9.5S7 14 9.5 14 14 12 14 9.5 12 5 9.5 5"/></svg>
+        </label>
+        <div class="md-search" data-md-component="search" role="dialog">
+  <label class="md-search__overlay" for="__search"></label>
+  <div class="md-search__inner" role="search">
+    <form class="md-search__form" name="search">
+      <input type="text" class="md-search__input" name="query" aria-label="Search" placeholder="Search" autocapitalize="off" autocorrect="off" autocomplete="off" spellcheck="false" data-md-component="search-query" required>
+      <label class="md-search__icon md-icon" for="__search">
+        
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M9.5 3A6.5 6.5 0 0 1 16 9.5c0 1.61-.59 3.09-1.56 4.23l.27.27h.79l5 5-1.5 1.5-5-5v-.79l-.27-.27A6.52 6.52 0 0 1 9.5 16 6.5 6.5 0 0 1 3 9.5 6.5 6.5 0 0 1 9.5 3m0 2C7 5 5 7 5 9.5S7 14 9.5 14 14 12 14 9.5 12 5 9.5 5"/></svg>
+        
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M20 11v2H8l5.5 5.5-1.42 1.42L4.16 12l7.92-7.92L13.5 5.5 8 11z"/></svg>
+      </label>
+      <nav class="md-search__options" aria-label="Search">
+        
+        <button type="reset" class="md-search__icon md-icon" title="Clear" aria-label="Clear" tabindex="-1">
+          
+          <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M19 6.41 17.59 5 12 10.59 6.41 5 5 6.41 10.59 12 5 17.59 6.41 19 12 13.41 17.59 19 19 17.59 13.41 12z"/></svg>
+        </button>
+      </nav>
+      
+    </form>
+    <div class="md-search__output">
+      <div class="md-search__scrollwrap" tabindex="0" data-md-scrollfix>
+        <div class="md-search-result" data-md-component="search-result">
+          <div class="md-search-result__meta">
+            Initializing search
+          </div>
+          <ol class="md-search-result__list" role="presentation"></ol>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+      
+    
+    
+  </nav>
+  
+</header>
+    
+    <div class="md-container" data-md-component="container">
+      
+      
+        
+          
+        
+      
+      <main class="md-main" data-md-component="main">
+        <div class="md-main__inner md-grid">
+          
+            
+              
+              <div class="md-sidebar md-sidebar--primary" data-md-component="sidebar" data-md-type="navigation" >
+                <div class="md-sidebar__scrollwrap">
+                  <div class="md-sidebar__inner">
+                    
+
+
+
+<nav class="md-nav md-nav--primary" aria-label="Navigation" data-md-level="0">
+  <label class="md-nav__title" for="__drawer">
+    <a href="../.." title="AgentPack Documentation" class="md-nav__button md-logo" aria-label="AgentPack Documentation" data-md-component="logo">
+      
+  
+  <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M12 8a3 3 0 0 0 3-3 3 3 0 0 0-3-3 3 3 0 0 0-3 3 3 3 0 0 0 3 3m0 3.54C9.64 9.35 6.5 8 3 8v11c3.5 0 6.64 1.35 9 3.54 2.36-2.19 5.5-3.54 9-3.54V8c-3.5 0-6.64 1.35-9 3.54"/></svg>
+
+    </a>
+    AgentPack Documentation
+  </label>
+  
+  <ul class="md-nav__list" data-md-scrollfix>
+    
+      
+      
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../.." class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Home
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../architecture/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Architecture & Internals
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../knowledge-map/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Knowledge Map
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../concept-graph/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Concept Graph
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../cli-reference/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    CLI Reference
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../corpus-explorer-ui/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Corpus Explorer UI
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../benchmark/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Benchmark
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../changelog/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Changelog
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    
+    
+    
+    
+    
+    <li class="md-nav__item md-nav__item--nested">
+      
+        
+        
+        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_9" >
+        
+          
+          <label class="md-nav__link" for="__nav_9" id="__nav_9_label" tabindex="0">
+            
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    API Reference
+  
+
+    
+  </span>
+  
+  
+
+            <span class="md-nav__icon md-icon"></span>
+          </label>
+        
+        <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_9_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_9">
+            <span class="md-nav__icon md-icon"></span>
+            
+  
+    API Reference
+  
+
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../api/core/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Core
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../api/parsers/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Parsers
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+    
+  </ul>
+</nav>
+                  </div>
+                </div>
+              </div>
+            
+            
+              
+              <div class="md-sidebar md-sidebar--secondary" data-md-component="sidebar" data-md-type="toc" >
+                <div class="md-sidebar__scrollwrap">
+                  <div class="md-sidebar__inner">
+                    
+
+<nav class="md-nav md-nav--secondary" aria-label="Table of contents">
+  
+  
+  
+    
+  
+  
+    <label class="md-nav__title" for="__toc">
+      <span class="md-nav__icon md-icon"></span>
+      Table of contents
+    </label>
+    <ul class="md-nav__list" data-md-component="toc" data-md-scrollfix>
+      
+        <li class="md-nav__item">
+  <a href="#1-objective" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        1. Objective
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="1. Objective">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#success-criteria-testable" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Success criteria (testable)
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#2-verified-facts-do-not-re-derive-grounds-every-design-decision-below" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        2. Verified facts (do not re-derive; grounds every design decision below)
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#3-resolved-decisions" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        3. Resolved decisions
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#4-the-graph-model-phase-a" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        4. The graph model (Phase A)
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="4. The graph model (Phase A)">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#concept-normalization-recipe-the-only-one-used-everywhere" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Concept normalization recipe (the only one — used everywhere)
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#concept-promotion-gates-all-must-pass" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Concept promotion gates (ALL must pass)
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#nodes" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Nodes
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#edges" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Edges
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#communities" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Communities
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#reportsgraph_reportmd-deterministic-no-llm" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        reports/graph_report.md (deterministic, no LLM)
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#4a-configuration-graph-in-agentpacktoml" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        4a. Configuration ([graph] in agentpack.toml)
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#5-phasing" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        5. Phasing
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#6-commands-project-structure-code-style" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        6. Commands / project structure / code style
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#7-testing-strategy" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        7. Testing strategy
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#8-boundaries" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        8. Boundaries
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#9-descoped-out-of-scope" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        9. Descoped / out of scope
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#10-open-questions-resolved-2026-08-11-defaults-accepted-numeric-gates-made-user-tunable-per-4a" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        10. Open Questions — RESOLVED 2026-08-11 (defaults accepted; numeric gates made user-tunable per §4a)
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#11-success-criteria-rollup" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        11. Success criteria (rollup)
+      
+    </span>
+  </a>
+  
+</li>
+      
+    </ul>
+  
+</nav>
+                  </div>
+                </div>
+              </div>
+            
+          
+          
+            <div class="md-content" data-md-component="content">
+              
+              <article class="md-content__inner md-typeset">
+                
+                  
+
+
+
+<h1 id="spec-corpus-concept-graph-graphyml">Spec: Corpus Concept Graph (graph.yml)</h1>
+<blockquote>
+<p>Status: <strong>APPROVED — ready for implementation</strong> (open questions §10 resolved 2026-08-11: proposed defaults accepted, exposed as user-tunable config — see §4a)
+Owner: Vedant
+Created: 2026-08-11
+Prior art: a code-level study of the <code>graphify</code> knowledge-graph tool (patterns and failure modes only — no code is copied from it)
+Relates to: <code>SPEC.md</code> (Knowledge Map — <code>graph.yml</code> builds <em>on top of</em> <code>map.yml</code>, never changes it), <code>docs/specs/0001-parsing-and-retrieval-overhaul.md</code> (retrieval Boundaries govern the deferred Phase C), <code>docs/specs/0002-ingestion-trust-layer.md</code> (structure/tone template; the never-raise posture is reused here)</p>
+<p><strong>Implementer note:</strong> this spec is written to be executed without re-deriving context. Every fact in §2 was verified against the live repo/venv when this spec was written. Do not re-litigate them; if one turns out to be false in practice, stop and report rather than improvising around it.</p>
+</blockquote>
+<h2 id="1-objective">1. Objective</h2>
+<p><code>map.yml</code> is a strict per-document tree: corpus → document → section → <code>chunk_ids</code>. It has <strong>zero cross-document edges</strong>. An agent can drill into one document but can never discover that section 4 of filing A discusses the same restructuring as section 7 of filing B — the current architecture cannot answer "what elsewhere in this corpus relates to X?" without brute-force retrieval.</p>
+<p>This spec adds a deterministic, LLM-free, cross-document <strong>concept graph</strong> — a sibling <code>graph.yml</code> — built entirely from artifacts AgentPack already computes:</p>
+<ul>
+<li><strong>YAKE keyphrases</strong> per section (already in <code>map.yml</code>, from <code>enrich.py</code>)</li>
+<li><strong>markdown links</strong> (present verbatim inside chunk text on disk)</li>
+<li><strong>fastembed chunk vectors</strong> (already computed at index time, L3-cached) — Phase B only</li>
+</ul>
+<p>The prior-art study that motivated this found that graphify — a tool built around exactly this kind of graph — requires an LLM pass to get concept nodes and similarity edges for documents, has no structural model for PDFs at all, and stores no document text. AgentPack already has the stronger halves of all three (deterministic keyphrases, Docling section/page structure, full-text chunks with citations). The missing piece is only the cross-document edge layer, and every input it needs already exists on disk.</p>
+<p><strong>Primary consumer:</strong> the same agentic-RAG orchestrator that consumes <code>map.yml</code> — the graph answers "what relates to X across documents?" the way the map answers "where inside this document is X?". <strong>Secondary:</strong> humans reading <code>reports/graph_report.md</code> for corpus themes and coverage gaps.</p>
+<h3 id="success-criteria-testable">Success criteria (testable)</h3>
+<ul>
+<li>Packing a multi-document corpus where two documents share a section keyphrase produces a concept node with <code>mentions</code> edges spanning both documents.</li>
+<li>A markdown document linking to another packed document produces a <code>references</code> edge; external URLs and unresolved link targets produce nothing.</li>
+<li>A single-document pack produces <strong>no</strong> <code>graph.yml</code> (auto-skip, one-line stderr note, not a warning).</li>
+<li>Two packs of the same corpus produce byte-identical <code>graph.yml</code> except <code>generated_at</code>.</li>
+<li><code>agentpack graph &lt;pack_dir&gt;</code> rebuilds <code>graph.yml</code> byte-identically (modulo <code>generated_at</code>) to the pack-time output — same code path, not a lossy approximation.</li>
+<li>Zero new dependencies. Zero changes to <code>manifest.yml</code>/<code>map.yml</code> schema or any existing consumer. <code>agentpack eval</code> numbers unchanged <strong>by construction</strong> (retrieval code untouched in Phases A/B).</li>
+<li>Full existing test suite passes unchanged.</li>
+</ul>
+<h2 id="2-verified-facts-do-not-re-derive-grounds-every-design-decision-below">2. Verified facts (do not re-derive; grounds every design decision below)</h2>
+<table>
+<thead>
+<tr>
+<th>Fact</th>
+<th>Where verified</th>
+<th>Consequence</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Embeddings are built at <strong>index</strong> time, not pack time: <code>build_vector_index</code> (<a href="../../src/agentpack/retrieve.py">retrieve.py:132</a>) reads <code>manifest.yml</code> + chunk files from an already-written pack; L3 cache keyed <code>sha256(chunk_text)+model_id</code> at retrieve.py:166-198</td>
+<td>live read</td>
+<td><code>similar_to</code> edges <strong>cannot</strong> be a pack-time feature → they are Phase B, hooked where vectors exist</td>
+</tr>
+<tr>
+<td>The markdown parser (<a href="../../src/agentpack/parsers/markdown_parser.py">parsers/markdown_parser.py</a>) does <strong>not</strong> extract links; paragraph blocks retain raw markdown (<code>[x](y.md)</code>) and that text flows into <code>chunks/*.md</code> on disk</td>
+<td>live read</td>
+<td>doc→doc <code>references</code> edges are regex-extracted from <strong>chunk text</strong> at graph-build time — zero parser changes</td>
+</tr>
+<tr>
+<td><code>map.yml</code> section nodes already carry <code>node_id</code> (deterministic ordinal path, e.g. <code>s_002_0007</code>), <code>keyphrases</code>, <code>chunk_ids</code> — <code>SectionNode</code> at <a href="../../src/agentpack/models.py">models.py:33-42</a></td>
+<td>live read</td>
+<td>graph nodes <strong>reuse these exact ids</strong> (single-identity rule, §8)</td>
+</tr>
+<tr>
+<td><code>networkx&gt;=3.0</code> and <code>yake</code> are already core deps; installed networkx 3.6.1 <code>louvain_communities(G, seed=42)</code> returns identical results across runs</td>
+<td>live run</td>
+<td>zero new dependencies; seeded Louvain is the community algorithm</td>
+</tr>
+<tr>
+<td><code>search_hybrid</code>'s RRF fusion (<a href="../../src/agentpack/retrieve.py">retrieve.py:359-390</a>) fuses by <strong>rank</strong>, so a graph-derived ranked list composes with no score normalization — but 0001's Boundaries make retrieval changes ask-first</td>
+<td>live read</td>
+<td>retrieval integration is <strong>Phase C, deferred</strong>, never bundled into A/B</td>
+</tr>
+<tr>
+<td>The repo's own recorded lesson (<a href="../../tasks/todo.md">tasks/todo.md</a>, Phase B note): synthesized doc/corpus topic lists were dropped because aggregation biases toward boilerplate</td>
+<td>repo history</td>
+<td>concept promotion <strong>requires</strong> a document-frequency cap (§4)</td>
+</tr>
+<tr>
+<td>Pack-time integration point: the <code>if not no_map:</code> block at <a href="../../src/agentpack/pack.py">pack.py:255-266</a>; flag pattern at <a href="../../src/agentpack/cli.py">cli.py:35</a> (<code>--no-map</code>); rebuild-command pattern at cli.py:175 (<code>map_cmd</code>); map validation pattern at <a href="../../src/agentpack/validate.py">validate.py:76-100</a></td>
+<td>live read</td>
+<td>each Phase-A wiring task has a named, existing pattern to mirror</td>
+</tr>
+</tbody>
+</table>
+<h2 id="3-resolved-decisions">3. Resolved decisions</h2>
+<table>
+<thead>
+<tr>
+<th>Decision</th>
+<th>Choice</th>
+<th>Rationale</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Artifact</td>
+<td>Sibling <code>graph.yml</code> next to <code>map.yml</code>/<code>manifest.yml</code>; <code>yaml.dump(..., default_flow_style=False, sort_keys=False)</code></td>
+<td>Mirrors the map.yml precedent exactly; additive; versions independently</td>
+</tr>
+<tr>
+<td>Builder architecture</td>
+<td><strong>Pure post-processor over pack artifacts on disk</strong> (<code>map.yml</code> + <code>manifest.yml</code> + <code>chunks/*.md</code>). Never touches parsers or the parse loop</td>
+<td>Makes <code>agentpack graph &lt;pack_dir&gt;</code> and the pack-time hook the <em>same code path</em> — unlike <code>agentpack map</code>'s lossy chunk-driven rebuild. Also means the trust layer, cache, and parsers are provably untouched</td>
+</tr>
+<tr>
+<td>Node identity</td>
+<td>Documents: manifest <code>source_id</code>. Sections: map.yml <code>node_id</code>. Concepts: <code>c_&lt;slug&gt;</code> (normalization recipe in §4)</td>
+<td><strong>Single-identity rule.</strong> The prior-art tool's costliest bug class was twin nodes from two id schemes for the same entity (its AST/semantic split needed a permanent reconciliation pass and produced a long tail of ghost/bloat bugs). Reusing existing ids makes that class unrepresentable</td>
+</tr>
+<tr>
+<td>Edge provenance</td>
+<td>Every edge carries <code>basis: structural \| keyphrase \| embedding</code></td>
+<td>The honest analogue of the prior art's EXTRACTED/INFERRED confidence tags — a consuming agent can decide how much to trust an edge</td>
+</tr>
+<tr>
+<td>Communities</td>
+<td>Seeded networkx Louvain (<code>seed=42</code>), with determinism hardening: rebuild the graph with sorted node + sorted edge insertion before partitioning; re-index communities by size desc with <code>tuple(sorted(members))</code> tiebreak</td>
+<td>Prevents run-to-run community-id churn (a documented failure mode upstream: equal-sized communities permute under hash-seed variation unless a total order is imposed)</td>
+</tr>
+<tr>
+<td>Community labels</td>
+<td>Highest-degree <strong>concept</strong> member's phrase; ties by node id; LLM-free</td>
+<td>Deterministic and readable; the prior art's hub-labeling pattern</td>
+</tr>
+<tr>
+<td>Gating</td>
+<td>Auto-skip (one-line stderr note) when the pack has &lt;2 <code>status: success</code> sources; <code>--no-graph</code> flag mirrors <code>--no-map</code></td>
+<td>A single-document corpus gets zero cross-document value — the honest-tooling verdict pattern. Warning-level noise would be wrong for expected behavior</td>
+</tr>
+<tr>
+<td>Failure mode</td>
+<td>Builder wrapped so any internal failure degrades to "no <code>graph.yml</code>" + one warning line — never a crashed pack</td>
+<td>Mirrors <code>trust.py</code>'s never-raise posture (0002 §8) and <code>cache.py</code>'s "never crash the main pipeline"</td>
+</tr>
+<tr>
+<td>Rebuild command</td>
+<td><code>agentpack graph &lt;pack_dir&gt;</code>, mirroring <code>agentpack map</code> (cli.py:175), lazy imports per cli.py convention</td>
+<td>Same surface users already know</td>
+</tr>
+<tr>
+<td>Validation</td>
+<td><code>validate.py</code>: when <code>graph.yml</code> present, FK-check node ids against manifest <code>source_ids</code> + map <code>node_id</code>s + the concept-id set; edge endpoints against node ids. Absent <code>graph.yml</code> is not an error</td>
+<td>Mirrors <code>_validate_map</code> (validate.py:76-100) exactly</td>
+</tr>
+<tr>
+<td>Models</td>
+<td><code>GraphNode</code>, <code>GraphEdge</code>, <code>CorpusGraph</code> pydantic models in <code>models.py</code>, mirroring <code>SectionNode</code>/<code>DocumentMap</code>/<code>CorpusMap</code>; dict-assembly only at the YAML boundary</td>
+<td>House style (0001 Code Style)</td>
+</tr>
+<tr>
+<td>Tunable gates</td>
+<td>The numeric gates (§4) are user-adjustable via a <code>[graph]</code> section in the <strong>existing</strong> <code>agentpack.toml</code> mechanism (<a href="../../src/agentpack/config.py">config.py</a>) — no new config file. Effective values are recorded in <code>graph.yml</code>'s <code>params:</code> block; <code>agentpack graph &lt;pack_dir&gt;</code> rebuilds use the <strong>recorded</strong> params, not the toml</td>
+<td>Deterministic gates replacing LLM judgment must be tunable per-corpus (a legal corpus and a filings corpus have different boilerplate profiles). Recording params in the artifact keeps the byte-determinism and rebuild-parity guarantees well-defined (identical <em>given identical params</em>) and makes every pack self-describing — a rebuild can never silently drift because the input dir's toml changed or is absent (the pack dir has no <code>agentpack.toml</code>)</td>
+</tr>
+</tbody>
+</table>
+<h2 id="4-the-graph-model-phase-a">4. The graph model (Phase A)</h2>
+<h3 id="concept-normalization-recipe-the-only-one-used-everywhere">Concept normalization recipe (the only one — used everywhere)</h3>
+<p><code>slug = re.sub(r"_+", "_", re.sub(r"[^\w]+", "_", phrase.casefold())).strip("_")</code>; concept id = <code>f"c_{slug}"</code>. Two keyphrases with the same slug are the same concept.</p>
+<h3 id="concept-promotion-gates-all-must-pass">Concept promotion gates (ALL must pass)</h3>
+<ol>
+<li>The keyphrase's slug appears in the <code>keyphrases</code> of sections belonging to <strong>≥2 distinct documents</strong> (cross-document value is the point — Open Question 4).</li>
+<li>It appears in <strong>≤30% of all sections</strong> in the pack (boilerplate cap — Open Question 1; motivated by the repo's own dropped-topic-lists lesson, §2).</li>
+<li>Normalized slug is ≥4 characters and not purely numeric/underscore.</li>
+</ol>
+<h3 id="nodes">Nodes</h3>
+<p><div class="highlight"><pre><span></span><code><span class="nt">nodes</span><span class="p">:</span>
+<span class="p p-Indicator">-</span><span class="w"> </span><span class="nt">id</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">src_000</span><span class="w">            </span><span class="c1"># document — manifest source_id, label = source path</span>
+<span class="w">  </span><span class="nt">kind</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">document</span>
+<span class="w">  </span><span class="nt">label</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">AMCOR_2020_10K.pdf</span>
+<span class="p p-Indicator">-</span><span class="w"> </span><span class="nt">id</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">s_000_0007</span><span class="w">         </span><span class="c1"># section — map.yml node_id, label = section title</span>
+<span class="w">  </span><span class="nt">kind</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">section</span>
+<span class="w">  </span><span class="nt">label</span><span class="p">:</span><span class="w"> </span><span class="s">&quot;Item</span><span class="nv"> </span><span class="s">8</span><span class="nv"> </span><span class="s">—</span><span class="nv"> </span><span class="s">Consolidated</span><span class="nv"> </span><span class="s">Balance</span><span class="nv"> </span><span class="s">Sheets&quot;</span>
+<span class="w">  </span><span class="nt">doc</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">src_000</span>
+<span class="p p-Indicator">-</span><span class="w"> </span><span class="nt">id</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">c_accounts_receivable</span><span class="w">   </span><span class="c1"># concept — promoted keyphrase</span>
+<span class="w">  </span><span class="nt">kind</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">concept</span>
+<span class="w">  </span><span class="nt">label</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">accounts receivable</span><span class="w">  </span><span class="c1"># the most frequent surface form, ties broken lexically</span>
+</code></pre></div>
+Only sections that carry ≥1 promoted concept (or an edge of any kind) become nodes — bare structural sections stay in <code>map.yml</code> where they already live. Documents always get a node.</p>
+<h3 id="edges">Edges</h3>
+<table>
+<thead>
+<tr>
+<th>relation</th>
+<th>endpoints</th>
+<th>basis</th>
+<th>source</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>contains</code></td>
+<td>doc → section</td>
+<td><code>structural</code></td>
+<td>map.yml tree, <strong>top-level sections only</strong> (keeps graph.yml lean; deep nesting stays map.yml's job)</td>
+</tr>
+<tr>
+<td><code>mentions</code></td>
+<td>section → concept</td>
+<td><code>keyphrase</code></td>
+<td>section's <code>keyphrases</code> list, slug-matched</td>
+</tr>
+<tr>
+<td><code>references</code></td>
+<td>doc → doc</td>
+<td><code>structural</code></td>
+<td>markdown links regex-extracted from that doc's chunk text (<code>\[[^\]]*\]\(([^)#?\s]+)[^)]*\)</code> plus reference-style and <code>[[wikilink]]</code> forms), resolved against manifest source paths by filename match; external URLs (scheme prefix) and unresolved targets <strong>dropped silently</strong>; deduped per (src_doc, tgt_doc) pair</td>
+</tr>
+</tbody>
+</table>
+<p>Determinism requirement on every list: nodes sorted by (kind, id); edges sorted by (source, target, relation). No dict/set iteration order may reach the YAML.</p>
+<h3 id="communities">Communities</h3>
+<p>Computed over the full node set; every node gets a <code>community: &lt;int&gt;</code> field; a top-level <code>communities:</code> block lists <code>{id, label, size}</code> per community, ordered by id.</p>
+<h3 id="reportsgraph_reportmd-deterministic-no-llm"><code>reports/graph_report.md</code> (deterministic, no LLM)</h3>
+<ul>
+<li><strong>Top concepts</strong> by degree (corpus themes), top 10</li>
+<li><strong>Bridge concepts</strong> — concepts whose neighbors span ≥2 communities</li>
+<li><strong>Isolated documents</strong> — documents with no cross-document edge (no shared concept, no reference): a coverage signal</li>
+<li><strong>Communities</strong> — per-community label + document/section/concept membership counts</li>
+<li>Standalone file; <code>audit</code> untouched (§10 Q3, resolved)</li>
+</ul>
+<h2 id="4a-configuration-graph-in-agentpacktoml">4a. Configuration (<code>[graph]</code> in <code>agentpack.toml</code>)</h2>
+<p>Extend the existing loader — a <code>[graph]</code> section beside <code>[pack]</code>, read by the same <code>load_config</code> pattern (config.py:31-42; add a parallel <code>_GRAPH_DEFAULTS</code> dict and section read — do <strong>not</strong> merge graph keys into the <code>[pack]</code> namespace):</p>
+<div class="highlight"><pre><span></span><code><span class="k">[graph]</span>
+<span class="n">enabled</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="kc">true</span><span class="w">                </span><span class="c1"># false ≡ --no-graph on every pack from this input dir</span>
+<span class="n">df_cap</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="mf">0.30</span><span class="w">                 </span><span class="c1"># Q1: skip keyphrases appearing in &gt; this fraction of all sections</span>
+<span class="n">min_docs</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="mi">2</span><span class="w">                  </span><span class="c1"># Q4: concept must span ≥ this many distinct documents</span>
+<span class="n">similarity_threshold</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="mf">0.80</span><span class="w">   </span><span class="c1"># Q2 (Phase B): min cosine for a similar_to edge</span>
+</code></pre></div>
+<p>Rules:
+- <strong>Precedence:</strong> CLI <code>--no-graph</code> &gt; toml <code>enabled</code> &gt; default — matching the existing <code>effective_fast = fast or cfg["fast"]</code> pattern (cli.py:47). The numeric gates are <strong>toml-only</strong> (no CLI flags): they're stable per-project tuning, exactly what the config file exists for, and CLI surface stays clean.
+- <strong>Validation at load:</strong> <code>df_cap</code> in (0, 1]; <code>min_docs</code> ≥ 1; <code>similarity_threshold</code> in (0, 1]. Out-of-range values → one warning naming the key, fall back to the default (never crash — same posture as the builder itself). Note <code>min_docs = 1</code> is a <em>legitimate</em> user choice (allows intra-document concepts, §10 Q4) — the default is 2, not the floor.
+- <strong>Recording:</strong> the effective values land in <code>graph.yml</code> under a top-level <code>params:</code> block. <code>agentpack graph &lt;pack_dir&gt;</code> reuses recorded params, so rebuild parity holds regardless of what any toml says now. Changing params = re-pack (or Phase-C future: an explicit <code>--config</code> override on the rebuild command — <strong>not</strong> in scope now).
+- Section-level similarity granularity and the concept slug recipe are <strong>not</strong> knobs — they're structural decisions (§4, §10 Q2), and exposing them would multiply the test matrix for no per-corpus benefit.</p>
+<h2 id="5-phasing">5. Phasing</h2>
+<p>Each phase is a separate PR with a human checkpoint between — the same A→checkpoint→B process the Knowledge Map used.</p>
+<p><strong>Phase A — pack-time structural graph (this spec's main body).</strong>
+New <code>src/agentpack/grapher.py</code>; nodes + <code>contains</code>/<code>mentions</code>/<code>references</code> edges; Louvain communities; <code>graph.yml</code> + <code>reports/graph_report.md</code>; <code>--no-graph</code> flag + <code>agentpack graph</code> command; <code>validate.py</code> extension; tests (§7). Zero new data computed — reads only what packs already contain.
+<strong>▣ CHECKPOINT:</strong> run on <code>demo_corpus/</code> and <code>benchmarks/financebench_sample</code>; human reviews concept quality (are promoted concepts real topics or noise?) and community coherence before Phase B starts.</p>
+<p><strong>Phase B — index-time similarity edges.</strong>
+<code>similar_to</code> (section ↔ section, <code>basis: embedding</code>): section centroid = mean of its chunks' already-normalized vectors; cosine ≥ 0.80 (Open Question 2). Computed where vectors exist — hooked into <code>build_vector_index</code> (retrieve.py:132, additive append after the existing index write) or an explicit <code>agentpack graph --with-similarity</code>; reuses the L3 embedding cache; merges into <code>graph.yml</code> and recomputes communities. Must be <strong>idempotent</strong>: re-running index never duplicates edges (merge keyed on (source, target, relation)).</p>
+<p><strong>Phase C — DEFERRED, deliberately not specced here.</strong>
+(a) RRF third contributor in <code>search_hybrid</code> — a retrieval behavior change, ask-first per 0001's Boundaries, and gated on demonstrated lift in <code>agentpack eval</code>. Explicitly <strong>not</strong> a token-reduction ratio: the prior art's benchmark framing (corpus size sometimes estimated from graph size; label-only subgraphs compared against full text) is documented as self-favorable and must not be copied. (b) Optional LLM concept enrichment behind the existing enrichment-flag pattern. (c) UI rendering (<code>umap-learn</code> already in the <code>[ui]</code> extra).</p>
+<h2 id="6-commands-project-structure-code-style">6. Commands / project structure / code style</h2>
+<table>
+<thead>
+<tr>
+<th>Command</th>
+<th>Change</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>agentpack pack &lt;dir&gt; --out &lt;out&gt;</code></td>
+<td>New flag <code>--no-graph</code> (suppress). Graph built by default when ≥2 successful sources</td>
+</tr>
+<tr>
+<td><code>agentpack graph &lt;pack_dir&gt;</code></td>
+<td><strong>New</strong> — (re)build <code>graph.yml</code> from an existing pack; same code path as pack-time. <code>--with-similarity</code> arrives in Phase B</td>
+</tr>
+<tr>
+<td><code>agentpack validate &lt;pack_dir&gt;</code></td>
+<td>Extended: validates <code>graph.yml</code> <strong>if present</strong></td>
+</tr>
+<tr>
+<td>all others</td>
+<td><strong>Unchanged</strong> (retrieve/audit/index/ui/eval untouched in A/B)</td>
+</tr>
+</tbody>
+</table>
+<div class="highlight"><pre><span></span><code>src/agentpack/
+  grapher.py       # NEW — build_graph(pack_dir, params) -&gt; dict: read map.yml/manifest.yml/chunks,
+                   #        promote concepts, emit nodes/edges/communities/params, write graph.yml + report
+  models.py        # +GraphNode/GraphEdge/CorpusGraph (additive)
+  config.py        # +_GRAPH_DEFAULTS + [graph] section read + range validation (§4a)
+  pack.py          # call grapher after the map block (pack.py:255-266), same shape, behind --no-graph
+  cli.py           # --no-graph on pack; new `graph` command (lazy imports)
+  validate.py      # optional graph.yml FK checks
+tests/
+  test_grapher.py  # NEW (§7)
+  test_graph_cli.py# NEW — flag + rebuild-command tests, mirroring test_map_cli.py
+  test_config.py   # +[graph] section: defaults, overrides, out-of-range fallback (extends existing file)
+</code></pre></div>
+<p>Code style: match the house rules (0001 §Code Style) — lazy imports in CLI commands, pydantic models with dict-assembly only at the YAML boundary, <code>yaml.dump(..., default_flow_style=False, sort_keys=False)</code>, deterministic ordering everywhere, no <code>print</code> from library code.</p>
+<h2 id="7-testing-strategy">7. Testing strategy</h2>
+<p>Mirror <code>tests/test_mapper.py</code> / <code>test_map_cli.py</code> conventions: fixtures built in-test, no committed binaries, <code>CliRunner</code> for CLI. Required tests:</p>
+<ul>
+<li><strong>Cross-document concept:</strong> two markdown docs sharing a keyphrase → concept node + <code>mentions</code> edges spanning both; keyphrase in one doc only → no concept node.</li>
+<li><strong>Boilerplate cap:</strong> a keyphrase present in &gt;30% of sections → <strong>not</strong> promoted.</li>
+<li><strong>References:</strong> doc A links <code>./b.md</code> → <code>references</code> edge; <code>https://…</code> link → nothing; link to a file not in the pack → nothing; three links to the same doc → one edge.</li>
+<li><strong>Auto-skip:</strong> single-document pack → no <code>graph.yml</code>, pack succeeds, stderr note present.</li>
+<li><strong>Determinism:</strong> build twice → byte-identical modulo <code>generated_at</code>; includes community ids (the Louvain hardening test).</li>
+<li><strong>Rebuild parity:</strong> <code>agentpack graph &lt;pack_dir&gt;</code> output byte-identical (modulo <code>generated_at</code>) to the pack-time artifact.</li>
+<li><strong>Never-raise:</strong> corrupted <code>map.yml</code> → pack completes, no <code>graph.yml</code>, one warning.</li>
+<li><strong>Validation:</strong> valid graph passes; edge to unknown node id and node with unknown <code>doc</code> ref are both reported; absent <code>graph.yml</code> is not an error.</li>
+<li><strong>Config:</strong> <code>[graph]</code> toml overrides take effect (a corpus whose shared keyphrase spans 2 docs produces the concept at <code>min_docs = 2</code> but not at <code>min_docs = 3</code>); out-of-range value → warning + default, never a crash; effective params recorded in <code>graph.yml</code>'s <code>params:</code> block; <code>agentpack graph</code> rebuild uses <strong>recorded</strong> params even when a conflicting toml exists in CWD.</li>
+<li><strong>Regression:</strong> full existing suite green; <code>validate</code>/<code>audit</code>/<code>retrieve</code> behavior on packs <em>without</em> graph.yml provably unchanged; existing <code>[pack]</code> config keys unaffected by the new section.</li>
+</ul>
+<h2 id="8-boundaries">8. Boundaries</h2>
+<p><strong>Always</strong>
+- Reuse <code>map.yml</code>/<code>manifest.yml</code> ids for documents/sections; concepts are the only new id namespace, minted by exactly one normalization recipe (§4).
+- Sorted iteration into every serialized list; the build-twice determinism test is required, not optional.
+- Read only pack <strong>output</strong> artifacts — parsers, chunker, cache, trust layer untouched.
+- Degrade to "no graph.yml + one warning" on any internal failure.</p>
+<p><strong>Ask first</strong>
+- Any new dependency (target is zero).
+- Any change to <code>manifest.yml</code>/<code>map.yml</code> schema or to <code>search_hybrid</code>/anything in <code>retrieve.py</code> (Phase A/B must not touch it; Phase C is its own ask).
+- Raising graph scope beyond the promoted-concept model (e.g. per-chunk nodes) — graph.yml must stay small relative to the pack.</p>
+<p><strong>Never</strong>
+- Mint a second id for an entity that already has one (the single-identity rule — the prior art's costliest bug class).
+- Promote gists, sentences, or any text longer than a YAKE 3-gram to a node (sentence-shaped labels are a known failure mode; rationale-as-node was tried upstream and rejected).
+- Call an LLM or the network in Phases A/B.
+- Let a graph failure fail the pack.
+- Copy the prior art's token-reduction benchmark framing; retrieval claims go through <code>agentpack eval</code> only.</p>
+<h2 id="9-descoped-out-of-scope">9. Descoped / out of scope</h2>
+<ul>
+<li><strong>PDF citation-graph edges</strong> (<code>cites</code>) — no reliable deterministic extractor; would need reference-section parsing. Future work.</li>
+<li><strong>Chunk-level similarity edges</strong> — section-level centroids only (Open Question 2 covers granularity); per-chunk edges would explode graph size.</li>
+<li><strong>Concept extraction beyond YAKE</strong> (NER entities, LLM concepts) — Phase C / the existing <code>[ner]</code>-extra plan in <code>SPEC.md</code> §10.</li>
+<li><strong>UI rendering</strong> — Phase C.</li>
+<li><strong>Retrieval integration</strong> — Phase C, ask-first.</li>
+</ul>
+<h2 id="10-open-questions-resolved-2026-08-11-defaults-accepted-numeric-gates-made-user-tunable-per-4a">10. Open Questions — RESOLVED 2026-08-11 (defaults accepted; numeric gates made user-tunable per §4a)</h2>
+<ol>
+<li><strong>Boilerplate DF cap</strong> — ✅ default <strong>0.30</strong>, exposed as <code>[graph] df_cap</code>. Sanity-check the default at the Phase-A checkpoint against financebench output; users with different corpus profiles tune per-project rather than waiting on a perfect global constant.</li>
+<li><strong>Similarity threshold / granularity</strong> — ✅ default <strong>0.80</strong>, exposed as <code>[graph] similarity_threshold</code> (Phase B). Granularity stays <strong>section-level and fixed</strong> (not a knob): chunk-level was rejected for graph size, and a granularity switch would multiply the test matrix.</li>
+<li><strong>Report location</strong> — ✅ <strong>standalone</strong> <code>reports/graph_report.md</code>; <code>audit</code> untouched (its warning grouping just shipped in 0.4.2 — don't churn it). Not configurable; it's a design decision, not a threshold.</li>
+<li><strong>Concept minimum</strong> — ✅ default <strong>2 distinct documents</strong>, exposed as <code>[graph] min_docs</code>. <code>min_docs = 1</code> is a legitimate opt-in for users who want intra-document concepts, but the default matches the cross-document motivation (intra-doc keyphrases already live in <code>map.yml</code>).</li>
+</ol>
+<h2 id="11-success-criteria-rollup">11. Success criteria (rollup)</h2>
+<ul>
+<li>[ ] All §1 success criteria pass, including byte-determinism and rebuild parity.</li>
+<li>[ ] Concept gates (§4) enforced with tests for each gate.</li>
+<li>[ ] <code>basis</code> field on every edge; only <code>structural</code>/<code>keyphrase</code> appear in Phase A.</li>
+<li>[ ] Auto-skip on &lt;2 successful sources; <code>--no-graph</code> works; never-raise verified.</li>
+<li>[ ] <code>validate.py</code> covers graph.yml FKs; absent file is not an error.</li>
+<li>[ ] <code>reports/graph_report.md</code> sections render deterministically (top concepts, bridges, isolated docs, communities).</li>
+<li>[ ] <code>[graph]</code> config section works per §4a: overrides honored, out-of-range → warning + default, params recorded in <code>graph.yml</code>, rebuild honors recorded params over any ambient toml.</li>
+<li>[ ] Zero new dependencies; zero retrieval changes; full suite green.</li>
+<li>[x] Open Questions 1–4 resolved (2026-08-11 — defaults accepted, numeric gates exposed via <code>agentpack.toml</code>).</li>
+<li>[ ] Phase-A checkpoint (concept quality + community coherence on a real corpus) passed before Phase B starts.</li>
+</ul>
+
+
+
+
+
+
+
+
+
+
+
+
+                
+              </article>
+            </div>
+          
+          
+<script>var target=document.getElementById(location.hash.slice(1));target&&target.name&&(target.checked=target.name.startsWith("__tabbed_"))</script>
+        </div>
+        
+      </main>
+      
+        <footer class="md-footer">
+  
+  <div class="md-footer-meta md-typeset">
+    <div class="md-footer-meta__inner md-grid">
+      <div class="md-copyright">
+  
+  
+    Made with
+    <a href="https://squidfunk.github.io/mkdocs-material/" target="_blank" rel="noopener">
+      Material for MkDocs
+    </a>
+  
+</div>
+      
+    </div>
+  </div>
+</footer>
+      
+    </div>
+    <div class="md-dialog" data-md-component="dialog">
+      <div class="md-dialog__inner md-typeset"></div>
+    </div>
+    
+    
+    
+      
+      
+      <script id="__config" type="application/json">{"annotate": null, "base": "../..", "features": [], "search": "../../assets/javascripts/workers/search.2c215733.min.js", "tags": null, "translations": {"clipboard.copied": "Copied to clipboard", "clipboard.copy": "Copy to clipboard", "search.result.more.one": "1 more on this page", "search.result.more.other": "# more on this page", "search.result.none": "No matching documents", "search.result.one": "1 matching document", "search.result.other": "# matching documents", "search.result.placeholder": "Type to start searching", "search.result.term.missing": "Missing", "select.version": "Select version"}, "version": null}</script>
+    
+    
+      <script src="../../assets/javascripts/bundle.79ae519e.min.js"></script>
+      
+    
+  </body>
+</html>
