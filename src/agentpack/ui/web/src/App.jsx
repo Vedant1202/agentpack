@@ -1,5 +1,5 @@
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
-import { Search, RefreshCw, X, Info, LayoutTemplate, Link as LinkIcon, FileText, Moon, Sun } from "lucide-react";
+import { Search, RefreshCw, X, Info, LayoutTemplate, Link as LinkIcon, FileText, Moon, Sun, Network } from "lucide-react";
 import ForceGraph2D from "react-force-graph-2d";
 import Shepherd from 'shepherd.js';
 import 'shepherd.js/dist/css/shepherd.css';
@@ -125,6 +125,122 @@ function buildGraphData(chunks) {
 }
 
 // ==========================================
+// CONCEPT GRAPH DATA BUILDER (graph.yml)
+// ==========================================
+const COMMUNITY_PALETTE = [
+  "#6366f1", "#0ea5e9", "#10b981", "#f59e0b", "#f43f5e",
+  "#a855f7", "#22c55e", "#f97316", "#14b8a6", "#eab308",
+];
+
+function communityColor(communityId) {
+  if (communityId === null || communityId === undefined) return "#94a3b8";
+  return COMMUNITY_PALETTE[communityId % COMMUNITY_PALETTE.length];
+}
+
+const KIND_VAL = { document: 40, section: 18, concept: 12 };
+
+function truncateLabel(label, max = 40) {
+  if (!label) return "";
+  const oneLine = String(label).replace(/\s+/g, " ").trim();
+  return oneLine.length > max ? oneLine.slice(0, max - 1) + "…" : oneLine;
+}
+
+const RELATION_STYLE = {
+  contains: { dash: null, label: "Contains" },
+  mentions: { dash: null, label: "Mentions" },
+  references: { dash: null, label: "References" },
+  similar_to: { dash: [4, 3], label: "Similar To (embedding)" },
+};
+
+function buildConceptGraphData(graphInfo) {
+  if (!graphInfo || !graphInfo.available) return { nodes: [], links: [] };
+  const nodes = (graphInfo.nodes || []).map(n => ({
+    id: n.id,
+    kind: n.kind,
+    label: n.label,
+    doc: n.doc,
+    community: n.community,
+    color: communityColor(n.community),
+    val: KIND_VAL[n.kind] || 15,
+  }));
+  const links = (graphInfo.edges || []).map(e => ({
+    source: e.source,
+    target: e.target,
+    relation: e.relation,
+    basis: e.basis,
+  }));
+  return { nodes, links };
+}
+
+function endpointId(nodeOrId) {
+  return (nodeOrId && nodeOrId.id) || nodeOrId;
+}
+
+function mentioningSections(conceptId, conceptGraphData) {
+  const nodeById = new Map(conceptGraphData.nodes.map(n => [n.id, n]));
+  return conceptGraphData.links
+    .filter(l => l.relation === "mentions" && endpointId(l.target) === conceptId)
+    .map(l => nodeById.get(endpointId(l.source)))
+    .filter(Boolean);
+}
+
+function sectionMentionsConcepts(sectionId, conceptGraphData) {
+  const nodeById = new Map(conceptGraphData.nodes.map(n => [n.id, n]));
+  return conceptGraphData.links
+    .filter(l => l.relation === "mentions" && endpointId(l.source) === sectionId)
+    .map(l => nodeById.get(endpointId(l.target)))
+    .filter(Boolean);
+}
+
+function conceptBridgeCommunities(conceptId, conceptGraphData) {
+  const nodeById = new Map(conceptGraphData.nodes.map(n => [n.id, n]));
+  const communities = new Set();
+  conceptGraphData.links.forEach(l => {
+    if (l.relation !== "mentions" || endpointId(l.target) !== conceptId) return;
+    const section = nodeById.get(endpointId(l.source));
+    if (section && section.community !== null && section.community !== undefined) {
+      communities.add(section.community);
+    }
+  });
+  return communities;
+}
+
+function isDocumentIsolated(docId, conceptGraphData) {
+  // Mirrors grapher.py's _isolated_documents: no `references` edge in
+  // either direction, AND no concept mentioned by this document's own
+  // sections is ALSO mentioned by a section of a DIFFERENT document.
+  const { nodes, links } = conceptGraphData;
+  const nodeById = new Map(nodes.map(n => [n.id, n]));
+
+  const referencedDocs = new Set();
+  links.forEach(l => {
+    if (l.relation === "references") {
+      referencedDocs.add(endpointId(l.source));
+      referencedDocs.add(endpointId(l.target));
+    }
+  });
+  if (referencedDocs.has(docId)) return false;
+
+  const ownConcepts = new Set();
+  links.forEach(l => {
+    if (l.relation !== "mentions") return;
+    const section = nodeById.get(endpointId(l.source));
+    if (section && section.doc === docId) ownConcepts.add(endpointId(l.target));
+  });
+
+  for (const l of links) {
+    if (l.relation !== "mentions" || !ownConcepts.has(endpointId(l.target))) continue;
+    const section = nodeById.get(endpointId(l.source));
+    if (section && section.doc && section.doc !== docId) return false;
+  }
+  return true;
+}
+
+function documentSectionCount(docId, conceptGraphData) {
+  return conceptGraphData.nodes.filter(n => n.kind === "section" && n.doc === docId).length;
+}
+
+// ==========================================
 // COMPONENTS
 // ==========================================
 
@@ -180,6 +296,53 @@ function GraphLegend() {
   );
 }
 
+function ConceptGraphLegend({ communities, relationVisibility, onToggleRelation }) {
+  return (
+    <div className="absolute bottom-6 left-6 bg-white/95 dark:bg-slate-900/95 backdrop-blur-md border border-slate-200 dark:border-slate-800 rounded-xl p-4 shadow-xl z-20 w-64 pointer-events-auto transition-colors">
+      <h4 className="text-xs font-bold text-slate-900 dark:text-slate-100 uppercase tracking-wide mb-3 flex items-center gap-2">
+        <Network size={14} className="text-indigo-500 dark:text-indigo-400" />
+        Concept Graph Legend
+      </h4>
+      <div className="space-y-3">
+        <div>
+          <div className="text-[10px] font-bold text-slate-500 dark:text-slate-400 uppercase tracking-wider mb-1.5">Communities (node color)</div>
+          <div className="flex flex-wrap gap-2 max-h-24 overflow-y-auto">
+            {communities.length === 0 && (
+              <span className="text-[11px] text-slate-400 dark:text-slate-500 italic">None.</span>
+            )}
+            {communities.map(c => (
+              <span key={c.id} className="inline-flex items-center gap-1.5 text-[11px] font-medium text-slate-700 dark:text-slate-300 max-w-full">
+                <span className="w-2.5 h-2.5 rounded-full shadow-sm shrink-0" style={{ backgroundColor: communityColor(c.id) }}></span>
+                <span className="truncate max-w-[150px]" title={c.label}>{c.label}</span>
+              </span>
+            ))}
+          </div>
+        </div>
+        <div>
+          <div className="text-[10px] font-bold text-slate-500 dark:text-slate-400 uppercase tracking-wider mb-1.5">Edge relations (click to hide)</div>
+          <div className="space-y-1.5">
+            {Object.entries(RELATION_STYLE).map(([relation, style]) => (
+              <label key={relation} className="flex items-center gap-2 text-[11px] text-slate-600 dark:text-slate-400 cursor-pointer select-none">
+                <input
+                  type="checkbox"
+                  checked={relationVisibility[relation] !== false}
+                  onChange={() => onToggleRelation(relation)}
+                  className="w-3 h-3 accent-indigo-600 shrink-0"
+                />
+                <span className={`w-4 h-0.5 shrink-0 ${style.dash ? "border-t-2 border-dashed border-slate-400 dark:border-slate-500" : "bg-slate-400 dark:bg-slate-500"}`}></span>
+                {style.label}
+              </label>
+            ))}
+          </div>
+        </div>
+        <div className="pt-2 border-t border-slate-100 dark:border-slate-800 text-[10px] text-slate-500 dark:text-slate-400 leading-relaxed">
+          <p>Node size: document &gt; section &gt; concept. Concepts render as diamonds.</p>
+        </div>
+      </div>
+    </div>
+  );
+}
+
 // ==========================================
 // MAIN APP COMPONENT
 // ==========================================
@@ -189,7 +352,15 @@ export default function App() {
   
   const [baseGraphData, setBaseGraphData] = useState({ nodes: [], links: [] });
   const [selectedNodeId, setSelectedNodeId] = useState(null);
-  
+
+  const [viewMode, setViewMode] = useState("universe"); // "universe" | "concepts"
+  const [graphInfo, setGraphInfo] = useState({ available: false, nodes: [], edges: [], communities: [] });
+  const [selectedConceptId, setSelectedConceptId] = useState(null);
+  const [relationVisibility, setRelationVisibility] = useState({
+    contains: true, mentions: true, references: true, similar_to: true,
+  });
+  const conceptFgRef = useRef();
+
   const [query, setQuery] = useState("");
   const [searchHits, setSearchHits] = useState([]);
   const [isSearching, setIsSearching] = useState(false);
@@ -233,6 +404,15 @@ export default function App() {
         console.error("Failed to load corpus data", error);
       } finally {
         setLoading(false);
+      }
+      // Isolated from the chunk-universe fetch above: a missing/failed
+      // graph.yml must never block or error the Universe view.
+      try {
+        const graphData = await fetchJson("/api/graph");
+        setGraphInfo(graphData);
+      } catch (error) {
+        console.error("Failed to load concept graph", error);
+        setGraphInfo({ available: false, nodes: [], edges: [], communities: [] });
       }
     }
     loadData();
@@ -309,7 +489,10 @@ export default function App() {
     });
     observer.observe(containerRef.current);
     return () => observer.disconnect();
-  }, [loading]);
+    // viewMode is a dependency, not just loading: switching views swaps in a
+    // DIFFERENT container div (same ref object, new DOM node), so the
+    // observer must detach from the old one and re-attach to the new one.
+  }, [loading, viewMode]);
 
   // 3. Search Handler
   const handleSearch = useCallback(async () => {
@@ -384,6 +567,55 @@ export default function App() {
       }
       return { nodes, links };
   }, [baseGraphData, searchHits]);
+
+  // 5b. Concept Graph Data (derived from graph.yml, filtered by relation toggles)
+  const conceptGraphData = useMemo(() => buildConceptGraphData(graphInfo), [graphInfo]);
+  const displayConceptData = useMemo(() => ({
+    nodes: conceptGraphData.nodes,
+    links: conceptGraphData.links.filter(l => relationVisibility[l.relation] !== false),
+  }), [conceptGraphData, relationVisibility]);
+
+  // 5c. Concept Node Paint Logic -- community color, kind-based size/shape
+  const paintConceptNode = useCallback((node, ctx, globalScale) => {
+    const isSelected = selectedConceptId === node.id;
+    const r = isSelected ? Math.sqrt(node.val) * 1.6 : Math.sqrt(node.val);
+
+    ctx.beginPath();
+    if (node.kind === "concept") {
+      // Diamond distinguishes concepts from document/section circles at a
+      // glance -- concepts are the one kind with no `doc` anchor of its own.
+      ctx.moveTo(node.x, node.y - r);
+      ctx.lineTo(node.x + r, node.y);
+      ctx.lineTo(node.x, node.y + r);
+      ctx.lineTo(node.x - r, node.y);
+      ctx.closePath();
+    } else {
+      ctx.arc(node.x, node.y, r, 0, 2 * Math.PI, false);
+    }
+    ctx.fillStyle = node.color;
+    ctx.fill();
+
+    if (isSelected) {
+      ctx.lineWidth = 1.5 / globalScale;
+      ctx.strokeStyle = darkMode ? "#f8fafc" : "#0f172a";
+      ctx.stroke();
+    } else if (node.kind === "document") {
+      ctx.lineWidth = 1 / globalScale;
+      ctx.strokeStyle = darkMode ? "rgba(248,250,252,0.5)" : "rgba(15,23,42,0.4)";
+      ctx.stroke();
+    }
+
+    const showLabel = node.kind === "document" || isSelected || globalScale > 2.5;
+    if (showLabel) {
+      const label = truncateLabel(node.label, node.kind === "document" ? 30 : 24);
+      const fontSize = node.kind === "document" ? 15 / globalScale : 10 / globalScale;
+      ctx.font = `600 ${fontSize}px Inter, sans-serif`;
+      ctx.textAlign = "center";
+      ctx.textBaseline = "middle";
+      ctx.fillStyle = darkMode ? "#f1f5f9" : "#334155";
+      ctx.fillText(label, node.x, node.y + r + (4 / globalScale) + fontSize / 2);
+    }
+  }, [selectedConceptId, darkMode]);
 
   // 6. Node Paint Logic
   const paintNode = useCallback((node, ctx, globalScale) => {
@@ -494,7 +726,26 @@ export default function App() {
                 </button>
             </div>
 
-            <button 
+            <button
+                onClick={() => {
+                    if (!graphInfo.available) return;
+                    setSelectedConceptId(null);
+                    setViewMode(viewMode === "universe" ? "concepts" : "universe");
+                }}
+                disabled={!graphInfo.available}
+                title={graphInfo.available ? "Switch between the chunk universe and the concept graph" : "No graph.yml in this pack — run `agentpack graph <pack_dir>` to build one"}
+                aria-label="Toggle universe/concepts view"
+                className={`flex items-center gap-2 px-3 py-2.5 rounded-lg text-sm font-medium border transition ${
+                    !graphInfo.available
+                        ? "opacity-40 cursor-not-allowed bg-slate-100 dark:bg-slate-800 text-slate-400 dark:text-slate-500 border-transparent"
+                        : "bg-slate-100 dark:bg-slate-800 text-slate-600 dark:text-slate-400 hover:bg-slate-200 dark:hover:bg-slate-700 border-transparent dark:border-slate-700"
+                }`}
+            >
+                <Network size={16} />
+                {viewMode === "universe" ? "Concepts" : "Universe"}
+            </button>
+
+            <button
                 onClick={() => setDarkMode(!darkMode)}
                 className="p-2.5 rounded-lg bg-slate-100 dark:bg-slate-800 text-slate-600 dark:text-slate-400 hover:bg-slate-200 dark:hover:bg-slate-700 border border-transparent dark:border-slate-700 transition"
                 aria-label="Toggle theme"
@@ -506,7 +757,8 @@ export default function App() {
 
       {/* WORKSPACE */}
       <div className="flex-1 flex p-4 gap-4 overflow-hidden relative">
-        
+      {viewMode === "universe" ? (
+      <>
         {/* GRAPH AREA */}
         <div className="tour-graph flex-1 relative rounded-2xl overflow-hidden shadow-lg border border-slate-200 dark:border-slate-800 bg-[#f8fafc] dark:bg-[#020617] transition-colors" ref={containerRef}>
             <ForceGraph2D
@@ -530,7 +782,7 @@ export default function App() {
                 }}
                 linkColor={link => {
                     if (link.isSearchTemp) return "#f59e0b";
-                    
+
                     // Highlight logic
                     if (selectedNodeId) {
                         const sId = link.source.id || link.source;
@@ -541,7 +793,7 @@ export default function App() {
                         return darkMode ? "rgba(51, 65, 85, 0.4)" : "rgba(203, 213, 225, 0.2)"; // Dim rest
                     }
                     if (searchHits.length > 0) return darkMode ? "rgba(51, 65, 85, 0.4)" : "rgba(203, 213, 225, 0.2)"; // Dim rest during search
-                    
+
                     if (link.isSequential) return darkMode ? "rgba(148, 163, 184, 0.3)" : "rgba(148, 163, 184, 0.45)";
                     return darkMode ? "rgba(148, 163, 184, 0.15)" : "rgba(148, 163, 184, 0.2)";
                 }}
@@ -556,7 +808,7 @@ export default function App() {
                 }}
                 linkLineDash={link => link.isSearchTemp ? [4, 4] : null}
             />
-            
+
             <GraphLegend />
         </div>
 
@@ -700,6 +952,201 @@ export default function App() {
                 )}
             </div>
         </aside>
+      </>
+      ) : (
+      <>
+        {/* CONCEPT GRAPH AREA */}
+        <div className="flex-1 relative rounded-2xl overflow-hidden shadow-lg border border-slate-200 dark:border-slate-800 bg-[#f8fafc] dark:bg-[#020617] transition-colors" ref={containerRef}>
+            <ForceGraph2D
+                ref={conceptFgRef}
+                width={dim.width}
+                height={dim.height}
+                graphData={displayConceptData}
+                nodeCanvasObject={paintConceptNode}
+                nodeId="id"
+                backgroundColor={darkMode ? "#020617" : "#f8fafc"}
+                onNodeClick={(node) => {
+                    setSelectedConceptId(node.id);
+                    conceptFgRef.current.centerAt(node.x, node.y, 800);
+                    conceptFgRef.current.zoom(3.5, 800);
+                }}
+                onBackgroundClick={() => setSelectedConceptId(null)}
+                linkColor={link => {
+                    if (selectedConceptId) {
+                        const sId = link.source.id || link.source;
+                        const tId = link.target.id || link.target;
+                        if (sId === selectedConceptId || tId === selectedConceptId) {
+                            return darkMode ? "#f8fafc" : "#0f172a";
+                        }
+                        return darkMode ? "rgba(51, 65, 85, 0.3)" : "rgba(203, 213, 225, 0.3)";
+                    }
+                    return darkMode ? "rgba(148, 163, 184, 0.25)" : "rgba(148, 163, 184, 0.35)";
+                }}
+                linkWidth={link => {
+                    if (selectedConceptId) {
+                        const sId = link.source.id || link.source;
+                        const tId = link.target.id || link.target;
+                        if (sId === selectedConceptId || tId === selectedConceptId) return 2;
+                    }
+                    return 1;
+                }}
+                linkLineDash={link => RELATION_STYLE[link.relation]?.dash || null}
+            />
+
+            <ConceptGraphLegend
+                communities={graphInfo.communities || []}
+                relationVisibility={relationVisibility}
+                onToggleRelation={(relation) => setRelationVisibility(prev => ({ ...prev, [relation]: prev[relation] === false ? true : false }))}
+            />
+        </div>
+
+        {/* CONCEPT CONTEXT SIDEBAR */}
+        <aside className="w-[380px] md:w-[420px] bg-white dark:bg-slate-900 rounded-2xl flex flex-col overflow-hidden transition-all duration-300 shadow-xl border border-slate-200 dark:border-slate-800 shrink-0 z-20">
+            {(() => {
+                const activeConceptNode = conceptGraphData.nodes.find(n => n.id === selectedConceptId);
+                const communityLabel = (communityId) => (graphInfo.communities || []).find(c => c.id === communityId)?.label || "Unassigned";
+                return (
+                    <>
+                        <div className="p-5 border-b border-slate-100 dark:border-slate-800 bg-slate-50/50 dark:bg-slate-800/50">
+                            <h2 className="text-lg font-bold text-slate-900 dark:text-slate-100 flex items-center justify-between">
+                                {activeConceptNode ? "Node Detail" : "Communities"}
+                                <span className="px-2 py-0.5 rounded-full text-[10px] font-bold uppercase tracking-wider border bg-indigo-100 dark:bg-indigo-900/30 text-indigo-700 dark:text-indigo-400 border-indigo-200 dark:border-indigo-800">
+                                    {activeConceptNode ? activeConceptNode.kind : "Overview"}
+                                </span>
+                            </h2>
+                            <p className="text-xs text-slate-500 dark:text-slate-400 mt-1">
+                                {activeConceptNode ? "Click the background to deselect." : `${conceptGraphData.nodes.length} nodes, ${(graphInfo.communities || []).length} communities.`}
+                            </p>
+                        </div>
+
+                        <div className="flex-1 overflow-y-auto p-5 relative">
+                            {!activeConceptNode && (
+                                <div className="space-y-4">
+                                    <div className="grid grid-cols-2 gap-3">
+                                        <Stat label="Nodes" value={conceptGraphData.nodes.length} />
+                                        <Stat label="Edges" value={conceptGraphData.links.length} />
+                                    </div>
+                                    <div>
+                                        <div className="text-[10px] font-bold text-slate-500 dark:text-slate-400 uppercase tracking-wider mb-2">Communities</div>
+                                        <div className="space-y-1.5">
+                                            {(graphInfo.communities || []).map(c => (
+                                                <div key={c.id} className="flex items-center justify-between p-2 bg-slate-50 dark:bg-slate-800/50 rounded-lg border border-slate-100 dark:border-slate-700/50">
+                                                    <div className="flex items-center gap-2 min-w-0">
+                                                        <span className="w-2.5 h-2.5 rounded-full shrink-0" style={{ background: communityColor(c.id) }}></span>
+                                                        <span className="text-xs font-semibold text-slate-700 dark:text-slate-300 truncate" title={c.label}>{c.label}</span>
+                                                    </div>
+                                                    <span className="text-[10px] text-slate-500 dark:text-slate-400 shrink-0 ml-2">{c.size} member(s)</span>
+                                                </div>
+                                            ))}
+                                            {(graphInfo.communities || []).length === 0 && (
+                                                <p className="text-xs text-slate-500 dark:text-slate-400 italic">No communities.</p>
+                                            )}
+                                        </div>
+                                    </div>
+                                </div>
+                            )}
+
+                            {activeConceptNode && (
+                                <div className="space-y-4">
+                                    <div>
+                                        <div className="text-[10px] font-bold text-slate-500 dark:text-slate-400 uppercase tracking-wider mb-1">Label</div>
+                                        <div className="text-sm font-semibold text-slate-800 dark:text-slate-200 bg-slate-100 dark:bg-slate-800 p-2 rounded-lg break-words">
+                                            {activeConceptNode.label}
+                                        </div>
+                                    </div>
+
+                                    <div>
+                                        <div className="text-[10px] font-bold text-slate-500 dark:text-slate-400 uppercase tracking-wider mb-1">Community</div>
+                                        <div className="text-sm text-slate-700 dark:text-slate-300 flex items-center gap-2">
+                                            <span className="w-2.5 h-2.5 rounded-full shrink-0" style={{ background: communityColor(activeConceptNode.community) }}></span>
+                                            {communityLabel(activeConceptNode.community)}
+                                        </div>
+                                    </div>
+
+                                    {activeConceptNode.kind === "document" && (
+                                        <>
+                                            <div>
+                                                <div className="text-[10px] font-bold text-slate-500 dark:text-slate-400 uppercase tracking-wider mb-1">Sections</div>
+                                                <div className="text-sm text-slate-700 dark:text-slate-300">{documentSectionCount(activeConceptNode.id, conceptGraphData)}</div>
+                                            </div>
+                                            <div>
+                                                <div className="text-[10px] font-bold text-slate-500 dark:text-slate-400 uppercase tracking-wider mb-1">Cross-Document Status</div>
+                                                <div className="text-sm text-slate-700 dark:text-slate-300">
+                                                    {isDocumentIsolated(activeConceptNode.id, conceptGraphData)
+                                                        ? "Isolated — no references or shared concepts with any other document."
+                                                        : "Connected — shares a reference or concept with another document."}
+                                                </div>
+                                            </div>
+                                        </>
+                                    )}
+
+                                    {activeConceptNode.kind === "section" && (
+                                        <>
+                                            <div>
+                                                <div className="text-[10px] font-bold text-slate-500 dark:text-slate-400 uppercase tracking-wider mb-1">Document</div>
+                                                <div className="text-sm text-slate-700 dark:text-slate-300 break-all">{activeConceptNode.doc || "—"}</div>
+                                            </div>
+                                            <div>
+                                                <div className="text-[10px] font-bold text-slate-500 dark:text-slate-400 uppercase tracking-wider mb-1">Concepts Mentioned</div>
+                                                <div className="space-y-1.5">
+                                                    {sectionMentionsConcepts(activeConceptNode.id, conceptGraphData).map(c => (
+                                                        <div key={c.id}
+                                                             className="text-xs text-slate-700 dark:text-slate-300 bg-slate-50 dark:bg-slate-800/50 p-2 rounded-lg truncate cursor-pointer hover:border-indigo-300 dark:hover:border-indigo-500 border border-transparent transition"
+                                                             onClick={() => setSelectedConceptId(c.id)}
+                                                             title={c.label}>
+                                                            {c.label}
+                                                        </div>
+                                                    ))}
+                                                    {sectionMentionsConcepts(activeConceptNode.id, conceptGraphData).length === 0 && (
+                                                        <p className="text-xs text-slate-500 dark:text-slate-400 italic">No promoted concepts.</p>
+                                                    )}
+                                                </div>
+                                            </div>
+                                        </>
+                                    )}
+
+                                    {activeConceptNode.kind === "concept" && (
+                                        <>
+                                            <div>
+                                                <div className="text-[10px] font-bold text-slate-500 dark:text-slate-400 uppercase tracking-wider mb-1">Bridge Status</div>
+                                                {(() => {
+                                                    const spanned = conceptBridgeCommunities(activeConceptNode.id, conceptGraphData);
+                                                    return (
+                                                        <div className="text-sm text-slate-700 dark:text-slate-300">
+                                                            {spanned.size >= 2
+                                                                ? `Bridge — mentioned by sections in ${spanned.size} different communities.`
+                                                                : "Not a bridge — mentioning sections stay within one community."}
+                                                        </div>
+                                                    );
+                                                })()}
+                                            </div>
+                                            <div>
+                                                <div className="text-[10px] font-bold text-slate-500 dark:text-slate-400 uppercase tracking-wider mb-1">Mentioned By</div>
+                                                <div className="space-y-1.5">
+                                                    {mentioningSections(activeConceptNode.id, conceptGraphData).map(s => (
+                                                        <div key={s.id}
+                                                             className="text-xs text-slate-700 dark:text-slate-300 bg-slate-50 dark:bg-slate-800/50 p-2 rounded-lg truncate cursor-pointer hover:border-indigo-300 dark:hover:border-indigo-500 border border-transparent transition"
+                                                             onClick={() => setSelectedConceptId(s.id)}
+                                                             title={s.label}>
+                                                            {s.label}
+                                                        </div>
+                                                    ))}
+                                                    {mentioningSections(activeConceptNode.id, conceptGraphData).length === 0 && (
+                                                        <p className="text-xs text-slate-500 dark:text-slate-400 italic">No mentioning sections.</p>
+                                                    )}
+                                                </div>
+                                            </div>
+                                        </>
+                                    )}
+                                </div>
+                            )}
+                        </div>
+                    </>
+                );
+            })()}
+        </aside>
+      </>
+      )}
       </div>
     </main>
   );
