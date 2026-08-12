@@ -1,0 +1,1164 @@
+
+<!doctype html>
+<html lang="en" class="no-js">
+  <head>
+    
+      <meta charset="utf-8">
+      <meta name="viewport" content="width=device-width,initial-scale=1">
+      
+      
+      
+        <link rel="canonical" href="https://vedant1202.github.io/agentpack/specs/0002-ingestion-trust-layer/">
+      
+      
+      
+      
+        
+      
+      
+      <link rel="icon" href="../../assets/images/favicon.png">
+      <meta name="generator" content="mkdocs-1.6.1, mkdocs-material-9.7.6">
+    
+    
+      
+        <title>Spec: Ingestion Trust Layer v1 - AgentPack Documentation</title>
+      
+    
+    
+      <link rel="stylesheet" href="../../assets/stylesheets/main.484c7ddc.min.css">
+      
+        
+        <link rel="stylesheet" href="../../assets/stylesheets/palette.ab4e12ef.min.css">
+      
+      
+
+
+    
+    
+      
+    
+    
+      
+        
+        
+        <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+        <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Roboto:300,300i,400,400i,700,700i%7CRoboto+Mono:400,400i,700,700i&display=fallback">
+        <style>:root{--md-text-font:"Roboto";--md-code-font:"Roboto Mono"}</style>
+      
+    
+    
+      <link rel="stylesheet" href="../../assets/_mkdocstrings.css">
+    
+    <script>__md_scope=new URL("../..",location),__md_hash=e=>[...e].reduce(((e,_)=>(e<<5)-e+_.charCodeAt(0)),0),__md_get=(e,_=localStorage,t=__md_scope)=>JSON.parse(_.getItem(t.pathname+"."+e)),__md_set=(e,_,t=localStorage,a=__md_scope)=>{try{t.setItem(a.pathname+"."+e,JSON.stringify(_))}catch(e){}}</script>
+    
+      
+
+    
+    
+  </head>
+  
+  
+    
+    
+    
+    
+    
+    <body dir="ltr" data-md-color-scheme="slate" data-md-color-primary="indigo" data-md-color-accent="indigo">
+  
+    
+    <input class="md-toggle" data-md-toggle="drawer" type="checkbox" id="__drawer" autocomplete="off">
+    <input class="md-toggle" data-md-toggle="search" type="checkbox" id="__search" autocomplete="off">
+    <label class="md-overlay" for="__drawer"></label>
+    <div data-md-component="skip">
+      
+        
+        <a href="#spec-ingestion-trust-layer-v1" class="md-skip">
+          Skip to content
+        </a>
+      
+    </div>
+    <div data-md-component="announce">
+      
+    </div>
+    
+    
+      
+
+  
+
+<header class="md-header md-header--shadow" data-md-component="header">
+  <nav class="md-header__inner md-grid" aria-label="Header">
+    <a href="../.." title="AgentPack Documentation" class="md-header__button md-logo" aria-label="AgentPack Documentation" data-md-component="logo">
+      
+  
+  <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M12 8a3 3 0 0 0 3-3 3 3 0 0 0-3-3 3 3 0 0 0-3 3 3 3 0 0 0 3 3m0 3.54C9.64 9.35 6.5 8 3 8v11c3.5 0 6.64 1.35 9 3.54 2.36-2.19 5.5-3.54 9-3.54V8c-3.5 0-6.64 1.35-9 3.54"/></svg>
+
+    </a>
+    <label class="md-header__button md-icon" for="__drawer">
+      
+      <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M3 6h18v2H3zm0 5h18v2H3zm0 5h18v2H3z"/></svg>
+    </label>
+    <div class="md-header__title" data-md-component="header-title">
+      <div class="md-header__ellipsis">
+        <div class="md-header__topic">
+          <span class="md-ellipsis">
+            AgentPack Documentation
+          </span>
+        </div>
+        <div class="md-header__topic" data-md-component="header-topic">
+          <span class="md-ellipsis">
+            
+              Spec: Ingestion Trust Layer v1
+            
+          </span>
+        </div>
+      </div>
+    </div>
+    
+      
+    
+    
+    
+    
+      
+      
+        <label class="md-header__button md-icon" for="__search">
+          
+          <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M9.5 3A6.5 6.5 0 0 1 16 9.5c0 1.61-.59 3.09-1.56 4.23l.27.27h.79l5 5-1.5 1.5-5-5v-.79l-.27-.27A6.52 6.52 0 0 1 9.5 16 6.5 6.5 0 0 1 3 9.5 6.5 6.5 0 0 1 9.5 3m0 2C7 5 5 7 5 9.5S7 14 9.5 14 14 12 14 9.5 12 5 9.5 5"/></svg>
+        </label>
+        <div class="md-search" data-md-component="search" role="dialog">
+  <label class="md-search__overlay" for="__search"></label>
+  <div class="md-search__inner" role="search">
+    <form class="md-search__form" name="search">
+      <input type="text" class="md-search__input" name="query" aria-label="Search" placeholder="Search" autocapitalize="off" autocorrect="off" autocomplete="off" spellcheck="false" data-md-component="search-query" required>
+      <label class="md-search__icon md-icon" for="__search">
+        
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M9.5 3A6.5 6.5 0 0 1 16 9.5c0 1.61-.59 3.09-1.56 4.23l.27.27h.79l5 5-1.5 1.5-5-5v-.79l-.27-.27A6.52 6.52 0 0 1 9.5 16 6.5 6.5 0 0 1 3 9.5 6.5 6.5 0 0 1 9.5 3m0 2C7 5 5 7 5 9.5S7 14 9.5 14 14 12 14 9.5 12 5 9.5 5"/></svg>
+        
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M20 11v2H8l5.5 5.5-1.42 1.42L4.16 12l7.92-7.92L13.5 5.5 8 11z"/></svg>
+      </label>
+      <nav class="md-search__options" aria-label="Search">
+        
+        <button type="reset" class="md-search__icon md-icon" title="Clear" aria-label="Clear" tabindex="-1">
+          
+          <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M19 6.41 17.59 5 12 10.59 6.41 5 5 6.41 10.59 12 5 17.59 6.41 19 12 13.41 17.59 19 19 17.59 13.41 12z"/></svg>
+        </button>
+      </nav>
+      
+    </form>
+    <div class="md-search__output">
+      <div class="md-search__scrollwrap" tabindex="0" data-md-scrollfix>
+        <div class="md-search-result" data-md-component="search-result">
+          <div class="md-search-result__meta">
+            Initializing search
+          </div>
+          <ol class="md-search-result__list" role="presentation"></ol>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+      
+    
+    
+  </nav>
+  
+</header>
+    
+    <div class="md-container" data-md-component="container">
+      
+      
+        
+          
+        
+      
+      <main class="md-main" data-md-component="main">
+        <div class="md-main__inner md-grid">
+          
+            
+              
+              <div class="md-sidebar md-sidebar--primary" data-md-component="sidebar" data-md-type="navigation" >
+                <div class="md-sidebar__scrollwrap">
+                  <div class="md-sidebar__inner">
+                    
+
+
+
+<nav class="md-nav md-nav--primary" aria-label="Navigation" data-md-level="0">
+  <label class="md-nav__title" for="__drawer">
+    <a href="../.." title="AgentPack Documentation" class="md-nav__button md-logo" aria-label="AgentPack Documentation" data-md-component="logo">
+      
+  
+  <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M12 8a3 3 0 0 0 3-3 3 3 0 0 0-3-3 3 3 0 0 0-3 3 3 3 0 0 0 3 3m0 3.54C9.64 9.35 6.5 8 3 8v11c3.5 0 6.64 1.35 9 3.54 2.36-2.19 5.5-3.54 9-3.54V8c-3.5 0-6.64 1.35-9 3.54"/></svg>
+
+    </a>
+    AgentPack Documentation
+  </label>
+  
+  <ul class="md-nav__list" data-md-scrollfix>
+    
+      
+      
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../.." class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Home
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../architecture/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Architecture & Internals
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../knowledge-map/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Knowledge Map
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../concept-graph/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Concept Graph
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../cli-reference/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    CLI Reference
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../corpus-explorer-ui/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Corpus Explorer UI
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../benchmark/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Benchmark
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../changelog/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Changelog
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    
+    
+    
+    
+    
+    <li class="md-nav__item md-nav__item--nested">
+      
+        
+        
+        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_9" >
+        
+          
+          <label class="md-nav__link" for="__nav_9" id="__nav_9_label" tabindex="0">
+            
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    API Reference
+  
+
+    
+  </span>
+  
+  
+
+            <span class="md-nav__icon md-icon"></span>
+          </label>
+        
+        <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_9_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_9">
+            <span class="md-nav__icon md-icon"></span>
+            
+  
+    API Reference
+  
+
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../api/core/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Core
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../api/parsers/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Parsers
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+    
+  </ul>
+</nav>
+                  </div>
+                </div>
+              </div>
+            
+            
+              
+              <div class="md-sidebar md-sidebar--secondary" data-md-component="sidebar" data-md-type="toc" >
+                <div class="md-sidebar__scrollwrap">
+                  <div class="md-sidebar__inner">
+                    
+
+<nav class="md-nav md-nav--secondary" aria-label="Table of contents">
+  
+  
+  
+    
+  
+  
+    <label class="md-nav__title" for="__toc">
+      <span class="md-nav__icon md-icon"></span>
+      Table of contents
+    </label>
+    <ul class="md-nav__list" data-md-component="toc" data-md-scrollfix>
+      
+        <li class="md-nav__item">
+  <a href="#1-objective" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        1. Objective
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="1. Objective">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#who-is-the-user" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Who is the user
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#success-criteria-testable" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Success criteria (testable)
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#2-resolved-decisions" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        2. Resolved decisions
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#3-detection-techniques-v1-scope" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        3. Detection techniques (v1 scope)
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#4-commands-cli-surface" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        4. Commands (CLI surface)
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#5-project-structure" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        5. Project structure
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#6-code-style" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        6. Code style
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#7-testing-strategy" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        7. Testing strategy
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#8-boundaries" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        8. Boundaries
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#9-descoped-out-of-scope" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        9. Descoped / out of scope
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#10-open-questions" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        10. Open Questions
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#11-success-criteria-rollup" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        11. Success criteria (rollup)
+      
+    </span>
+  </a>
+  
+</li>
+      
+    </ul>
+  
+</nav>
+                  </div>
+                </div>
+              </div>
+            
+          
+          
+            <div class="md-content" data-md-component="content">
+              
+              <article class="md-content__inner md-typeset">
+                
+                  
+
+
+
+<h1 id="spec-ingestion-trust-layer-v1">Spec: Ingestion Trust Layer v1</h1>
+<blockquote>
+<p>Status: <strong>DRAFT — awaiting sign-off</strong> (per project convention: open questions must be resolved before implementation)
+Owner: Vedant
+Created: 2026-08-09
+Source: <code>agentpack-directions-1-2-implementation.md</code>, Direction 1 (sub-parts 1a + 1c only — see Descoped)
+Relates to: <code>SPEC.md</code> (Knowledge Map — unaffected, no overlap), <code>docs/specs/0001-parsing-and-retrieval-overhaul.md</code> §G-G3 (secret/PII redaction — this spec does not absorb it; see Open Question 3)</p>
+</blockquote>
+<h2 id="1-objective">1. Objective</h2>
+<p>AgentPack's own manifest tells the consuming agent to trust the corpus: every pack ships with
+<code>agent.instructions: ["Use citations when answering.", "Prefer raw chunks over summaries.", ...]</code>
+(<a href="../../src/agentpack/pack.py"><code>pack.py:216-220</code></a>). That trust is currently unconditional — nothing
+in the pipeline distinguishes a paragraph a human wrote from a paragraph a human can't see. Content
+concealment techniques (white-on-white text, PDF invisible render mode, Office <code>w:vanish</code> runs,
+Unicode "tag character" smuggling) let an attacker plant instructions in a source document that are
+invisible on a human skim but fully readable to the extraction pipeline and, downstream, to the
+agent. This is not hypothetical: it's the exact technique class an existing open-source scanner
+(<code>wppoland/hidden-text-detector</code>) is built around, and the March 2026 "Reverse CAPTCHA" paper
+measures how reliably LLMs act on instructions hidden this way.</p>
+<p>AgentPack today has zero visibility into this. Docling's structured-tree output — what
+<code>_parse_semantic</code> in <a href="../../src/agentpack/parsers/pdf_parser.py"><code>pdf_parser.py</code></a> and all of
+<a href="../../src/agentpack/parsers/docling_parser.py"><code>docling_parser.py</code></a> consume — discards render-level
+detail (color, opacity, OCG visibility) before it ever reaches a <code>DocumentBlock</code>. Concealed content
+and normal content are indistinguishable by the time a pack exists.</p>
+<p>This spec adds a deterministic, dependency-light scanning pass that surfaces concealment techniques
+as <code>ExtractionWarning</code>s — the same mechanism already used for <code>parse_error</code> / <code>import_error</code> /
+<code>low_text_density</code> — so a human reviewing <code>agentpack audit</code> output sees them. It also bundles two
+small, unrelated hardening items (§1c of the source doc) because both touch the same ingestion
+boundary: a <code>pymupdf</code> floor bump closing a disclosed CVE, and a zip-bomb guard for the
+office-document formats that are all zip+XML under the hood.</p>
+<p><strong>Explicitly not in this spec:</strong> the ML/semantic prompt-injection classifier (source doc's 1b) and
+secret/PII detection (1d). See Descoped (§9) for why.</p>
+<h3 id="who-is-the-user">Who is the user</h3>
+<p>Same as <code>docs/specs/0001-parsing-and-retrieval-overhaul.md</code>: engineers/AI builders packing a corpus
+for agent retrieval. This spec is most load-bearing for teams packing third-party or
+user-submitted documents (contracts, resumes, RFPs, scraped web content) where a planted hidden
+instruction is a real adversarial input, not just noisy data.</p>
+<h3 id="success-criteria-testable">Success criteria (testable)</h3>
+<ul>
+<li>A fixture PDF with PyMuPDF-inserted invisible text (<code>render_mode=3</code>) produces a <code>hidden_text</code>
+  warning naming the correct page.</li>
+<li>A fixture <code>.docx</code> with a <code>&lt;w:vanish/&gt;</code> run produces a <code>hidden_text</code> warning.</li>
+<li>A fixture chunk containing Unicode tag characters (U+E0000–U+E007F) produces a <code>unicode_smuggling</code>
+  warning.</li>
+<li>Re-packing <code>demo_corpus/</code> (no planted concealment) produces <strong>zero</strong> new warnings — no
+  false-positive flood on ordinary documents.</li>
+<li>A synthetic zip-bomb <code>.docx</code> fails the pack gracefully (an <code>ExtractionWarning</code>, <code>status: failed</code>
+  in the manifest) in bounded time — never a hang, never an unhandled exception.</li>
+<li>Re-packing an <strong>unchanged</strong> corpus (L1 cache hit path) still emits trust warnings identically to a
+  cold pack — this is the regression guard for the caching design in §2.</li>
+<li>Zero new core dependencies. <code>defusedxml</code> (already present transitively via <code>docling-core</code>) becomes
+  a direct declared dependency; no other package is added.</li>
+<li>Full existing test suite passes unchanged.</li>
+</ul>
+<hr />
+<h2 id="2-resolved-decisions">2. Resolved decisions</h2>
+<table>
+<thead>
+<tr>
+<th>Decision</th>
+<th>Choice</th>
+<th>Rationale</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Where the scan hooks in</td>
+<td>Call <code>scan_for_hidden_content()</code> from <code>_parse_one</code> in <code>pack.py</code>, <strong>after</strong> the <code>cache_get</code>/<code>cache_set</code> block — not inside it</td>
+<td>The L1 parse cache pickles the whole <code>SourceDocument</code> (<a href="../../src/agentpack/pack.py"><code>pack.py:47-53</code></a>). If trust warnings were appended before caching, a cache hit on <code>--scan-hidden</code> toggled off (or a prior version of this code) would silently miss them, and there's no scan-related component in the cache key today. Running the scan <em>after</em> the cache block sidesteps needing a cache-key version bump entirely: it always re-runs, cache hit or miss, cheaply (see cost budget below). This also means trust warnings always carry the <em>current</em> <code>source_id</code>, which sidesteps <code>pack.py:55</code>'s existing behavior of reassigning <code>doc.source_id</code> on a cache hit without updating the <code>source_id</code> field embedded in the doc's warnings — a latent bug this design doesn't need to fix but must not inherit.</td>
+</tr>
+<tr>
+<td>Zip-bomb guard placement</td>
+<td>A pre-flight check in <code>trust.py</code>, called from <code>_parse_one</code> <strong>before</strong> <code>parser.parse()</code> for <code>.docx</code>/<code>.pptx</code>/<code>.xlsx</code>, gating both Docling's own conversion and the trust scanner's zip read</td>
+<td>Docling opens office files as zip+XML internally; an unbounded read there is the actual DoS surface, not just the trust scanner's own zip access. One guard, one place, protects both call sites.</td>
+</tr>
+<tr>
+<td>New dependency footprint</td>
+<td>Zero new core deps. PDF checks via <code>fitz.get_texttrace()</code> (module already imported, <a href="../../src/agentpack/parsers/pdf_parser.py"><code>pdf_parser.py:2</code></a>); office checks via stdlib <code>zipfile</code> + <code>defusedxml</code> (confirmed already installed transitively via <code>docling-core</code>)</td>
+<td>Matches this codebase's existing dependency conservatism (0001's Boundaries: "ask first before adding heavyweight deps"). <code>python-docx</code>/<code>python-pptx</code> are deliberately <strong>not</strong> added — raw XML part reads via <code>zipfile</code> cover the needed tags without a new dependency surface. <code>defusedxml</code> moves from implicit-transitive to an explicit <code>pyproject.toml</code> entry, since relying on an unpinned transitive dependency for a security-relevant XML parser is itself a small risk.</td>
+</tr>
+<tr>
+<td>Failure mode</td>
+<td><code>scan_for_hidden_content()</code> never raises — blanket <code>try/except</code> returning <code>[]</code> on any internal failure</td>
+<td>Mirrors the existing "cache writes must never crash the main pipeline" comment in <a href="../../src/agentpack/cache.py"><code>cache.py:66</code></a>. A malformed or adversarially-crafted file degrades to "no trust signal available," never an aborted pack.</td>
+</tr>
+<tr>
+<td>Zip-bomb rejection warning type</td>
+<td>Reuse <code>type="parse_error"</code> (not a new <code>"zip_bomb"</code> type), with a message naming the rejection reason</td>
+<td><code>pack.py:174-176</code>'s failure/status logic already keys off <code>w.type == "parse_error"</code> to mark a source <code>"failed"</code> and surface the reason. Reusing the existing type means <strong>zero changes</strong> to that logic — the file already ends up with 0 blocks / 0 chunks either way, which alone would mark it failed. A new type would need that matcher extended for no behavioral gain.</td>
+</tr>
+<tr>
+<td>PDF OCG <code>/OFF</code> layers</td>
+<td>Descoped from v1 (§9)</td>
+<td>PyMuPDF does not cleanly expose text-to-OCG association; needs dedicated investigation before it's a same-scope item.</td>
+</tr>
+<tr>
+<td>Pixel-contrast detection</td>
+<td>Descoped from v1 (§9)</td>
+<td>Requires rendering every page — not free like a <code>get_texttrace()</code> pass. If ever added, it must move <em>inside</em> the L1 cache with a cache-key version bump, unlike everything else in this spec. Flagged explicitly so it is never casually added as a "small extension" of this scanner later.</td>
+</tr>
+<tr>
+<td>1b (ML prompt-injection classifier)</td>
+<td>Rejected outright, not merely descoped (§9)</td>
+<td><code>protectai/llm-guard</code> and its underlying model repo are both archived/unmaintained; an independent evaluation (arXiv 2504.11168) measured the model at 67.87% attack success under adversarial ML evasion; the model card itself documents false positives on system-prompt/policy-like text, which describes a large share of real document corpora.</td>
+</tr>
+</tbody>
+</table>
+<hr />
+<h2 id="3-detection-techniques-v1-scope">3. Detection techniques (v1 scope)</h2>
+<table>
+<thead>
+<tr>
+<th>Format</th>
+<th>Technique</th>
+<th>Check</th>
+<th>Warning type</th>
+<th>Confidence</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>PDF</td>
+<td>Invisible render mode (<code>3 Tr</code>)</td>
+<td><code>page.get_texttrace()</code> — filter entries with text render mode <code>3</code></td>
+<td><code>hidden_text</code></td>
+<td>High</td>
+</tr>
+<tr>
+<td>PDF</td>
+<td>Near-zero fill/stroke opacity</td>
+<td><code>page.get_texttrace()</code> opacity fields ≈ 0</td>
+<td><code>hidden_text</code></td>
+<td>High</td>
+</tr>
+<tr>
+<td>PDF</td>
+<td>Sub-legible font size (&lt; 2pt)</td>
+<td><code>page.get_texttrace()</code> font size</td>
+<td><code>hidden_text</code></td>
+<td>High</td>
+</tr>
+<tr>
+<td>DOCX</td>
+<td><code>w:vanish</code> hidden run</td>
+<td><code>zipfile</code> read of <code>word/document.xml</code>, <code>defusedxml</code>-parsed, search <code>w:rPr/w:vanish</code></td>
+<td><code>hidden_text</code></td>
+<td>High</td>
+</tr>
+<tr>
+<td>DOCX</td>
+<td>Explicit white-on-white run color</td>
+<td>Same parse, <code>w:rPr/w:color[@w:val='FFFFFF']</code> with no contrasting highlight</td>
+<td><code>hidden_text</code></td>
+<td>Medium</td>
+</tr>
+<tr>
+<td>PPTX</td>
+<td>Explicit white/background-matched text fill or zero font size</td>
+<td><code>zipfile</code> read of <code>ppt/slides/slideN.xml</code></td>
+<td><code>hidden_text</code></td>
+<td><strong>Medium</strong> — PPTX has no direct <code>w:vanish</code> equivalent; v1 covers only explicit color-match and zero-size heuristics, narrower than DOCX coverage</td>
+</tr>
+<tr>
+<td>XLSX</td>
+<td>White font color in <code>sharedStrings.xml</code> / <code>sheetN.xml</code> cell styles</td>
+<td><code>zipfile</code> read of relevant parts</td>
+<td><code>hidden_text</code></td>
+<td><strong>Medium</strong> — same narrower-than-DOCX caveat</td>
+</tr>
+<tr>
+<td>Any extracted block text</td>
+<td>Unicode tag characters (U+E0000–U+E007F)</td>
+<td>Codepoint range scan over <code>DocumentBlock.text</code></td>
+<td><code>unicode_smuggling</code></td>
+<td>High</td>
+</tr>
+<tr>
+<td>Any extracted block text</td>
+<td>Zero-width characters (U+200B–200D, U+FEFF)</td>
+<td>Codepoint scan</td>
+<td><code>unicode_smuggling</code></td>
+<td>High</td>
+</tr>
+<tr>
+<td>Any extracted block text</td>
+<td>Deprecated Unicode format characters (U+206A–U+206F)</td>
+<td>Codepoint scan</td>
+<td><code>unicode_smuggling</code></td>
+<td>High</td>
+</tr>
+<tr>
+<td>Any extracted block text</td>
+<td>Bidirectional control characters (U+202A–U+202E, U+2066–U+2069)</td>
+<td>Codepoint scan</td>
+<td><code>unicode_smuggling</code></td>
+<td>Medium — legitimate RTL-language documents use some of these; needs the false-positive check against a real multilingual fixture before shipping default-on (see §8)</td>
+</tr>
+</tbody>
+</table>
+<p>The Unicode-smuggling scan runs over <code>DocumentBlock.text</code> post-extraction (format-agnostic, one
+implementation for every source type). The render/structural checks are format-specific and run
+against the original file bytes, since that detail is exactly what parsing already discards.</p>
+<hr />
+<h2 id="4-commands-cli-surface">4. Commands (CLI surface)</h2>
+<table>
+<thead>
+<tr>
+<th>Command</th>
+<th>Change</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>agentpack pack &lt;dir&gt; --out &lt;out&gt;</code></td>
+<td>Scan runs automatically as part of parsing (see Open Question 1 on default-on vs. flag). No new required flag.</td>
+</tr>
+<tr>
+<td><code>agentpack audit &lt;pack_dir&gt;</code></td>
+<td>Warning section groups by <code>type</code> with per-type counts; <code>parse_error</code>/<code>import_error</code> remain listed first (see Open Question 2).</td>
+</tr>
+<tr>
+<td><code>agentpack validate &lt;pack_dir&gt;</code></td>
+<td>Unchanged — trust warnings use the existing <code>ExtractionWarning</code> schema, no new validation needed.</td>
+</tr>
+<tr>
+<td>all others (<code>retrieve</code>, <code>map</code>, <code>index</code>, <code>ui</code>, <code>eval</code>)</td>
+<td>Unchanged.</td>
+</tr>
+</tbody>
+</table>
+<hr />
+<h2 id="5-project-structure">5. Project structure</h2>
+<div class="highlight"><pre><span></span><code>src/agentpack/
+  trust.py            # NEW — scan_for_hidden_content(file_path, doc_type, source_id) -&gt; List[ExtractionWarning]
+                       #       check_zip_safety(file_path) -&gt; Optional[ExtractionWarning]
+                       #       Imports only agentpack.models; no dependency on pack.py/parsers/*.
+  pack.py              # _parse_one(): call check_zip_safety() pre-parse for .docx/.pptx/.xlsx;
+                       #   call scan_for_hidden_content() after the cache_get/cache_set block
+  models.py            # unchanged — reuses ExtractionWarning as-is, zero schema change
+  audit.py             # group the warnings section by type with per-type counts
+pyproject.toml         # pymupdf floor &gt;=1.23.0 -&gt; &gt;=1.26.7; defusedxml declared as a direct dep
+tests/
+  test_trust.py        # NEW — one test per technique in §3 (synthetic fixtures built in-test,
+                       #   nothing committed as a binary); zip-bomb rejection test; never-raises
+                       #   fuzz test on truncated/corrupt input; no-false-positive test on demo_corpus
+  test_pack.py         # +1 regression test: cache hit still emits trust warnings, with correct
+                       #   source_id, identical to a cold pack
+</code></pre></div>
+<hr />
+<h2 id="6-code-style">6. Code style</h2>
+<p>Match the existing codebase (same conventions as <code>docs/specs/0001-...</code>):
+- <code>ExtractionWarning</code> pydantic objects, not dicts, returned from <code>scan_for_hidden_content</code>.
+- Blanket <code>try/except</code> at the function boundary — this module must never propagate an exception
+  into <code>_parse_one</code>.
+- No <code>print</code> from library code, ever (this module has no <code>verbose</code>/<code>quiet</code> context to check —
+  findings surface only as warnings, never console output).
+- Deterministic ordering: iterate pages/XML entries in file order; never let dict/set iteration
+  order leak into warning ordering.
+- <code>block_id</code>/<code>page</code> references in warning messages should point at something a human can act on
+  (page number, XML part name) — mirror the existing message style in <code>pdf_parser.py</code>
+  (<code>f"Page {page_num + 1} has little or no text."</code>).</p>
+<p>Sketch of the integration point in <code>pack.py</code>:</p>
+<div class="highlight"><pre><span></span><code><span class="k">def</span><span class="w"> </span><span class="nf">_parse_one</span><span class="p">(</span><span class="n">file_path</span><span class="p">,</span> <span class="n">source_id</span><span class="p">,</span> <span class="n">fast_pdf</span><span class="p">,</span> <span class="n">remove_empty_lines</span><span class="p">,</span> <span class="n">cache_dir</span><span class="p">):</span>
+    <span class="n">parser</span> <span class="o">=</span> <span class="n">get_parser</span><span class="p">(</span><span class="n">file_path</span><span class="o">.</span><span class="n">suffix</span><span class="p">,</span> <span class="n">fast_pdf</span><span class="o">=</span><span class="n">fast_pdf</span><span class="p">)</span>
+    <span class="k">if</span> <span class="n">parser</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+        <span class="k">return</span> <span class="kc">None</span>
+
+    <span class="k">if</span> <span class="n">file_path</span><span class="o">.</span><span class="n">suffix</span><span class="o">.</span><span class="n">lower</span><span class="p">()</span> <span class="ow">in</span> <span class="p">{</span><span class="s2">&quot;.docx&quot;</span><span class="p">,</span> <span class="s2">&quot;.pptx&quot;</span><span class="p">,</span> <span class="s2">&quot;.xlsx&quot;</span><span class="p">}:</span>
+        <span class="n">zip_warning</span> <span class="o">=</span> <span class="n">check_zip_safety</span><span class="p">(</span><span class="n">file_path</span><span class="p">,</span> <span class="n">source_id</span><span class="p">)</span>
+        <span class="k">if</span> <span class="n">zip_warning</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="k">return</span> <span class="n">SourceDocument</span><span class="p">(</span>
+                <span class="n">source_id</span><span class="o">=</span><span class="n">source_id</span><span class="p">,</span> <span class="n">path</span><span class="o">=</span><span class="n">file_path</span><span class="o">.</span><span class="n">name</span><span class="p">,</span>
+                <span class="nb">type</span><span class="o">=</span><span class="n">file_path</span><span class="o">.</span><span class="n">suffix</span><span class="o">.</span><span class="n">lstrip</span><span class="p">(</span><span class="s2">&quot;.&quot;</span><span class="p">)</span><span class="o">.</span><span class="n">lower</span><span class="p">(),</span>
+                <span class="n">checksum</span><span class="o">=</span><span class="n">_sha256</span><span class="p">(</span><span class="n">file_path</span><span class="p">),</span> <span class="n">blocks</span><span class="o">=</span><span class="p">[],</span> <span class="n">warnings</span><span class="o">=</span><span class="p">[</span><span class="n">zip_warning</span><span class="p">],</span>
+            <span class="p">)</span>
+
+    <span class="c1"># ... existing cache_get / parser.parse / cache_set block, unchanged ...</span>
+
+    <span class="n">doc</span><span class="o">.</span><span class="n">warnings</span><span class="o">.</span><span class="n">extend</span><span class="p">(</span><span class="n">scan_for_hidden_content</span><span class="p">(</span><span class="n">file_path</span><span class="p">,</span> <span class="n">doc</span><span class="o">.</span><span class="n">type</span><span class="p">,</span> <span class="n">source_id</span><span class="p">))</span>
+    <span class="k">return</span> <span class="n">doc</span>
+</code></pre></div>
+<hr />
+<h2 id="7-testing-strategy">7. Testing strategy</h2>
+<ul>
+<li><strong>Unit, per technique:</strong> each row in §3 gets a synthetic fixture built at test time, not a
+  committed binary — e.g. <code>fitz</code> PDFs constructed via <code>page.insert_text(point, text, render_mode=3)</code>
+  (the real API OCR pipelines use to write invisible text layers); minimal <code>.docx</code>/<code>.pptx</code>/<code>.xlsx</code>
+  built as an in-memory <code>zipfile.ZipFile</code> with a hand-written XML part containing the target tag.</li>
+<li><strong>Zip-bomb test:</strong> construct a highly-compressible zip at test time (never commit an actual
+  exploit-shaped binary to the repo); assert <code>pack()</code> marks the source <code>"failed"</code> with a
+  <code>parse_error</code> warning naming the rejection, and assert wall-clock stays bounded.</li>
+<li><strong>Never-raises test:</strong> feed <code>scan_for_hidden_content</code> a truncated/corrupted <code>.docx</code> and a
+  corrupted PDF; assert it returns <code>[]</code>, not an exception.</li>
+<li><strong>False-positive guard:</strong> re-pack <code>demo_corpus/</code> (and any other existing fixture corpus with no
+  planted concealment) and assert zero new <code>hidden_text</code>/<code>unicode_smuggling</code> warnings appear.
+  Include at least one fixture with legitimate RTL (Arabic/Hebrew) text to validate the
+  bidi-control-character check doesn't fire on ordinary multilingual content (flagged as Medium
+  confidence in §3 for exactly this reason).</li>
+<li><strong>Cache-interaction regression test:</strong> pack the same corpus twice. Assert the second (cache-hit)
+  run's manifest carries the same trust warnings as the first, each with <code>source_id</code> matching its
+  actual source — this is the direct regression guard for the caching design decision in §2.</li>
+<li><strong>Determinism:</strong> two packs of the same corpus produce identical trust warnings (order and
+  content), matching the existing determinism guarantee for <code>map.yml</code> in <code>SPEC.md</code>.</li>
+</ul>
+<hr />
+<h2 id="8-boundaries">8. Boundaries</h2>
+<p><strong>Always</strong>
+- <code>scan_for_hidden_content</code> never raises; on any internal failure it returns <code>[]</code>.
+- Stay additive: no existing <code>ExtractionWarning</code> field, manifest key, or warning type is removed or
+  renamed.
+- Trust warnings are computed fresh every pack (never pickled into the L1 cache) — see §2.
+- Zero new core dependencies beyond declaring <code>defusedxml</code> directly.</p>
+<p><strong>Ask first</strong>
+- Adding <code>python-docx</code>/<code>python-pptx</code> (or any dependency beyond stdlib <code>zipfile</code> + <code>defusedxml</code>) for
+  office-format parsing convenience — that would be a real new footprint, unlike <code>defusedxml</code>.
+- Changing the scan from default-on to opt-in (or vice versa) after ship, once real false-positive
+  data exists — that's a behavior change, not a bug fix.
+- Any change that causes a trust finding to modify, redact, or drop chunk content — this spec is
+  <strong>flag-only</strong>.</p>
+<p><strong>Never</strong>
+- Block or fail a pack solely because hidden content was found. This is a signal for the human
+  running <code>agentpack audit</code>, never an enforcement gate.
+- Extract, interpret, or act on any instruction found inside concealed content. The scanner's job
+  is to report that concealment <em>exists</em> — nothing in this pipeline should read a hidden
+  instruction's semantic content and behave differently because of it.
+- Render PDF pages to images as part of this scan (that's the descoped pixel-contrast tier,
+  deliberately excluded from v1's performance envelope — see §2).
+- Change <code>pack.py</code>'s existing <code>has_parse_error</code> / status-determination logic — the zip-bomb guard is
+  designed to require zero changes there (§2).</p>
+<hr />
+<h2 id="9-descoped-out-of-scope">9. Descoped / out of scope</h2>
+<ul>
+<li><strong>PDF OCG <code>/OFF</code> layer detection</strong> — needs dedicated investigation into PyMuPDF's OCG API before
+  it's addable at this confidence level.</li>
+<li><strong>Pixel-rendering contrast detection</strong> (the <code>wppoland/hidden-text-detector</code> technique of
+  rendering pages and measuring text-region contrast) — the most robust single technique for
+  catching white-on-white and colored-panel matches, but not free like <code>get_texttrace()</code>; requires
+  moving inside the L1 cache with a key-version bump. Real future work, not this spec.</li>
+<li><strong>1b — ML/semantic prompt-injection classifier</strong> — rejected for the reasons in §2, not merely
+  deferred. Revisit only if a current, maintained, independently-well-evaluated alternative to
+  <code>protectai/llm-guard</code> emerges (e.g. a non-archived successor to Meta Prompt Guard).</li>
+<li><strong>1d — secret/PII detection wiring</strong> (<code>detect-secrets</code> is a declared but never-imported dependency
+  today) — already tracked as <code>G-G3</code> in <code>docs/specs/0001-parsing-and-retrieval-overhaul.md</code> Phase 4,
+  with its own open question there ("redact or only flag?"). Not absorbed into this spec — see Open
+  Question 3 for whether that should change.</li>
+</ul>
+<hr />
+<h2 id="10-open-questions">10. Open Questions</h2>
+<ol>
+<li><strong>Default-on or opt-in flag?</strong> Proposed: <strong>default-on</strong>, no new flag. This is a warning-only
+   signal — nothing is blocked, redacted, or altered — which matches the "safe/complete behavior is
+   the default" pattern this codebase already uses for <code>map.yml</code> generation (<code>--no-map</code> is an
+   <em>opt-out</em>, not opt-in). Contrast with <code>--fast</code>/<code>--enrich-llm</code>-style flags, which gate genuinely
+   expensive or behavior-changing paths; this scan is neither. Open because it changes what shows up
+   in every <code>manifest.yml</code>/<code>audit</code> output by default, including for users who have never heard of
+   this feature.</li>
+<li><strong>Does <code>agentpack audit</code> need warning grouping?</strong> Proposed: group the existing flat warning list
+   by <code>type</code> with per-type counts, <code>parse_error</code>/<code>import_error</code> listed first/most prominent. A
+   corpus with many <code>hidden_text</code> findings (e.g. a batch of OCR'd PDFs with legitimate invisible
+   text layers) would otherwise drown genuine parse failures in one undifferentiated list. Simpler
+   than building a full severity-ranking system, which is overkill for v1.</li>
+<li><strong>Bundle 1d (secret detection) into this spec, or leave it as <code>G-G3</code> fast-follow work under
+   0001?</strong> Proposed: <strong>leave it separate.</strong> It shares the <code>ExtractionWarning</code> mechanism but its
+   optional <code>--redact-secrets</code> path mutates emitted chunk text, which nothing in this spec does —
+   different risk profile, different review. <code>G-G3</code> in 0001 already tracks it with its own open
+   redact-vs-flag question; duplicating that tracking here would fork the decision in two places.</li>
+<li><strong>Bidi-control-character false positives (§3, last row):</strong> is the Medium-confidence check
+   ship-blocking pending the RTL fixture test in §7, or should it start out logged-but-not-surfaced
+   (collected in warnings but excluded from <code>audit</code>'s summary count) until real corpus data confirms
+   the false-positive rate? Proposed: ship it, gated by the RTL fixture test passing — no separate
+   suppression mechanism, keep the warning model uniform.</li>
+</ol>
+<hr />
+<h2 id="11-success-criteria-rollup">11. Success criteria (rollup)</h2>
+<ul>
+<li>[ ] <code>hidden_text</code> warnings fire correctly for PDF render-mode-3, DOCX <code>w:vanish</code>, and the
+      Medium-confidence PPTX/XLSX color-match checks (§3).</li>
+<li>[ ] <code>unicode_smuggling</code> warnings fire correctly for tag characters, zero-width characters, and
+      deprecated format characters; bidi-control-character check passes the RTL false-positive
+      fixture (§7, Open Question 4).</li>
+<li>[ ] Zero new warnings on <code>demo_corpus/</code> and other existing fixtures (no false-positive flood).</li>
+<li>[ ] Zip-bomb <code>.docx</code> fails gracefully, bounded time, <code>parse_error</code> warning, zero changes to
+      <code>pack.py</code>'s existing status logic (§2).</li>
+<li>[ ] Cache-hit regression test passes: trust warnings identical across cold and warm packs, correct
+      <code>source_id</code> every time (§7).</li>
+<li>[ ] <code>pymupdf</code> floor bumped to <code>&gt;=1.26.7</code>; <code>defusedxml</code> declared as a direct dependency.</li>
+<li>[ ] Zero new core dependencies beyond <code>defusedxml</code>.</li>
+<li>[ ] Full existing test suite passes unchanged.</li>
+<li>[ ] Open Questions 1–4 resolved and recorded here before implementation begins.</li>
+</ul>
+
+
+
+
+
+
+
+
+
+
+
+
+                
+              </article>
+            </div>
+          
+          
+<script>var target=document.getElementById(location.hash.slice(1));target&&target.name&&(target.checked=target.name.startsWith("__tabbed_"))</script>
+        </div>
+        
+      </main>
+      
+        <footer class="md-footer">
+  
+  <div class="md-footer-meta md-typeset">
+    <div class="md-footer-meta__inner md-grid">
+      <div class="md-copyright">
+  
+  
+    Made with
+    <a href="https://squidfunk.github.io/mkdocs-material/" target="_blank" rel="noopener">
+      Material for MkDocs
+    </a>
+  
+</div>
+      
+    </div>
+  </div>
+</footer>
+      
+    </div>
+    <div class="md-dialog" data-md-component="dialog">
+      <div class="md-dialog__inner md-typeset"></div>
+    </div>
+    
+    
+    
+      
+      
+      <script id="__config" type="application/json">{"annotate": null, "base": "../..", "features": [], "search": "../../assets/javascripts/workers/search.2c215733.min.js", "tags": null, "translations": {"clipboard.copied": "Copied to clipboard", "clipboard.copy": "Copy to clipboard", "search.result.more.one": "1 more on this page", "search.result.more.other": "# more on this page", "search.result.none": "No matching documents", "search.result.one": "1 matching document", "search.result.other": "# matching documents", "search.result.placeholder": "Type to start searching", "search.result.term.missing": "Missing", "select.version": "Select version"}, "version": null}</script>
+    
+    
+      <script src="../../assets/javascripts/bundle.79ae519e.min.js"></script>
+      
+    
+  </body>
+</html>

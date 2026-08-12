@@ -70,6 +70,12 @@ def validate_pack(pack_dir: str) -> List[str]:
         chunk_ids = {c.get("id") for c in manifest.get("chunks", []) if c.get("id")}
         errors.extend(_validate_map(map_path, source_ids, chunk_ids))
 
+    # Validate the optional corpus concept graph (graph.yml). Its absence is not an error.
+    graph_path = base_path / "graph.yml"
+    if graph_path.exists():
+        map_node_ids = _collect_map_node_ids(map_path)
+        errors.extend(_validate_graph(graph_path, source_ids, map_node_ids))
+
     return errors
 
 
@@ -97,4 +103,80 @@ def _validate_map(map_path: Path, source_ids: set, chunk_ids: set) -> List[str]:
         if sid not in source_ids:
             errors.append(f"Map document refers to unknown source_id '{sid}'")
         walk(doc.get("sections", []))
+    return errors
+
+
+def _collect_map_node_ids(map_path: Path) -> set:
+    """All node_ids appearing anywhere in map.yml's section trees, at any
+    depth. Mirrors _validate_map's own recursive walk, but collects ids
+    instead of checking chunk_id references -- used by _validate_graph to
+    confirm graph.yml's section nodes resolve to real map.yml nodes.
+    A missing or corrupt map.yml yields an empty set rather than raising;
+    graph.yml built without a map.yml present has no section nodes to
+    begin with (grapher.py degrades to document-only nodes), so this
+    never produces a false FK violation on a genuinely valid graph.
+    """
+    if not map_path.exists():
+        return set()
+    try:
+        with open(map_path, "r", encoding="utf-8") as f:
+            kmap = yaml.safe_load(f)
+    except Exception:
+        return set()
+    if not kmap:
+        return set()
+
+    ids: set = set()
+
+    def walk(nodes):
+        for node in nodes or []:
+            node_id = node.get("node_id")
+            if node_id:
+                ids.add(node_id)
+            walk(node.get("nodes", []))
+
+    for doc in kmap.get("documents", []) or []:
+        walk(doc.get("sections", []))
+    return ids
+
+
+def _validate_graph(graph_path: Path, source_ids: set, map_node_ids: set) -> List[str]:
+    """Validate graph.yml referential integrity (spec §3): every node's
+    `doc` ref resolves to a real manifest source_id; every section node's
+    id is a real map.yml node_id; every edge endpoint is a node in this
+    same graph; every node's `community` is a real community id."""
+    errors: List[str] = []
+    try:
+        with open(graph_path, "r", encoding="utf-8") as f:
+            graph = yaml.safe_load(f)
+    except Exception as e:
+        return [f"Failed to parse graph.yml: {e}"]
+    if not graph:
+        return ["graph.yml is empty."]
+
+    nodes = graph.get("nodes", []) or []
+    node_ids = {n.get("id") for n in nodes if n.get("id")}
+    community_ids = {
+        c.get("id") for c in (graph.get("communities", []) or []) if c.get("id") is not None
+    }
+
+    for node in nodes:
+        node_id = node.get("id", "<unknown>")
+        doc_ref = node.get("doc")
+        if doc_ref is not None and doc_ref not in source_ids:
+            errors.append(f"Graph node '{node_id}' refers to unknown source_id '{doc_ref}'")
+        if node.get("kind") == "section" and node_id not in map_node_ids:
+            errors.append(f"Graph section node '{node_id}' has no matching map.yml node_id")
+        community = node.get("community")
+        if community is not None and community not in community_ids:
+            errors.append(f"Graph node '{node_id}' refers to unknown community id '{community}'")
+
+    for edge in graph.get("edges", []) or []:
+        source = edge.get("source")
+        target = edge.get("target")
+        if source not in node_ids:
+            errors.append(f"Graph edge references unknown source node '{source}'")
+        if target not in node_ids:
+            errors.append(f"Graph edge references unknown target node '{target}'")
+
     return errors

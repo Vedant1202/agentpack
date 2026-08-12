@@ -34,6 +34,7 @@ flowchart TD
         G[(indexes/lexical_index.db\nSQLite FTS5)]
         V[(indexes/hnsw_index.bin\nHNSW vector index)]
         M[map.yml\nhierarchical knowledge map]
+        GR[graph.yml\ncorpus concept graph]
 
         C --> D
         C --> E
@@ -41,6 +42,9 @@ flowchart TD
         C --> G
         C --> V
         C --> M
+        D --> GR
+        M --> GR
+        V -.->|"similar_to edges (index time)"| GR
         CA <-->|"L3: sha256(chunk) + model_id"| V
     end
 
@@ -62,6 +66,7 @@ When you run `agentpack pack`, it generates a directory structure known as a **C
 agentpack-output/
 ├── manifest.yml           # Registry: sources, chunks, tables, citations, pack version.
 ├── map.yml                # Hierarchical knowledge map (corpus → document → section → chunk).
+├── graph.yml              # Corpus concept graph (documents ↔ sections ↔ concepts).
 ├── chunks/                # Agent-ready markdown files (one per chunk).
 ├── tables/                # Extracted tables in standalone Markdown format.
 ├── indexes/               # FTS and vector indexes.
@@ -72,7 +77,8 @@ agentpack-output/
 │   └── vector_index.hash  # Content hash for invalidation.
 ├── .cache/
 │   └── cache.db           # Content-addressed cache (L1/L3/L5 layers).
-└── reports/               # Audit and validation reports.
+└── reports/               # Audit, validation, and concept-graph reports.
+    └── graph_report.md    # Top concepts, bridge concepts, isolated documents.
 ```
 
 ### `manifest.yml`
@@ -80,6 +86,11 @@ The registry for the pack. Maps original document sources to their chunks and ma
 
 ### `map.yml`
 A hierarchical **knowledge map** — `corpus → document → section → chunk` — that an agent reads to locate *where* information lives, then pulls only the chunks it needs. The tree structure is reconstructed from the parsed section hierarchy; each section also carries deterministic, offline descriptors (YAKE `keyphrases` + a TextRank `gist`). The map is purely additive and **never enters the retrieval indexes**. Built by default (`--no-map` to skip; `agentpack map` to rebuild). See **[Knowledge Map](knowledge-map.md)** for the full schema and rationale.
+
+### `graph.yml`
+A **corpus concept graph** — where `map.yml` describes one document at a time, `graph.yml` describes how documents relate to each other. Documents, sections, and promoted concepts are nodes; `contains`, `mentions`, `references`, and (at index time) `similar_to` are edges. Louvain communities, bridge concepts, and isolated documents are derived from it and rendered to `reports/graph_report.md`.
+
+It is built by a **pure post-processor** (`grapher.py`) that reads `manifest.yml` and `map.yml` back off disk and imports nothing from the parsing or chunking pipeline. That is what makes pack-time construction and the `agentpack graph` rebuild the same code path — a rebuild reproduces the original byte-for-byte apart from its timestamp. Like the map, it is purely additive and **never enters the retrieval indexes**. Built by default (`--no-graph` to skip). See **[Concept Graph](concept-graph.md)**.
 
 ### Security & Scanning Layer
 Before parsing, AgentPack acts as a firewall against context bloat and secret leakage:
