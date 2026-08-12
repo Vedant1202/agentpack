@@ -55,6 +55,17 @@ When you click on a chunk, the right-hand panel instantly updates to show:
 ![Deep-Dive into Semantic Boundaries (Node Drilldown)](./assets/node_click.png)
 *Click any chunk to inspect its exact boundaries, raw text content, and nearest semantic neighbors.*
 
+### Concept Graph View
+The header carries a **Universe ⇄ Concepts** toggle. The Universe view is the chunk map described above; the Concepts view renders the pack's [concept graph](concept-graph.md) — how documents relate to each other, rather than what is inside each one.
+
+- **Nodes are colored by community**, so Louvain clusters are visible at a glance. Documents and sections render as circles (sized document > section), concepts as diamonds.
+- **Edges are styled by relation:** `contains`, `mentions`, and `references` draw solid; `similar_to` draws dashed, since it is the one relation derived from embeddings rather than structure.
+- **Relation checkboxes** in the legend hide any edge type on the spot. This matters on corpora where one relation dominates — a PDF-heavy corpus can produce a `similar_to` edge between nearly every pair of documents, and hiding it in one click exposes the real structural graph underneath.
+- **Clicking a node** opens a detail panel tailored to its kind: a concept shows its bridge status and the sections that mention it; a document shows its section count and whether it is isolated; a section shows its parent document and the concepts it mentions. Every listed item is clickable, so you can walk concept → section → its other concepts without leaving the view.
+- **With nothing selected**, the panel lists every community with its label and member count.
+
+If the pack has no `graph.yml` — packed with `--no-graph`, or a single-document corpus — the toggle is disabled and explains how to build one (`agentpack graph <pack_dir>`). The Universe view is unaffected.
+
 ### Onboarding
 The UI comes with an interactive Shepherd.js onboarding tour to guide you through your first time exploring the corpus.
 

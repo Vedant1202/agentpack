@@ -114,6 +114,48 @@ agentpack map ./agentpack-output     # (re)build map.yml for an existing pack
 
 **[🗺️ Read the full Knowledge Map guide](https://github.com/Vedant1202/agentpack/blob/main/docs/knowledge-map.md)**
 
+### 2d. The Concept Graph (`graph.yml`)
+`map.yml` describes what is inside each document. **`graph.yml`** describes how the documents relate to *each other* — which topics recur across the corpus, which documents reference each other, and which are connected to nothing at all.
+
+Documents, sections, and recurring concepts become nodes; `contains`, `mentions`, `references`, and `similar_to` become edges. Communities are detected with seeded Louvain clustering. Like the map, it is deterministic, offline, and never touches the retrieval indexes.
+
+```mermaid
+flowchart LR
+    D1[onboarding.md] -->|contains| S1[Deployment Basics]
+    D2[incident-response.md] -->|contains| S2[The Deployment Pipeline]
+    S1 -->|mentions| C1([Deployment Pipeline])
+    S2 -->|mentions| C1
+    D1 -.->|references| D2
+```
+
+Every pack also writes `reports/graph_report.md`, a plain-language read on the corpus:
+
+```markdown
+## Top Concepts
+- **alerting system** (3 mention(s))
+- **Deployment Pipeline** (2 mention(s))
+
+## Isolated Documents
+- No isolated documents.
+```
+
+That report answers questions retrieval alone cannot: *is this corpus actually about what I assumed?* and *is any document disconnected from the rest* — either off-topic, or a sign the document that would connect it is missing.
+
+```bash
+agentpack graph ./agentpack-output                     # (re)build graph.yml
+agentpack graph ./agentpack-output --with-similarity   # add embedding-based similarity edges
+```
+
+Concept promotion is tunable per corpus in `agentpack.toml`:
+
+```toml
+[graph]
+df_cap   = 0.30   # ignore phrases appearing in >30% of sections (boilerplate)
+min_docs = 2      # a concept must span at least 2 documents
+```
+
+**[Read the full Concept Graph guide](https://github.com/Vedant1202/agentpack/blob/main/docs/concept-graph.md)**
+
 ### 3. Retrieve
 AgentPack comes with a built-in hybrid search engine (SQLite FTS5 + HNSW vector search, fused with RRF) to test your chunks instantly.
 
@@ -137,6 +179,11 @@ If you installed AgentPack with the `[ui]` extra, you can launch a local 2D forc
 ```bash
 agentpack ui ./agentpack-output --port 8000
 ```
+
+The explorer has two views, switched from the header:
+
+- **Universe** — every chunk as a node, clustered by document. Run a query and watch which chunks the hybrid retriever actually returns.
+- **Concepts** — the concept graph, colored by community. Click a concept to see which sections mention it and whether it bridges clusters; click a document to see whether it is isolated. Individual edge types can be hidden to cut through dense graphs.
 
 ![Visualizing Hybrid Retrieval (Search)](./docs/assets/search.png)
 
@@ -163,9 +210,20 @@ flowchart LR
     Parsers --> Chunker[Chunker]
     Chunker --> Pack[Context Pack]
     Pack --> Map[Knowledge Map map.yml]
+    Map --> Graph[Concept Graph graph.yml]
+    Pack --> Graph
     Pack --> Agent[LLM Agent]
     Map --> Agent
+    Graph --> Agent
 ```
+
+Three layers, each answering a different question:
+
+| Artifact | Answers | Scope |
+|---|---|---|
+| `manifest.yml` | *Where did this text come from?* | Per chunk |
+| `map.yml` | *What is inside this document, and where?* | Per document |
+| `graph.yml` | *How do these documents relate to each other?* | Whole corpus |
 
 For a deep dive into how AgentPack parses, chunks, and indexes data, see [Architecture & Internals](https://github.com/Vedant1202/agentpack/blob/main/docs/architecture.md).
 
@@ -176,6 +234,8 @@ For a deep dive into how AgentPack parses, chunks, and indexes data, see [Archit
 - **Cloud Vector DB Integration**: Retrieval runs locally (SQLite FTS5 + HNSW). Connectors for Pinecone, Weaviate, or Qdrant are planned.
 - **Cross-Encoder Reranking**: A secondary rerank pass is on the roadmap (deferred to v0.4).
 - **Map Enrichment Extras**: The knowledge map's descriptors are deterministic/offline today; opt-in LLM-abstractive summaries and typed-entity (NER) extraction are planned as optional add-ons.
+- **Concept Quality**: Concept graph concepts come from statistical keyphrase extraction (YAKE), so corpora with heavy shared boilerplate can surface generic vocabulary alongside real topics. Structural duplicates and self-references are filtered; semantically-empty phrases are not. Optional LLM concept enrichment is planned.
+- **Graph-Aware Retrieval**: The concept graph is a navigation and audit layer today — it never influences what `agentpack retrieve` returns. Fusing graph signals into hybrid retrieval as a third RRF contributor is planned, gated on demonstrated lift in `agentpack eval`.
 
 ---
 *Built with ❤️ for Agents.*
