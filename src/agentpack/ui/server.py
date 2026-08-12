@@ -1,5 +1,6 @@
 import os
 import json
+import sys
 import yaml
 import sqlite3
 import numpy as np
@@ -68,6 +69,24 @@ def get_manifest():
     ensure_manifest_exists(get_base_path())
     with open(manifest_path, "r", encoding="utf-8") as f:
         return yaml.safe_load(f)
+
+@app.get("/api/graph")
+def get_graph():
+    base_path = get_base_path()
+    ensure_manifest_exists(base_path)
+    graph_path = base_path / "graph.yml"
+    if not graph_path.exists():
+        return {"available": False}
+    try:
+        with open(graph_path, "r", encoding="utf-8") as f:
+            graph = yaml.safe_load(f)
+    except Exception as e:
+        print(f"[agentpack] Warning: failed to parse graph.yml ({e}).", file=sys.stderr)
+        return {"available": False}
+    if not graph:
+        return {"available": False}
+    return {"available": True, **graph}
+
 
 def build_human_readable_title(source_id: str, citation: dict) -> str:
     # Try to extract the real filename or a cleaner version of the source_id
@@ -379,7 +398,6 @@ def submit_feedback(fb: Feedback):
     return {"status": "success"}
 
 from fastapi.responses import FileResponse
-import sys
 
 # Try to find the dist directory robustly
 possible_web_dirs = [

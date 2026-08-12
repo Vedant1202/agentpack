@@ -33,6 +33,7 @@ def pack(
     fast: bool = typer.Option(False, "--fast", help="Fast mode: PyMuPDF parser + sqlite-vec backend"),
     fast_pdf: bool = typer.Option(False, "--fast-pdf", hidden=True, help="[Deprecated] Use --fast instead"),
     no_map: bool = typer.Option(False, "--no-map", help="Skip building the hierarchical knowledge map (map.yml)"),
+    no_graph: bool = typer.Option(False, "--no-graph", help="Skip building the corpus concept graph (graph.yml)"),
 ):
     """Pack documents into an agent-friendly context pack."""
     from agentpack.pack import write_pack
@@ -48,6 +49,7 @@ def pack(
     effective_remove_empty = remove_empty_lines or cfg["remove_empty_lines"]
     effective_include = include or (",".join(cfg["include"]) if cfg["include"] else None)
     effective_exclude = exclude or (",".join(cfg["exclude"]) if cfg["exclude"] else None)
+    effective_no_graph = no_graph or not cfg["graph"]["enabled"]
 
     if not quiet:
         typer.echo(f"Packing {input_dir} into {out}...")
@@ -68,6 +70,8 @@ def pack(
         remove_empty_lines=effective_remove_empty,
         fast_pdf=effective_fast,
         no_map=no_map,
+        no_graph=effective_no_graph,
+        graph_params=cfg["graph"],
     )
     
     if not quiet:
@@ -197,6 +201,72 @@ def map_cmd(
         _yaml.dump(map_obj, f, default_flow_style=False, sort_keys=False)
     if not quiet:
         typer.secho("map.yml written.", fg=typer.colors.GREEN)
+
+
+@app.command(name="graph")
+def graph_cmd(
+    pack_dir: str,
+    quiet: bool = typer.Option(False, help="Suppress progress output"),
+    with_similarity: bool = typer.Option(
+        False, "--with-similarity",
+        help="Also (re)compute similar_to edges from an already-built vector index",
+    ),
+):
+    """(Re)build the corpus concept graph (graph.yml) for an existing pack."""
+    from pathlib import Path as _Path
+    import yaml as _yaml
+    from agentpack.grapher import write_graph
+
+    base = _Path(pack_dir)
+    if not (base / "manifest.yml").exists():
+        typer.secho(f"No manifest.yml found at {pack_dir}", fg=typer.colors.RED)
+        raise typer.Exit(code=1)
+
+    # Reuse the params recorded in an existing graph.yml (spec §3: rebuild is
+    # the same code path as pack-time, not a re-read of ambient config) --
+    # fall back to defaults (via write_graph's own params=None handling) if
+    # there's no existing graph.yml, or it can't be parsed.
+    params = None
+    existing = base / "graph.yml"
+    if existing.exists():
+        try:
+            with open(existing, "r", encoding="utf-8") as f:
+                existing_graph = _yaml.safe_load(f)
+            params = existing_graph.get("params") if existing_graph else None
+        except Exception as e:
+            typer.secho(
+                f"Warning: could not read params from existing graph.yml ({e}); using defaults.",
+                fg=typer.colors.YELLOW,
+            )
+            params = None
+
+    if not quiet:
+        typer.echo("Rebuilding graph.yml from manifest + map…")
+    written = write_graph(str(base), params)
+    if not quiet:
+        if written:
+            typer.secho("graph.yml written.", fg=typer.colors.GREEN)
+        else:
+            typer.secho(
+                "graph.yml skipped (too few successfully parsed sources, or missing map.yml).",
+                fg=typer.colors.YELLOW,
+            )
+
+    if with_similarity:
+        from agentpack.grapher import add_similarity_edges
+
+        # No params passed explicitly -- add_similarity_edges reads them back
+        # from the graph.yml write_graph just produced, which already holds
+        # exactly the params resolved above (recorded params, or defaults).
+        sim_written = add_similarity_edges(str(base))
+        if not quiet:
+            if sim_written:
+                typer.secho("similar_to edges refreshed.", fg=typer.colors.GREEN)
+            else:
+                typer.secho(
+                    "similarity edges skipped (no graph.yml, or no vector index built yet).",
+                    fg=typer.colors.YELLOW,
+                )
 
 
 @app.command(name="eval")

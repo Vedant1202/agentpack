@@ -104,7 +104,9 @@ def write_pack(
     quiet: bool = False,
     remove_empty_lines: bool = False,
     fast_pdf: bool = False,
-    no_map: bool = False
+    no_map: bool = False,
+    no_graph: bool = False,
+    graph_params: Optional[Dict] = None,
 ):
     """
     Scans an input directory, parses supported files, chunks them, and generates a context pack.
@@ -264,5 +266,12 @@ def write_pack(
         map_obj = build_map(pack_meta, docs_ordered, all_chunks)
         with open(out_path / "map.yml", "w", encoding="utf-8") as f:
             yaml.dump(map_obj, f, default_flow_style=False, sort_keys=False)
+
+    # Build the corpus concept graph (sibling graph.yml) unless suppressed.
+    # Reads map.yml/manifest.yml back off disk (post-processor, not in-memory
+    # state) -- see docs/specs/0003-corpus-concept-graph.md §3.
+    if not no_graph:
+        from agentpack.grapher import write_graph
+        write_graph(str(out_path), graph_params)
 
     print(f"Pack generated at {out_path}")

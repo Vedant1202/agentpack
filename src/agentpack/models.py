@@ -62,4 +62,34 @@ class CorpusMap(BaseModel):
     documents: List[DocumentMap] = []
 
 
+class GraphNode(BaseModel):
+    """A node in the corpus concept graph (graph.yml) — a document, a top-level
+    section, or a promoted concept. id reuses an existing identity (manifest
+    source_id for documents, map.yml node_id for sections) rather than minting
+    a new one; only concepts (id: c_<slug>) are a new id namespace."""
+    id: str
+    kind: Literal["document", "section", "concept"]
+    label: str
+    doc: Optional[str] = None          # owning document's source_id (section/concept nodes)
+    community: Optional[int] = None    # set once communities are computed
+
+
+class GraphEdge(BaseModel):
+    """A directed edge in the corpus concept graph, tagged with how it was derived."""
+    source: str
+    target: str
+    relation: str                      # contains | mentions | references | similar_to
+    basis: Literal["structural", "keyphrase", "embedding"]
+
+
+class CorpusGraph(BaseModel):
+    """Top-level corpus concept graph written to graph.yml."""
+    graph_version: int = 1
+    pack: Dict
+    params: Dict                       # effective [graph] config this graph was built with
+    nodes: List[GraphNode] = []
+    edges: List[GraphEdge] = []
+    communities: List[Dict] = []       # [{id, label, size}, ...]
+
+
 SectionNode.model_rebuild()
