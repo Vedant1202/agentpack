@@ -890,13 +890,21 @@ Then open <code>http://localhost:8000</code> in your browser.</p>
 <em>Click any chunk to inspect its exact boundaries, raw text content, and nearest semantic neighbors.</em></p>
 <h3 id="concept-graph-view">Concept Graph View</h3>
 <p>The header carries a <strong>Universe ⇄ Concepts</strong> toggle. The Universe view is the chunk map described above; the Concepts view renders the pack's <a href="../concept-graph/">concept graph</a> — how documents relate to each other, rather than what is inside each one.</p>
+<p><img alt="The Concept Graph view, colored by community" src="../assets/concepts_overview.png" />
+<em>Nodes colored by community, sized document &gt; section &gt; concept. This is the same four-file example corpus used throughout the <a href="../concept-graph/">Concept Graph guide</a>.</em></p>
 <ul>
 <li><strong>Nodes are colored by community</strong>, so Louvain clusters are visible at a glance. Documents and sections render as circles (sized document &gt; section), concepts as diamonds.</li>
 <li><strong>Edges are styled by relation:</strong> <code>contains</code>, <code>mentions</code>, and <code>references</code> draw solid; <code>similar_to</code> draws dashed, since it is the one relation derived from embeddings rather than structure.</li>
-<li><strong>Relation checkboxes</strong> in the legend hide any edge type on the spot. This matters on corpora where one relation dominates — a PDF-heavy corpus can produce a <code>similar_to</code> edge between nearly every pair of documents, and hiding it in one click exposes the real structural graph underneath.</li>
+<li><strong>Relation checkboxes</strong> in the legend hide any edge type on the spot. This matters on corpora where one relation dominates — a PDF-heavy corpus can produce a <code>similar_to</code> edge between nearly every pair of documents, and hiding it in one click exposes the real structural graph underneath:</li>
+</ul>
+<p><img alt="Similar_to hidden, exposing the real structural graph" src="../assets/concepts_similarity_toggle.png" />
+<em>A 21-document financial-filing corpus with <code>similar_to</code> unchecked. Left unchecked, this pack's structural clusters — like the <code>Amcor Flexibles North</code> and <code>Corning Display Technologies</code> communities visible here — are buried under a near-complete <code>similar_to</code> hairball; see <a href="../concept-graph/#limitations">Concept Graph: Limitations</a> for why that happens on PDF-heavy corpora.</em></p>
+<ul>
 <li><strong>Clicking a node</strong> opens a detail panel tailored to its kind: a concept shows its bridge status and the sections that mention it; a document shows its section count and whether it is isolated; a section shows its parent document and the concepts it mentions. Every listed item is clickable, so you can walk concept → section → its other concepts without leaving the view.</li>
 <li><strong>With nothing selected</strong>, the panel lists every community with its label and member count.</li>
 </ul>
+<p><img alt="Node detail panel for a document node" src="../assets/concepts_node_detail.png" />
+<em>Clicking any node opens this panel. Documents show section count and cross-document status (here, "Connected" — this one shares a reference or concept with another document); concepts show bridge status and their mentioning sections instead.</em></p>
 <p>If the pack has no <code>graph.yml</code> — packed with <code>--no-graph</code>, or a single-document corpus — the toggle is disabled and explains how to build one (<code>agentpack graph &lt;pack_dir&gt;</code>). The Universe view is unaffected.</p>
 <h3 id="onboarding">Onboarding</h3>
 <p>The UI comes with an interactive Shepherd.js onboarding tour to guide you through your first time exploring the corpus.</p>

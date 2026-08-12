@@ -1102,6 +1102,7 @@ pip<span class="w"> </span>install<span class="w"> </span>-e<span class="w"> </s
 <span class="k">-</span><span class="w"> </span>No isolated documents.
 </code></pre></div>
 <p>That report answers questions retrieval alone cannot: <em>is this corpus actually about what I assumed?</em> and <em>is any document disconnected from the rest</em> — either off-topic, or a sign the document that would connect it is missing.</p>
+<p><img alt="The Concept Graph view in the Corpus Explorer, colored by community" src="docs/assets/concepts_overview.png" /></p>
 <div class="highlight"><pre><span></span><code>agentpack<span class="w"> </span>graph<span class="w"> </span>./agentpack-output<span class="w">                     </span><span class="c1"># (re)build graph.yml</span>
 agentpack<span class="w"> </span>graph<span class="w"> </span>./agentpack-output<span class="w"> </span>--with-similarity<span class="w">   </span><span class="c1"># add embedding-based similarity edges</span>
 </code></pre></div>
@@ -1131,7 +1132,7 @@ agentpack<span class="w"> </span>retrieve<span class="w"> </span>./agentpack-out
 <li><strong>Universe</strong> — every chunk as a node, clustered by document. Run a query and watch which chunks the hybrid retriever actually returns.</li>
 <li><strong>Concepts</strong> — the concept graph, colored by community. Click a concept to see which sections mention it and whether it bridges clusters; click a document to see whether it is isolated. Individual edge types can be hidden to cut through dense graphs.</li>
 </ul>
-<p><img alt="Visualizing Hybrid Retrieval (Search)" src="./docs/assets/search.png" /></p>
+<p><img alt="Visualizing Hybrid Retrieval (Search)" src="docs/assets/search.png" /></p>
 <p><strong><a href="https://github.com/Vedant1202/agentpack/blob/main/docs/corpus-explorer-ui.md">🖼️ Read the full UI breakdown</a></strong></p>
 <h2 id="comprehensive-cli-documentation">Comprehensive CLI Documentation</h2>
 <p>AgentPack provides a rich CLI for auditing, validating, and testing your context packs (including Generative QA evaluations). </p>
