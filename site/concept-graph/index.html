@@ -1,0 +1,1314 @@
+
+<!doctype html>
+<html lang="en" class="no-js">
+  <head>
+    
+      <meta charset="utf-8">
+      <meta name="viewport" content="width=device-width,initial-scale=1">
+      
+      
+      
+        <link rel="canonical" href="https://vedant1202.github.io/agentpack/concept-graph/">
+      
+      
+        <link rel="prev" href="../knowledge-map/">
+      
+      
+        <link rel="next" href="../cli-reference/">
+      
+      
+        
+      
+      
+      <link rel="icon" href="../assets/images/favicon.png">
+      <meta name="generator" content="mkdocs-1.6.1, mkdocs-material-9.7.6">
+    
+    
+      
+        <title>Concept Graph - AgentPack Documentation</title>
+      
+    
+    
+      <link rel="stylesheet" href="../assets/stylesheets/main.484c7ddc.min.css">
+      
+        
+        <link rel="stylesheet" href="../assets/stylesheets/palette.ab4e12ef.min.css">
+      
+      
+
+
+    
+    
+      
+    
+    
+      
+        
+        
+        <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+        <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Roboto:300,300i,400,400i,700,700i%7CRoboto+Mono:400,400i,700,700i&display=fallback">
+        <style>:root{--md-text-font:"Roboto";--md-code-font:"Roboto Mono"}</style>
+      
+    
+    
+      <link rel="stylesheet" href="../assets/_mkdocstrings.css">
+    
+    <script>__md_scope=new URL("..",location),__md_hash=e=>[...e].reduce(((e,_)=>(e<<5)-e+_.charCodeAt(0)),0),__md_get=(e,_=localStorage,t=__md_scope)=>JSON.parse(_.getItem(t.pathname+"."+e)),__md_set=(e,_,t=localStorage,a=__md_scope)=>{try{t.setItem(a.pathname+"."+e,JSON.stringify(_))}catch(e){}}</script>
+    
+      
+
+    
+    
+  </head>
+  
+  
+    
+    
+    
+    
+    
+    <body dir="ltr" data-md-color-scheme="slate" data-md-color-primary="indigo" data-md-color-accent="indigo">
+  
+    
+    <input class="md-toggle" data-md-toggle="drawer" type="checkbox" id="__drawer" autocomplete="off">
+    <input class="md-toggle" data-md-toggle="search" type="checkbox" id="__search" autocomplete="off">
+    <label class="md-overlay" for="__drawer"></label>
+    <div data-md-component="skip">
+      
+        
+        <a href="#corpus-concept-graph-graphyml" class="md-skip">
+          Skip to content
+        </a>
+      
+    </div>
+    <div data-md-component="announce">
+      
+    </div>
+    
+    
+      
+
+  
+
+<header class="md-header md-header--shadow" data-md-component="header">
+  <nav class="md-header__inner md-grid" aria-label="Header">
+    <a href=".." title="AgentPack Documentation" class="md-header__button md-logo" aria-label="AgentPack Documentation" data-md-component="logo">
+      
+  
+  <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M12 8a3 3 0 0 0 3-3 3 3 0 0 0-3-3 3 3 0 0 0-3 3 3 3 0 0 0 3 3m0 3.54C9.64 9.35 6.5 8 3 8v11c3.5 0 6.64 1.35 9 3.54 2.36-2.19 5.5-3.54 9-3.54V8c-3.5 0-6.64 1.35-9 3.54"/></svg>
+
+    </a>
+    <label class="md-header__button md-icon" for="__drawer">
+      
+      <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M3 6h18v2H3zm0 5h18v2H3zm0 5h18v2H3z"/></svg>
+    </label>
+    <div class="md-header__title" data-md-component="header-title">
+      <div class="md-header__ellipsis">
+        <div class="md-header__topic">
+          <span class="md-ellipsis">
+            AgentPack Documentation
+          </span>
+        </div>
+        <div class="md-header__topic" data-md-component="header-topic">
+          <span class="md-ellipsis">
+            
+              Concept Graph
+            
+          </span>
+        </div>
+      </div>
+    </div>
+    
+      
+    
+    
+    
+    
+      
+      
+        <label class="md-header__button md-icon" for="__search">
+          
+          <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M9.5 3A6.5 6.5 0 0 1 16 9.5c0 1.61-.59 3.09-1.56 4.23l.27.27h.79l5 5-1.5 1.5-5-5v-.79l-.27-.27A6.52 6.52 0 0 1 9.5 16 6.5 6.5 0 0 1 3 9.5 6.5 6.5 0 0 1 9.5 3m0 2C7 5 5 7 5 9.5S7 14 9.5 14 14 12 14 9.5 12 5 9.5 5"/></svg>
+        </label>
+        <div class="md-search" data-md-component="search" role="dialog">
+  <label class="md-search__overlay" for="__search"></label>
+  <div class="md-search__inner" role="search">
+    <form class="md-search__form" name="search">
+      <input type="text" class="md-search__input" name="query" aria-label="Search" placeholder="Search" autocapitalize="off" autocorrect="off" autocomplete="off" spellcheck="false" data-md-component="search-query" required>
+      <label class="md-search__icon md-icon" for="__search">
+        
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M9.5 3A6.5 6.5 0 0 1 16 9.5c0 1.61-.59 3.09-1.56 4.23l.27.27h.79l5 5-1.5 1.5-5-5v-.79l-.27-.27A6.52 6.52 0 0 1 9.5 16 6.5 6.5 0 0 1 3 9.5 6.5 6.5 0 0 1 9.5 3m0 2C7 5 5 7 5 9.5S7 14 9.5 14 14 12 14 9.5 12 5 9.5 5"/></svg>
+        
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M20 11v2H8l5.5 5.5-1.42 1.42L4.16 12l7.92-7.92L13.5 5.5 8 11z"/></svg>
+      </label>
+      <nav class="md-search__options" aria-label="Search">
+        
+        <button type="reset" class="md-search__icon md-icon" title="Clear" aria-label="Clear" tabindex="-1">
+          
+          <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M19 6.41 17.59 5 12 10.59 6.41 5 5 6.41 10.59 12 5 17.59 6.41 19 12 13.41 17.59 19 19 17.59 13.41 12z"/></svg>
+        </button>
+      </nav>
+      
+    </form>
+    <div class="md-search__output">
+      <div class="md-search__scrollwrap" tabindex="0" data-md-scrollfix>
+        <div class="md-search-result" data-md-component="search-result">
+          <div class="md-search-result__meta">
+            Initializing search
+          </div>
+          <ol class="md-search-result__list" role="presentation"></ol>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+      
+    
+    
+  </nav>
+  
+</header>
+    
+    <div class="md-container" data-md-component="container">
+      
+      
+        
+          
+        
+      
+      <main class="md-main" data-md-component="main">
+        <div class="md-main__inner md-grid">
+          
+            
+              
+              <div class="md-sidebar md-sidebar--primary" data-md-component="sidebar" data-md-type="navigation" >
+                <div class="md-sidebar__scrollwrap">
+                  <div class="md-sidebar__inner">
+                    
+
+
+
+<nav class="md-nav md-nav--primary" aria-label="Navigation" data-md-level="0">
+  <label class="md-nav__title" for="__drawer">
+    <a href=".." title="AgentPack Documentation" class="md-nav__button md-logo" aria-label="AgentPack Documentation" data-md-component="logo">
+      
+  
+  <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M12 8a3 3 0 0 0 3-3 3 3 0 0 0-3-3 3 3 0 0 0-3 3 3 3 0 0 0 3 3m0 3.54C9.64 9.35 6.5 8 3 8v11c3.5 0 6.64 1.35 9 3.54 2.36-2.19 5.5-3.54 9-3.54V8c-3.5 0-6.64 1.35-9 3.54"/></svg>
+
+    </a>
+    AgentPack Documentation
+  </label>
+  
+  <ul class="md-nav__list" data-md-scrollfix>
+    
+      
+      
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href=".." class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Home
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../architecture/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Architecture & Internals
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../knowledge-map/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Knowledge Map
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+    
+      
+      
+  
+  
+    
+  
+  
+  
+    <li class="md-nav__item md-nav__item--active">
+      
+      <input class="md-nav__toggle md-toggle" type="checkbox" id="__toc">
+      
+      
+        
+      
+      
+        <label class="md-nav__link md-nav__link--active" for="__toc">
+          
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Concept Graph
+  
+
+    
+  </span>
+  
+  
+
+          <span class="md-nav__icon md-icon"></span>
+        </label>
+      
+      <a href="./" class="md-nav__link md-nav__link--active">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Concept Graph
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+      
+        
+
+<nav class="md-nav md-nav--secondary" aria-label="Table of contents">
+  
+  
+  
+    
+  
+  
+    <label class="md-nav__title" for="__toc">
+      <span class="md-nav__icon md-icon"></span>
+      Table of contents
+    </label>
+    <ul class="md-nav__list" data-md-component="toc" data-md-scrollfix>
+      
+        <li class="md-nav__item">
+  <a href="#why-a-graph" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Why a graph?
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#the-model-at-a-glance" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        The model at a glance
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#a-worked-example" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        A worked example
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="A worked example">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#why-api-gateway-is-not-a-concept" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Why "API gateway" is not a concept
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#concept-promotion" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Concept promotion
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#communities-bridges-and-isolated-documents" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Communities, bridges, and isolated documents
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#the-report" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        The report
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#similarity-edges" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Similarity edges
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#configuration" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Configuration
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Configuration">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#tuning-by-corpus-shape" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Tuning by corpus shape
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#use-cases" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Use cases
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#the-graph-never-affects-retrieval" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        The graph never affects retrieval
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#cli" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        CLI
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#when-the-graph-is-skipped" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        When the graph is skipped
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#limitations" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Limitations
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#see-also" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        See also
+      
+    </span>
+  </a>
+  
+</li>
+      
+    </ul>
+  
+</nav>
+      
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../cli-reference/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    CLI Reference
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../corpus-explorer-ui/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Corpus Explorer UI
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../benchmark/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Benchmark
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../changelog/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Changelog
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    
+    
+    
+    
+    
+    <li class="md-nav__item md-nav__item--nested">
+      
+        
+        
+        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_9" >
+        
+          
+          <label class="md-nav__link" for="__nav_9" id="__nav_9_label" tabindex="0">
+            
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    API Reference
+  
+
+    
+  </span>
+  
+  
+
+            <span class="md-nav__icon md-icon"></span>
+          </label>
+        
+        <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_9_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_9">
+            <span class="md-nav__icon md-icon"></span>
+            
+  
+    API Reference
+  
+
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../api/core/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Core
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../api/parsers/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Parsers
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+    
+  </ul>
+</nav>
+                  </div>
+                </div>
+              </div>
+            
+            
+              
+              <div class="md-sidebar md-sidebar--secondary" data-md-component="sidebar" data-md-type="toc" >
+                <div class="md-sidebar__scrollwrap">
+                  <div class="md-sidebar__inner">
+                    
+
+<nav class="md-nav md-nav--secondary" aria-label="Table of contents">
+  
+  
+  
+    
+  
+  
+    <label class="md-nav__title" for="__toc">
+      <span class="md-nav__icon md-icon"></span>
+      Table of contents
+    </label>
+    <ul class="md-nav__list" data-md-component="toc" data-md-scrollfix>
+      
+        <li class="md-nav__item">
+  <a href="#why-a-graph" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Why a graph?
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#the-model-at-a-glance" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        The model at a glance
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#a-worked-example" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        A worked example
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="A worked example">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#why-api-gateway-is-not-a-concept" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Why "API gateway" is not a concept
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#concept-promotion" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Concept promotion
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#communities-bridges-and-isolated-documents" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Communities, bridges, and isolated documents
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#the-report" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        The report
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#similarity-edges" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Similarity edges
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#configuration" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Configuration
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Configuration">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#tuning-by-corpus-shape" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Tuning by corpus shape
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#use-cases" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Use cases
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#the-graph-never-affects-retrieval" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        The graph never affects retrieval
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#cli" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        CLI
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#when-the-graph-is-skipped" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        When the graph is skipped
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#limitations" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Limitations
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#see-also" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        See also
+      
+    </span>
+  </a>
+  
+</li>
+      
+    </ul>
+  
+</nav>
+                  </div>
+                </div>
+              </div>
+            
+          
+          
+            <div class="md-content" data-md-component="content">
+              
+              <article class="md-content__inner md-typeset">
+                
+                  
+
+
+
+<h1 id="corpus-concept-graph-graphyml">Corpus Concept Graph (<code>graph.yml</code>)</h1>
+<p>Alongside <code>manifest.yml</code> and <code>map.yml</code>, a pack emits <strong><code>graph.yml</code></strong> — a graph of how documents in the corpus relate to <em>each other</em>. Where <code>map.yml</code> answers "what is inside this document?", <code>graph.yml</code> answers <strong>"what does this corpus have in common, and what is disconnected from everything else?"</strong></p>
+<p>It is generated by default during <code>agentpack pack</code> (disable with <code>--no-graph</code>).</p>
+<h2 id="why-a-graph">Why a graph?</h2>
+<p><code>map.yml</code> is a tree, and a tree has one root per document. That shape can describe a single document perfectly and still tell you nothing about the corpus as a whole. Questions that need edges <em>between</em> documents have nowhere to live:</p>
+<ul>
+<li>Which topics recur across many documents, rather than appearing once?</li>
+<li>Which documents actually reference each other?</li>
+<li>Which document is connected to nothing — either off-topic, or a gap where the connecting document is missing?</li>
+<li>Which topics act as bridges between otherwise-separate clusters of the corpus?</li>
+</ul>
+<p><code>graph.yml</code> encodes exactly those relationships, and nothing else. It is built entirely from artifacts the pack already produced, so it adds no parsing and no network calls.</p>
+<h2 id="the-model-at-a-glance">The model at a glance</h2>
+<p>Three node kinds, four edge relations:</p>
+<pre class="mermaid"><code>flowchart LR
+    D1[document&lt;br/&gt;onboarding.md] --&gt;|contains| S1[section&lt;br/&gt;Deployment Basics]
+    D2[document&lt;br/&gt;incident-response.md] --&gt;|contains| S2[section&lt;br/&gt;The Deployment Pipeline]
+    S1 --&gt;|mentions| C1([concept&lt;br/&gt;Deployment Pipeline])
+    S2 --&gt;|mentions| C1
+    D1 -.-&gt;|references| D2
+    S1 -.-&gt;|similar_to| S2</code></pre>
+<table>
+<thead>
+<tr>
+<th>Node kind</th>
+<th>Id comes from</th>
+<th>Meaning</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>document</code></td>
+<td><code>manifest.yml</code> <code>sources[].id</code></td>
+<td>One packed source file. Every source gets a node, including ones that failed to parse.</td>
+</tr>
+<tr>
+<td><code>section</code></td>
+<td><code>map.yml</code> <code>node_id</code></td>
+<td>A section that carries at least one edge.</td>
+</tr>
+<tr>
+<td><code>concept</code></td>
+<td><code>c_&lt;slug&gt;</code> (new namespace)</td>
+<td>A keyphrase that recurred across enough documents to be promoted.</td>
+</tr>
+</tbody>
+</table>
+<table>
+<thead>
+<tr>
+<th>Edge</th>
+<th>Direction</th>
+<th><code>basis</code></th>
+<th>Built from</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>contains</code></td>
+<td>document → section</td>
+<td><code>structural</code></td>
+<td>The <code>map.yml</code> tree.</td>
+</tr>
+<tr>
+<td><code>mentions</code></td>
+<td>section → concept</td>
+<td><code>keyphrase</code></td>
+<td>Promoted YAKE keyphrases.</td>
+</tr>
+<tr>
+<td><code>references</code></td>
+<td>document → document</td>
+<td><code>structural</code></td>
+<td>Markdown links between packed files.</td>
+</tr>
+<tr>
+<td><code>similar_to</code></td>
+<td>section ↔ section</td>
+<td><code>embedding</code></td>
+<td>Section-centroid cosine similarity, at index time only.</td>
+</tr>
+</tbody>
+</table>
+<p>Nodes reuse the ids that already exist — a <code>document</code> node <strong>is</strong> the manifest's <code>source_id</code>, a <code>section</code> node <strong>is</strong> the map's <code>node_id</code>. Only concepts introduce new ids. That means a graph node can be resolved against the other two files without a lookup table.</p>
+<h2 id="a-worked-example">A worked example</h2>
+<p>Four short Markdown files about an engineering org (<code>onboarding.md</code>, <code>incident-response.md</code>, <code>api-gateway.md</code>, <code>alerting.md</code>). Packing them produces:</p>
+<div class="highlight"><pre><span></span><code><span class="nt">graph_version</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">1</span>
+<span class="nt">pack</span><span class="p">:</span><span class="w"> </span><span class="p p-Indicator">{</span><span class="nt"> name</span><span class="p">:</span><span class="w"> </span><span class="nv">docs_example_corpus</span><span class="p p-Indicator">,</span><span class="nt"> generated_at</span><span class="p">:</span><span class="w"> </span><span class="nv">...</span><span class="p p-Indicator">,</span><span class="nt"> manifest</span><span class="p">:</span><span class="w"> </span><span class="nv">manifest.yml</span><span class="w"> </span><span class="p p-Indicator">}</span>
+<span class="nt">params</span><span class="p">:</span>
+<span class="w">  </span><span class="nt">enabled</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">true</span>
+<span class="w">  </span><span class="nt">df_cap</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">0.30</span>
+<span class="w">  </span><span class="nt">min_docs</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">2</span>
+<span class="w">  </span><span class="nt">similarity_threshold</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">0.80</span>
+<span class="nt">nodes</span><span class="p">:</span>
+<span class="p p-Indicator">-</span><span class="w"> </span><span class="p p-Indicator">{</span><span class="nt"> id</span><span class="p">:</span><span class="w"> </span><span class="nv">c_alerting_system</span><span class="p p-Indicator">,</span><span class="nt">     kind</span><span class="p">:</span><span class="w"> </span><span class="nv">concept</span><span class="p p-Indicator">,</span><span class="nt">  label</span><span class="p">:</span><span class="w"> </span><span class="nv">alerting system</span><span class="p p-Indicator">,</span><span class="nt">     doc</span><span class="p">:</span><span class="w"> </span><span class="nv">null</span><span class="p p-Indicator">,</span><span class="nt">    community</span><span class="p">:</span><span class="w"> </span><span class="nv">0</span><span class="w"> </span><span class="p p-Indicator">}</span>
+<span class="p p-Indicator">-</span><span class="w"> </span><span class="p p-Indicator">{</span><span class="nt"> id</span><span class="p">:</span><span class="w"> </span><span class="nv">c_deployment_pipeline</span><span class="p p-Indicator">,</span><span class="nt"> kind</span><span class="p">:</span><span class="w"> </span><span class="nv">concept</span><span class="p p-Indicator">,</span><span class="nt">  label</span><span class="p">:</span><span class="w"> </span><span class="nv">Deployment Pipeline</span><span class="p p-Indicator">,</span><span class="nt"> doc</span><span class="p">:</span><span class="w"> </span><span class="nv">null</span><span class="p p-Indicator">,</span><span class="nt">    community</span><span class="p">:</span><span class="w"> </span><span class="nv">2</span><span class="w"> </span><span class="p p-Indicator">}</span>
+<span class="p p-Indicator">-</span><span class="w"> </span><span class="p p-Indicator">{</span><span class="nt"> id</span><span class="p">:</span><span class="w"> </span><span class="nv">src_003</span><span class="p p-Indicator">,</span><span class="nt">               kind</span><span class="p">:</span><span class="w"> </span><span class="nv">document</span><span class="p p-Indicator">,</span><span class="nt"> label</span><span class="p">:</span><span class="w"> </span><span class="nv">onboarding.md</span><span class="p p-Indicator">,</span><span class="nt">       doc</span><span class="p">:</span><span class="w"> </span><span class="nv">null</span><span class="p p-Indicator">,</span><span class="nt">    community</span><span class="p">:</span><span class="w"> </span><span class="nv">1</span><span class="w"> </span><span class="p p-Indicator">}</span>
+<span class="p p-Indicator">-</span><span class="w"> </span><span class="p p-Indicator">{</span><span class="nt"> id</span><span class="p">:</span><span class="w"> </span><span class="nv">src_003_s00-01</span><span class="p p-Indicator">,</span><span class="nt">        kind</span><span class="p">:</span><span class="w"> </span><span class="nv">section</span><span class="p p-Indicator">,</span><span class="nt">  label</span><span class="p">:</span><span class="w"> </span><span class="nv">Deployment Basics</span><span class="p p-Indicator">,</span><span class="nt">   doc</span><span class="p">:</span><span class="w"> </span><span class="nv">src_003</span><span class="p p-Indicator">,</span><span class="nt"> community</span><span class="p">:</span><span class="w"> </span><span class="nv">2</span><span class="w"> </span><span class="p p-Indicator">}</span>
+<span class="w">  </span><span class="c1"># ... 11 more nodes</span>
+<span class="nt">edges</span><span class="p">:</span>
+<span class="p p-Indicator">-</span><span class="w"> </span><span class="p p-Indicator">{</span><span class="nt"> source</span><span class="p">:</span><span class="w"> </span><span class="nv">src_003</span><span class="p p-Indicator">,</span><span class="nt">        target</span><span class="p">:</span><span class="w"> </span><span class="nv">src_003_s00-01</span><span class="p p-Indicator">,</span><span class="nt">      relation</span><span class="p">:</span><span class="w"> </span><span class="nv">contains</span><span class="p p-Indicator">,</span><span class="nt">   basis</span><span class="p">:</span><span class="w"> </span><span class="nv">structural</span><span class="w"> </span><span class="p p-Indicator">}</span>
+<span class="p p-Indicator">-</span><span class="w"> </span><span class="p p-Indicator">{</span><span class="nt"> source</span><span class="p">:</span><span class="w"> </span><span class="nv">src_003_s00-01</span><span class="p p-Indicator">,</span><span class="nt"> target</span><span class="p">:</span><span class="w"> </span><span class="nv">c_deployment_pipeline</span><span class="p p-Indicator">,</span><span class="nt"> relation</span><span class="p">:</span><span class="w"> </span><span class="nv">mentions</span><span class="p p-Indicator">,</span><span class="nt"> basis</span><span class="p">:</span><span class="w"> </span><span class="nv">keyphrase</span><span class="w"> </span><span class="p p-Indicator">}</span>
+<span class="p p-Indicator">-</span><span class="w"> </span><span class="p p-Indicator">{</span><span class="nt"> source</span><span class="p">:</span><span class="w"> </span><span class="nv">src_003</span><span class="p p-Indicator">,</span><span class="nt">        target</span><span class="p">:</span><span class="w"> </span><span class="nv">src_001</span><span class="p p-Indicator">,</span><span class="nt">             relation</span><span class="p">:</span><span class="w"> </span><span class="nv">references</span><span class="p p-Indicator">,</span><span class="nt"> basis</span><span class="p">:</span><span class="w"> </span><span class="nv">structural</span><span class="w"> </span><span class="p p-Indicator">}</span>
+<span class="w">  </span><span class="c1"># ... 8 more edges</span>
+<span class="nt">communities</span><span class="p">:</span>
+<span class="p p-Indicator">-</span><span class="w"> </span><span class="p p-Indicator">{</span><span class="nt"> id</span><span class="p">:</span><span class="w"> </span><span class="nv">0</span><span class="p p-Indicator">,</span><span class="nt"> label</span><span class="p">:</span><span class="w"> </span><span class="nv">alerting system</span><span class="p p-Indicator">,</span><span class="nt">     size</span><span class="p">:</span><span class="w"> </span><span class="nv">4</span><span class="w"> </span><span class="p p-Indicator">}</span>
+<span class="p p-Indicator">-</span><span class="w"> </span><span class="p p-Indicator">{</span><span class="nt"> id</span><span class="p">:</span><span class="w"> </span><span class="nv">2</span><span class="p p-Indicator">,</span><span class="nt"> label</span><span class="p">:</span><span class="w"> </span><span class="nv">Deployment Pipeline</span><span class="p p-Indicator">,</span><span class="nt"> size</span><span class="p">:</span><span class="w"> </span><span class="nv">3</span><span class="w"> </span><span class="p p-Indicator">}</span>
+<span class="w">  </span><span class="c1"># ... 3 more</span>
+</code></pre></div>
+<p>Two concepts were promoted. <code>alerting system</code> is mentioned by three sections spread across three different documents; <code>Deployment Pipeline</code> by two sections in two documents. The mutual Markdown links between <code>onboarding.md</code> and <code>incident-response.md</code> became <code>references</code> edges in both directions.</p>
+<h3 id="why-api-gateway-is-not-a-concept">Why "API gateway" is <em>not</em> a concept</h3>
+<p>The corpus talks about the API gateway constantly, and it still did not promote. That is the gates working, and it is worth walking through because it is the most common source of "why isn't my obvious topic here?"</p>
+<table>
+<thead>
+<tr>
+<th>Gate</th>
+<th>Value</th>
+<th>Passes?</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Document frequency (<code>df_cap</code>)</td>
+<td>Appears in 4 of 16 sections = <strong>0.25</strong>, under the 0.30 cap</td>
+<td>Yes</td>
+</tr>
+<tr>
+<td>Distinct documents (<code>min_docs</code>)</td>
+<td>3 occurrences in <code>api-gateway.md</code>, 1 in <code>onboarding.md</code></td>
+<td><strong>No</strong> — see below</td>
+</tr>
+<tr>
+<td>Length / not-numeric</td>
+<td><code>api_gateway</code>, 11 chars</td>
+<td>Yes</td>
+</tr>
+</tbody>
+</table>
+<p><code>api-gateway.md</code>'s own title is <em>"API Gateway Architecture"</em>. A document repeating its own name is not evidence that a topic spans the corpus, so those three occurrences are excluded as <strong>self-reference</strong>. That leaves one document, below <code>min_docs = 2</code>, so no concept.</p>
+<p>This is intentional: without the filter, every document in a corpus of company filings would promote its own company name, and every README its own project name. To promote it anyway, either lower <code>min_docs</code> to <code>1</code> or rename the file so its title stops matching.</p>
+<h2 id="concept-promotion">Concept promotion</h2>
+<p>A keyphrase from <code>map.yml</code> becomes a concept only if it clears <strong>all three</strong> gates:</p>
+<ol>
+<li><strong><code>min_docs</code></strong> (default <code>2</code>) — appears in sections from at least this many <em>distinct</em> documents. A phrase repeated twenty times in one document is that document's topic, not the corpus's.</li>
+<li><strong><code>df_cap</code></strong> (default <code>0.30</code>) — appears in at most this fraction of <em>all</em> sections in the pack. A phrase in most sections is boilerplate (a page header, a footer, a recurring disclaimer), not a distinguishing topic.</li>
+<li><strong>Length</strong> — at least 4 characters and not purely numeric, which drops fragments like <code>q3</code> and <code>2024</code>.</li>
+</ol>
+<p>Two normalizations run before the gates:</p>
+<ul>
+<li><strong>Slug merging.</strong> Keyphrases are normalized to a slug (casefolded, non-word runs collapsed to <code>_</code>), so <code>Balance Sheet</code> and <code>balance-sheet</code> are one concept. Slugs that differ only in <strong>word order or repetition</strong> are also merged — YAKE emits overlapping windows over a repeated phrase, producing <code>FISCAL YEAR</code>, <code>Fiscal Year Fiscal</code>, and <code>Year Fiscal Year</code> for a single idea. These count as one concept's evidence rather than three weaker candidates.</li>
+<li><strong>Self-title filtering.</strong> A keyphrase that reduces to nothing but the document's own title (plus optionally a generic corporate suffix like <em>Inc.</em> or <em>Corp.</em>) is excluded <strong>for that document only</strong>. A genuine mention of the same phrase in a <em>different</em> document still counts.</li>
+</ul>
+<p>The concept's <code>label</code> is the most frequent surface form among its contributors, with ties broken lexically so the choice is deterministic.</p>
+<h2 id="communities-bridges-and-isolated-documents">Communities, bridges, and isolated documents</h2>
+<p><strong>Communities</strong> come from seeded Louvain clustering over the whole graph. Each node gets a <code>community</code> id; the <code>communities:</code> block lists each one with a label (its highest-degree concept member, falling back to its highest-degree node) and size. Community ids are re-indexed by size so they do not churn between runs of the same corpus.</p>
+<p><strong>Bridge concepts</strong> are concepts whose mentioning sections span two or more distinct communities. That is not the same as a high-degree concept — a concept can be mentioned many times inside one cluster and bridge nothing. Bridges are where otherwise-separate parts of a corpus actually touch.</p>
+<p><strong>Isolated documents</strong> have no <code>references</code> edge in either direction <em>and</em> share no concept with any other document. Practically, an isolated document is one of three things: genuinely off-topic, the only document covering its subject, or evidence that the document connecting it to the rest of the corpus is missing. All three are worth knowing before handing the pack to an agent.</p>
+<h2 id="the-report">The report</h2>
+<p><code>reports/graph_report.md</code> renders the same data for humans — no LLM, deterministic:</p>
+<div class="highlight"><pre><span></span><code><span class="gu">## Statistics</span>
+<span class="k">-</span><span class="w"> </span><span class="gs">**Documents:**</span> 4
+<span class="k">-</span><span class="w"> </span><span class="gs">**Concepts:**</span> 2
+<span class="k">-</span><span class="w"> </span><span class="gs">**Communities:**</span> 5
+
+<span class="gu">## Top Concepts</span>
+<span class="k">-</span><span class="w"> </span><span class="gs">**alerting system**</span> (3 mention(s))
+<span class="k">-</span><span class="w"> </span><span class="gs">**Deployment Pipeline**</span> (2 mention(s))
+
+<span class="gu">## Bridge Concepts</span>
+<span class="k">-</span><span class="w"> </span>No bridge concepts found.
+
+<span class="gu">## Isolated Documents</span>
+<span class="k">-</span><span class="w"> </span>No isolated documents.
+</code></pre></div>
+<h2 id="similarity-edges">Similarity edges</h2>
+<p><code>similar_to</code> edges are the one part that needs embeddings, so they are added at <strong>index</strong> time rather than pack time:</p>
+<div class="highlight"><pre><span></span><code>agentpack<span class="w"> </span>index<span class="w"> </span>./out<span class="w">                      </span><span class="c1"># builds vectors, then refreshes similar_to edges</span>
+agentpack<span class="w"> </span>graph<span class="w"> </span>./out<span class="w"> </span>--with-similarity<span class="w">    </span><span class="c1"># or refresh them explicitly</span>
+</code></pre></div>
+<p>A section's centroid is the mean of its chunks' already-normalized vectors, re-normalized. Sections in <em>different</em> documents whose centroids reach <code>similarity_threshold</code> (default <code>0.80</code>) get an edge, and communities are recomputed afterward. The operation is idempotent — running <code>agentpack index</code> repeatedly never accumulates duplicate edges.</p>
+<p>Similarity edges reuse the embedding cache, so they cost no extra model work beyond the index build you were already paying for.</p>
+<h2 id="configuration">Configuration</h2>
+<p>Every gate is tunable through <code>agentpack.toml</code> in your input directory:</p>
+<div class="highlight"><pre><span></span><code><span class="k">[graph]</span>
+<span class="n">enabled</span><span class="w">              </span><span class="o">=</span><span class="w"> </span><span class="kc">true</span><span class="w">   </span><span class="c1"># false is equivalent to always passing --no-graph</span>
+<span class="n">df_cap</span><span class="w">               </span><span class="o">=</span><span class="w"> </span><span class="mf">0.30</span><span class="w">   </span><span class="c1"># (0, 1]  max fraction of sections a concept may appear in</span>
+<span class="n">min_docs</span><span class="w">             </span><span class="o">=</span><span class="w"> </span><span class="mi">2</span><span class="w">      </span><span class="c1"># &gt;= 1    distinct documents required to promote</span>
+<span class="n">similarity_threshold</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="mf">0.80</span><span class="w">   </span><span class="c1"># (0, 1]  cosine floor for similar_to edges</span>
+</code></pre></div>
+<p>CLI flags take precedence over the config file. An out-of-range or wrong-typed value produces a warning and falls back to the default rather than failing the pack.</p>
+<p>The values actually used are recorded verbatim in <code>graph.yml</code>'s <code>params:</code> block, so a graph always describes how it was built. <code>agentpack graph</code> reuses those recorded params on rebuild rather than re-reading the config, which is what makes a rebuild reproduce the original byte-for-byte.</p>
+<h3 id="tuning-by-corpus-shape">Tuning by corpus shape</h3>
+<table>
+<thead>
+<tr>
+<th>Corpus</th>
+<th>Symptom</th>
+<th>Try</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Many near-identical documents (filings, releases, contract versions)</td>
+<td>Boilerplate dominates the concept list</td>
+<td>Lower <code>df_cap</code> toward <code>0.15</code></td>
+</tr>
+<tr>
+<td>Small corpus (under ~10 documents)</td>
+<td>Almost nothing promotes</td>
+<td>Lower <code>min_docs</code> to <code>1</code>, accepting single-document topics</td>
+</tr>
+<tr>
+<td>Topically diverse corpus</td>
+<td>No concepts at all</td>
+<td>Expected — no shared vocabulary means no shared concepts. Confirm by re-running with <code>df_cap = 1.0</code>; if it is still empty, there genuinely is no overlap.</td>
+</tr>
+<tr>
+<td>Long documents, few sections</td>
+<td>Every section looks similar to every other</td>
+<td>Raise <code>similarity_threshold</code> toward <code>0.90</code></td>
+</tr>
+</tbody>
+</table>
+<h2 id="use-cases">Use cases</h2>
+<p><strong>Auditing a corpus before you trust it.</strong> Run a pack, open <code>reports/graph_report.md</code>, and look at Isolated Documents first. A document connected to nothing is the cheapest possible signal that your corpus has a gap or a stray file in it.</p>
+<p><strong>Choosing what to retrieve over.</strong> Top Concepts is a fast read on what a corpus is <em>actually</em> about, as opposed to what you assumed when you assembled it. If the top concepts are all filing boilerplate, the corpus will not answer topical questions well no matter how good retrieval is.</p>
+<p><strong>Finding where subject areas connect.</strong> Bridge concepts point at the documents that tie two clusters together — useful when deciding which document an agent should read first, or which one is load-bearing enough to keep updated.</p>
+<p><strong>Spotting redundancy.</strong> A dense cluster of <code>similar_to</code> edges between different documents' sections usually means duplicated content: the same policy restated in four places, or three near-identical versions of one report.</p>
+<p><strong>Navigating as an agent.</strong> The graph is small enough to hand to a model whole. An agent can read <code>graph.yml</code>, pick a community or concept, and use the <code>mentions</code> edges to jump straight to the <code>node_id</code>s worth expanding in <code>map.yml</code> — without scanning the chunk list.</p>
+<h2 id="the-graph-never-affects-retrieval">The graph never affects retrieval</h2>
+<p>Like <code>map.yml</code>, <code>graph.yml</code> is a <strong>navigation and audit layer, not an index</strong>. Nothing in it is written into the FTS or vector index, and <code>agentpack retrieve</code> never reads it. Building, skipping, or rebuilding the graph cannot change what a query returns.</p>
+<p>A pack with no <code>graph.yml</code> behaves exactly as it did before the feature existed — <code>retrieve</code>, <code>audit</code>, and <code>validate</code> are all unaffected by its absence.</p>
+<h2 id="cli">CLI</h2>
+<div class="highlight"><pre><span></span><code>agentpack<span class="w"> </span>pack<span class="w"> </span>./docs<span class="w"> </span>--out<span class="w"> </span>./out<span class="w">                 </span><span class="c1"># graph.yml built by default</span>
+agentpack<span class="w"> </span>pack<span class="w"> </span>./docs<span class="w"> </span>--out<span class="w"> </span>./out<span class="w"> </span>--no-graph<span class="w">      </span><span class="c1"># skip the graph</span>
+agentpack<span class="w"> </span>graph<span class="w"> </span>./out<span class="w">                             </span><span class="c1"># (re)build graph.yml for an existing pack</span>
+agentpack<span class="w"> </span>graph<span class="w"> </span>./out<span class="w"> </span>--with-similarity<span class="w">           </span><span class="c1"># also refresh similar_to edges</span>
+</code></pre></div>
+<p><code>agentpack validate</code> checks <code>graph.yml</code> when present — every node's <code>doc</code> resolves to a manifest source, every section node to a real <code>map.yml</code> node, every edge endpoint to a node in the graph, and every <code>community</code> to a listed community. An absent graph is not an error.</p>
+<h2 id="when-the-graph-is-skipped">When the graph is skipped</h2>
+<p>The graph is skipped, with a note on stderr and no error, when:</p>
+<ul>
+<li>the pack has fewer than <strong>2 successfully parsed sources</strong> — a cross-document graph over one document has nothing to say;</li>
+<li><code>--no-graph</code> was passed, or <code>[graph] enabled = false</code> is set;</li>
+<li><code>manifest.yml</code> or <code>map.yml</code> is missing or unreadable.</li>
+</ul>
+<p>Graph construction never fails a pack. Any unexpected error degrades to "no <code>graph.yml</code>, one warning line" rather than taking down the rest of the output.</p>
+<h2 id="limitations">Limitations</h2>
+<p>Worth knowing before you read too much into a graph:</p>
+<ul>
+<li><strong>Concept quality tracks keyphrase quality.</strong> Concepts come from YAKE, which is statistical and has no idea what words mean. On corpora with heavy shared boilerplate, generic vocabulary can outrank real topics even after the gates. The slug-merging and self-title filters remove structural duplicates, not semantically empty phrases.</li>
+<li><strong>Plural variants do not merge.</strong> <code>year ended December</code> and <code>years ended December</code> remain separate concepts. Collapsing them would need stemming, which misfires on words that are their own singular (<em>status</em>, <em>bonus</em>, <em>focus</em>).</li>
+<li><strong>Self-title filtering is exact-token, not fuzzy.</strong> A filename-derived title of <code>COCACOLA</code> will not match <code>Coca-Cola</code> in the body text, so that self-reference survives. Fuzzier matching was avoided because it risks suppressing genuine concepts.</li>
+<li><strong>Section granularity depends on the parser.</strong> PDFs parsed without semantic structure collapse to a single root section per document, which makes <code>similar_to</code> behave like document-level similarity — often close to non-discriminative, since two long documents of the same genre produce similar centroids. Markdown and semantically-parsed documents give much better section granularity.</li>
+<li><strong>Concepts are not entities.</strong> There is no NER and no type system. <code>c_alerting_system</code> is a recurring phrase, not a resolved thing.</li>
+</ul>
+<h2 id="see-also">See also</h2>
+<ul>
+<li><a href="../knowledge-map/">Knowledge Map</a> — the per-document tree the graph is built from</li>
+<li><a href="../corpus-explorer-ui/">Corpus Explorer UI</a> — the interactive Concepts view</li>
+<li><a href="../cli-reference/">CLI Reference</a> — every flag in one place</li>
+</ul>
+
+
+
+
+
+
+
+
+
+
+
+
+                
+              </article>
+            </div>
+          
+          
+<script>var target=document.getElementById(location.hash.slice(1));target&&target.name&&(target.checked=target.name.startsWith("__tabbed_"))</script>
+        </div>
+        
+      </main>
+      
+        <footer class="md-footer">
+  
+  <div class="md-footer-meta md-typeset">
+    <div class="md-footer-meta__inner md-grid">
+      <div class="md-copyright">
+  
+  
+    Made with
+    <a href="https://squidfunk.github.io/mkdocs-material/" target="_blank" rel="noopener">
+      Material for MkDocs
+    </a>
+  
+</div>
+      
+    </div>
+  </div>
+</footer>
+      
+    </div>
+    <div class="md-dialog" data-md-component="dialog">
+      <div class="md-dialog__inner md-typeset"></div>
+    </div>
+    
+    
+    
+      
+      
+      <script id="__config" type="application/json">{"annotate": null, "base": "..", "features": [], "search": "../assets/javascripts/workers/search.2c215733.min.js", "tags": null, "translations": {"clipboard.copied": "Copied to clipboard", "clipboard.copy": "Copy to clipboard", "search.result.more.one": "1 more on this page", "search.result.more.other": "# more on this page", "search.result.none": "No matching documents", "search.result.one": "1 matching document", "search.result.other": "# matching documents", "search.result.placeholder": "Type to start searching", "search.result.term.missing": "Missing", "select.version": "Select version"}, "version": null}</script>
+    
+    
+      <script src="../assets/javascripts/bundle.79ae519e.min.js"></script>
+      
+    
+  </body>
+</html>

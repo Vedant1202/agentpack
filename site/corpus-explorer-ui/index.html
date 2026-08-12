@@ -289,6 +289,33 @@
   
   
     <li class="md-nav__item">
+      <a href="../concept-graph/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Concept Graph
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    <li class="md-nav__item">
       <a href="../cli-reference/" class="md-nav__link">
         
   
@@ -454,6 +481,17 @@
 </li>
         
           <li class="md-nav__item">
+  <a href="#concept-graph-view" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Concept Graph View
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
   <a href="#onboarding" class="md-nav__link">
     <span class="md-ellipsis">
       
@@ -557,10 +595,10 @@
       
         
         
-        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_8" >
+        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_9" >
         
           
-          <label class="md-nav__link" for="__nav_8" id="__nav_8_label" tabindex="0">
+          <label class="md-nav__link" for="__nav_9" id="__nav_9_label" tabindex="0">
             
   
   
@@ -578,8 +616,8 @@
             <span class="md-nav__icon md-icon"></span>
           </label>
         
-        <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_8_label" aria-expanded="false">
-          <label class="md-nav__title" for="__nav_8">
+        <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_9_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_9">
             <span class="md-nav__icon md-icon"></span>
             
   
@@ -757,6 +795,17 @@
 </li>
         
           <li class="md-nav__item">
+  <a href="#concept-graph-view" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Concept Graph View
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
   <a href="#onboarding" class="md-nav__link">
     <span class="md-ellipsis">
       
@@ -839,6 +888,16 @@ Then open <code>http://localhost:8000</code> in your browser.</p>
 - A live calculation of <strong>Semantic Neighbors</strong>, allowing you to click through and explore semantically similar chunks across entirely different documents.</p>
 <p><img alt="Deep-Dive into Semantic Boundaries (Node Drilldown)" src="../assets/node_click.png" />
 <em>Click any chunk to inspect its exact boundaries, raw text content, and nearest semantic neighbors.</em></p>
+<h3 id="concept-graph-view">Concept Graph View</h3>
+<p>The header carries a <strong>Universe ⇄ Concepts</strong> toggle. The Universe view is the chunk map described above; the Concepts view renders the pack's <a href="../concept-graph/">concept graph</a> — how documents relate to each other, rather than what is inside each one.</p>
+<ul>
+<li><strong>Nodes are colored by community</strong>, so Louvain clusters are visible at a glance. Documents and sections render as circles (sized document &gt; section), concepts as diamonds.</li>
+<li><strong>Edges are styled by relation:</strong> <code>contains</code>, <code>mentions</code>, and <code>references</code> draw solid; <code>similar_to</code> draws dashed, since it is the one relation derived from embeddings rather than structure.</li>
+<li><strong>Relation checkboxes</strong> in the legend hide any edge type on the spot. This matters on corpora where one relation dominates — a PDF-heavy corpus can produce a <code>similar_to</code> edge between nearly every pair of documents, and hiding it in one click exposes the real structural graph underneath.</li>
+<li><strong>Clicking a node</strong> opens a detail panel tailored to its kind: a concept shows its bridge status and the sections that mention it; a document shows its section count and whether it is isolated; a section shows its parent document and the concepts it mentions. Every listed item is clickable, so you can walk concept → section → its other concepts without leaving the view.</li>
+<li><strong>With nothing selected</strong>, the panel lists every community with its label and member count.</li>
+</ul>
+<p>If the pack has no <code>graph.yml</code> — packed with <code>--no-graph</code>, or a single-document corpus — the toggle is disabled and explains how to build one (<code>agentpack graph &lt;pack_dir&gt;</code>). The Universe view is unaffected.</p>
 <h3 id="onboarding">Onboarding</h3>
 <p>The UI comes with an interactive Shepherd.js onboarding tour to guide you through your first time exploring the corpus.</p>
 <h3 id="built-in-dark-mode">Built-in Dark Mode</h3>

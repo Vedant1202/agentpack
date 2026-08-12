@@ -355,6 +355,17 @@
 </li>
         
           <li class="md-nav__item">
+  <a href="#2d-the-concept-graph-graphyml" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        2d. The Concept Graph (graph.yml)
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
   <a href="#3-retrieve" class="md-nav__link">
     <span class="md-ellipsis">
       
@@ -505,6 +516,33 @@
   
   
     <li class="md-nav__item">
+      <a href="concept-graph/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Concept Graph
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    <li class="md-nav__item">
       <a href="cli-reference/" class="md-nav__link">
         
   
@@ -621,10 +659,10 @@
       
         
         
-        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_8" >
+        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_9" >
         
           
-          <label class="md-nav__link" for="__nav_8" id="__nav_8_label" tabindex="0">
+          <label class="md-nav__link" for="__nav_9" id="__nav_9_label" tabindex="0">
             
   
   
@@ -642,8 +680,8 @@
             <span class="md-nav__icon md-icon"></span>
           </label>
         
-        <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_8_label" aria-expanded="false">
-          <label class="md-nav__title" for="__nav_8">
+        <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_9_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_9">
             <span class="md-nav__icon md-icon"></span>
             
   
@@ -825,6 +863,17 @@
     <span class="md-ellipsis">
       
         2c. The Knowledge Map (map.yml)
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#2d-the-concept-graph-graphyml" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        2d. The Concept Graph (graph.yml)
       
     </span>
   </a>
@@ -1035,6 +1084,33 @@ pip<span class="w"> </span>install<span class="w"> </span>-e<span class="w"> </s
 <div class="highlight"><pre><span></span><code>agentpack<span class="w"> </span>map<span class="w"> </span>./agentpack-output<span class="w">     </span><span class="c1"># (re)build map.yml for an existing pack</span>
 </code></pre></div>
 <p><strong><a href="https://github.com/Vedant1202/agentpack/blob/main/docs/knowledge-map.md">🗺️ Read the full Knowledge Map guide</a></strong></p>
+<h3 id="2d-the-concept-graph-graphyml">2d. The Concept Graph (<code>graph.yml</code>)</h3>
+<p><code>map.yml</code> describes what is inside each document. <strong><code>graph.yml</code></strong> describes how the documents relate to <em>each other</em> — which topics recur across the corpus, which documents reference each other, and which are connected to nothing at all.</p>
+<p>Documents, sections, and recurring concepts become nodes; <code>contains</code>, <code>mentions</code>, <code>references</code>, and <code>similar_to</code> become edges. Communities are detected with seeded Louvain clustering. Like the map, it is deterministic, offline, and never touches the retrieval indexes.</p>
+<pre class="mermaid"><code>flowchart LR
+    D1[onboarding.md] --&gt;|contains| S1[Deployment Basics]
+    D2[incident-response.md] --&gt;|contains| S2[The Deployment Pipeline]
+    S1 --&gt;|mentions| C1([Deployment Pipeline])
+    S2 --&gt;|mentions| C1
+    D1 -.-&gt;|references| D2</code></pre>
+<p>Every pack also writes <code>reports/graph_report.md</code>, a plain-language read on the corpus:</p>
+<div class="highlight"><pre><span></span><code><span class="gu">## Top Concepts</span>
+<span class="k">-</span><span class="w"> </span><span class="gs">**alerting system**</span> (3 mention(s))
+<span class="k">-</span><span class="w"> </span><span class="gs">**Deployment Pipeline**</span> (2 mention(s))
+
+<span class="gu">## Isolated Documents</span>
+<span class="k">-</span><span class="w"> </span>No isolated documents.
+</code></pre></div>
+<p>That report answers questions retrieval alone cannot: <em>is this corpus actually about what I assumed?</em> and <em>is any document disconnected from the rest</em> — either off-topic, or a sign the document that would connect it is missing.</p>
+<div class="highlight"><pre><span></span><code>agentpack<span class="w"> </span>graph<span class="w"> </span>./agentpack-output<span class="w">                     </span><span class="c1"># (re)build graph.yml</span>
+agentpack<span class="w"> </span>graph<span class="w"> </span>./agentpack-output<span class="w"> </span>--with-similarity<span class="w">   </span><span class="c1"># add embedding-based similarity edges</span>
+</code></pre></div>
+<p>Concept promotion is tunable per corpus in <code>agentpack.toml</code>:</p>
+<div class="highlight"><pre><span></span><code><span class="k">[graph]</span>
+<span class="n">df_cap</span><span class="w">   </span><span class="o">=</span><span class="w"> </span><span class="mf">0.30</span><span class="w">   </span><span class="c1"># ignore phrases appearing in &gt;30% of sections (boilerplate)</span>
+<span class="n">min_docs</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="mi">2</span><span class="w">      </span><span class="c1"># a concept must span at least 2 documents</span>
+</code></pre></div>
+<p><strong><a href="https://github.com/Vedant1202/agentpack/blob/main/docs/concept-graph.md">Read the full Concept Graph guide</a></strong></p>
 <h3 id="3-retrieve">3. Retrieve</h3>
 <p>AgentPack comes with a built-in hybrid search engine (SQLite FTS5 + HNSW vector search, fused with RRF) to test your chunks instantly.</p>
 <div class="highlight"><pre><span></span><code>agentpack<span class="w"> </span>retrieve<span class="w"> </span>./agentpack-output<span class="w"> </span><span class="s2">&quot;eligibility criteria&quot;</span><span class="w"> </span>--top-k<span class="w"> </span><span class="m">5</span>
@@ -1050,6 +1126,11 @@ agentpack<span class="w"> </span>retrieve<span class="w"> </span>./agentpack-out
 <p>If you installed AgentPack with the <code>[ui]</code> extra, you can launch a local 2D force-graph explorer of your compiled chunks. This allows you to visually debug chunk sizes, semantic similarities, and ranked retrieval results.</p>
 <div class="highlight"><pre><span></span><code>agentpack<span class="w"> </span>ui<span class="w"> </span>./agentpack-output<span class="w"> </span>--port<span class="w"> </span><span class="m">8000</span>
 </code></pre></div>
+<p>The explorer has two views, switched from the header:</p>
+<ul>
+<li><strong>Universe</strong> — every chunk as a node, clustered by document. Run a query and watch which chunks the hybrid retriever actually returns.</li>
+<li><strong>Concepts</strong> — the concept graph, colored by community. Click a concept to see which sections mention it and whether it bridges clusters; click a document to see whether it is isolated. Individual edge types can be hidden to cut through dense graphs.</li>
+</ul>
 <p><img alt="Visualizing Hybrid Retrieval (Search)" src="./docs/assets/search.png" /></p>
 <p><strong><a href="https://github.com/Vedant1202/agentpack/blob/main/docs/corpus-explorer-ui.md">🖼️ Read the full UI breakdown</a></strong></p>
 <h2 id="comprehensive-cli-documentation">Comprehensive CLI Documentation</h2>
@@ -1069,8 +1150,38 @@ agentpack<span class="w"> </span>retrieve<span class="w"> </span>./agentpack-out
     Parsers --&gt; Chunker[Chunker]
     Chunker --&gt; Pack[Context Pack]
     Pack --&gt; Map[Knowledge Map map.yml]
+    Map --&gt; Graph[Concept Graph graph.yml]
+    Pack --&gt; Graph
     Pack --&gt; Agent[LLM Agent]
-    Map --&gt; Agent</code></pre>
+    Map --&gt; Agent
+    Graph --&gt; Agent</code></pre>
+<p>Three layers, each answering a different question:</p>
+<table>
+<thead>
+<tr>
+<th>Artifact</th>
+<th>Answers</th>
+<th>Scope</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>manifest.yml</code></td>
+<td><em>Where did this text come from?</em></td>
+<td>Per chunk</td>
+</tr>
+<tr>
+<td><code>map.yml</code></td>
+<td><em>What is inside this document, and where?</em></td>
+<td>Per document</td>
+</tr>
+<tr>
+<td><code>graph.yml</code></td>
+<td><em>How do these documents relate to each other?</em></td>
+<td>Whole corpus</td>
+</tr>
+</tbody>
+</table>
 <p>For a deep dive into how AgentPack parses, chunks, and indexes data, see <a href="https://github.com/Vedant1202/agentpack/blob/main/docs/architecture.md">Architecture &amp; Internals</a>.</p>
 <h2 id="current-limitations-roadmap">Current Limitations &amp; Roadmap</h2>
 <ul>
@@ -1080,6 +1191,8 @@ agentpack<span class="w"> </span>retrieve<span class="w"> </span>./agentpack-out
 <li><strong>Cloud Vector DB Integration</strong>: Retrieval runs locally (SQLite FTS5 + HNSW). Connectors for Pinecone, Weaviate, or Qdrant are planned.</li>
 <li><strong>Cross-Encoder Reranking</strong>: A secondary rerank pass is on the roadmap (deferred to v0.4).</li>
 <li><strong>Map Enrichment Extras</strong>: The knowledge map's descriptors are deterministic/offline today; opt-in LLM-abstractive summaries and typed-entity (NER) extraction are planned as optional add-ons.</li>
+<li><strong>Concept Quality</strong>: Concept graph concepts come from statistical keyphrase extraction (YAKE), so corpora with heavy shared boilerplate can surface generic vocabulary alongside real topics. Structural duplicates and self-references are filtered; semantically-empty phrases are not. Optional LLM concept enrichment is planned.</li>
+<li><strong>Graph-Aware Retrieval</strong>: The concept graph is a navigation and audit layer today — it never influences what <code>agentpack retrieve</code> returns. Fusing graph signals into hybrid retrieval as a third RRF contributor is planned, gated on demonstrated lift in <code>agentpack eval</code>.</li>
 </ul>
 <hr />
 <p><em>Built with ❤️ for Agents.</em></p>
