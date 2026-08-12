@@ -377,6 +377,160 @@ def test_concept_promotion_deterministic(tmp_path):
     assert yaml.dump(a, sort_keys=False) == yaml.dump(b, sort_keys=False)
 
 
+def _write_doc_titled_pack(tmp_path, doc_specs):
+    """doc_specs: [(source_id, title, [(node_id, title, keyphrases), ...]), ...]
+    -- like _write_synthetic_pack but each document also carries its own
+    map.yml `title` field, needed for the self-title-reference tests."""
+    sources = [{"id": sid, "path": f"{sid}.md", "status": "success"} for sid, _title, _secs in doc_specs]
+    map_documents = [
+        {
+            "source_id": sid,
+            "title": title,
+            "sections": [_section(nid, stitle, kws) for nid, stitle, kws in secs],
+        }
+        for sid, title, secs in doc_specs
+    ]
+    _write_synthetic_pack(tmp_path, sources, map_documents)
+
+
+def test_dedup_key_groups_word_order_and_repetition_variants():
+    from agentpack.grapher import _dedup_key, _slug
+    assert _dedup_key(_slug("FISCAL YEAR")) == _dedup_key(_slug("Fiscal Year Fiscal"))
+    assert _dedup_key(_slug("FISCAL YEAR")) == _dedup_key(_slug("Year Fiscal Year"))
+    # A genuinely different phrase must NOT collide.
+    assert _dedup_key(_slug("FISCAL YEAR")) != _dedup_key(_slug("Balance Sheet"))
+    # Plurals are a real, acknowledged limitation -- NOT merged by this key.
+    assert _dedup_key(_slug("year ended December")) != _dedup_key(_slug("years ended December"))
+
+
+def test_concept_near_duplicate_slugs_merge_into_one_concept(tmp_path):
+    """YAKE's overlapping n-gram windows over a repeated phrase produce
+    'FISCAL YEAR' / 'Fiscal Year Fiscal' / 'Year Fiscal Year' as three
+    distinct slugs for one underlying idea -- must promote as ONE concept,
+    labeled by the single most frequent surface form across all variants."""
+    sources = [
+        {"id": "src_000", "path": "a.md", "status": "success"},
+        {"id": "src_001", "path": "b.md", "status": "success"},
+    ]
+    map_documents = [
+        {"source_id": "src_000", "sections": [
+            _section("src_000_s00", "One", ["FISCAL YEAR"]),
+            _section("src_000_s01", "Two", ["FISCAL YEAR"]),
+        ]},
+        {"source_id": "src_001", "sections": [
+            _section("src_001_s00", "Three", ["Fiscal Year Fiscal"]),
+            _section("src_001_s01", "Four", ["Year Fiscal Year"]),
+        ]},
+    ]
+    _write_synthetic_pack(tmp_path, sources, map_documents)
+    from agentpack.grapher import build_graph
+    graph = build_graph(str(tmp_path), params=_DEFAULT_PARAMS)
+    concept_nodes = [n for n in graph["nodes"] if n["kind"] == "concept"]
+    assert len(concept_nodes) == 1
+    assert concept_nodes[0]["id"] == "c_fiscal_year"
+    assert concept_nodes[0]["label"] == "FISCAL YEAR"  # most frequent surface form (2 of 4)
+
+    mentions = [e for e in graph["edges"] if e["relation"] == "mentions"]
+    assert len(mentions) == 4  # all four contributing sections get an edge to the ONE concept
+    assert all(e["target"] == "c_fiscal_year" for e in mentions)
+
+
+def test_concept_near_duplicate_merge_does_not_double_count_one_section(tmp_path):
+    """A single section that independently contributed keyphrases under TWO
+    near-duplicate slugs (real YAKE behavior: multiple overlapping windows
+    extracted from the same section) must still count as ONE section for
+    min_docs/df_cap, not two -- proven by a df_cap boundary that would only
+    pass if the merge correctly deduped per-section."""
+    sources = [
+        {"id": "src_000", "path": "a.md", "status": "success"},
+        {"id": "src_001", "path": "b.md", "status": "success"},
+    ]
+    map_documents = [
+        # src_000_s00 contributes BOTH near-duplicate variants itself.
+        {"source_id": "src_000", "sections": [
+            _section("src_000_s00", "One", ["FISCAL YEAR", "Fiscal Year Fiscal"]),
+        ]},
+        {"source_id": "src_001", "sections": [
+            _section("src_001_s00", "Two", ["Year Fiscal Year"]),
+            _section("src_001_s01", "Three", ["something else"]),
+        ]},
+    ]
+    _write_synthetic_pack(tmp_path, sources, map_documents)
+    from agentpack.grapher import build_graph
+    # 2 of 3 total sections carry a fiscal-year variant = 0.667 fraction.
+    # If src_000_s00 were double-counted (once per slug), the fraction would
+    # read as 3/3 = 1.0 and even a generous cap would still (coincidentally)
+    # pass -- so this alone doesn't prove correctness. The real proof is the
+    # mentions-edge count below: exactly one edge per DISTINCT section.
+    graph = build_graph(str(tmp_path), params={**_DEFAULT_PARAMS, "df_cap": 0.7})
+    concept_nodes = [n for n in graph["nodes"] if n["kind"] == "concept"]
+    assert len(concept_nodes) == 1
+    mentions = [e for e in graph["edges"] if e["relation"] == "mentions" and e["target"] == concept_nodes[0]["id"]]
+    assert len(mentions) == 2  # src_000_s00 and src_001_s00 -- NOT 3
+    assert {e["source"] for e in mentions} == {"src_000_s00", "src_001_s00"}
+
+
+def test_concept_self_title_reference_filtered(tmp_path):
+    """A keyphrase that reduces to nothing but the document's own name
+    (optionally plus a generic corporate suffix) is self-reference, not
+    cross-document topical evidence -- every section of a company's own
+    filing naturally repeats its own name. Same phrase in both documents,
+    so min_docs=2 would be satisfied WITHOUT the filter -- proving this
+    test actually exercises self-title filtering, not just an unrelated
+    gate rejection."""
+    _write_doc_titled_pack(tmp_path, [
+        ("src_000", "CORNING 2022 10K", [("src_000_s00", "One", ["CORNING"])]),
+        ("src_001", "CORNING 2020 10K", [("src_001_s00", "Two", ["CORNING"])]),
+    ])
+    from agentpack.grapher import build_graph
+    graph = build_graph(str(tmp_path), params=_DEFAULT_PARAMS)
+    assert [n for n in graph["nodes"] if n["kind"] == "concept"] == []
+
+
+def test_concept_self_title_reference_does_not_suppress_real_concept(tmp_path):
+    """'Corning Display Technologies' shares the entity name with the title
+    but carries real additional content (a named business segment) -- must
+    NOT be treated as self-reference, unlike the bare company name."""
+    _write_doc_titled_pack(tmp_path, [
+        ("src_000", "CORNING 2022 10K", [("src_000_s00", "One", ["Corning Display Technologies"])]),
+        ("src_001", "CORNING 2020 10K", [("src_001_s00", "Two", ["Corning Display Technologies"])]),
+    ])
+    from agentpack.grapher import build_graph
+    graph = build_graph(str(tmp_path), params=_DEFAULT_PARAMS)
+    concept_nodes = [n for n in graph["nodes"] if n["kind"] == "concept"]
+    assert len(concept_nodes) == 1
+    assert concept_nodes[0]["label"] == "Corning Display Technologies"
+
+
+def test_concept_self_title_reference_is_per_document_not_global(tmp_path):
+    """A phrase that's self-referential for ONE document must still count
+    normally when a DIFFERENT document genuinely mentions it -- the filter
+    excludes self-naming occurrences, it doesn't blacklist the phrase."""
+    _write_doc_titled_pack(tmp_path, [
+        ("src_000", "CORNING 2022 10K", [("src_000_s00", "One", ["CORNING"])]),
+        ("src_001", "SOME OTHER CO 2022 10K", [("src_001_s00", "Two", ["CORNING"])]),
+        ("src_002", "A THIRD CO 2022 10K", [("src_002_s00", "Three", ["CORNING"])]),
+    ])
+    from agentpack.grapher import build_graph
+    # min_docs=2: src_000's own self-reference is excluded, but src_001 and
+    # src_002 both genuinely mention Corning (e.g. as a supplier/peer) --
+    # that's real cross-document evidence and must still promote.
+    graph = build_graph(str(tmp_path), params=_DEFAULT_PARAMS)
+    concept_nodes = [n for n in graph["nodes"] if n["kind"] == "concept"]
+    assert len(concept_nodes) == 1
+    mentions = [e for e in graph["edges"] if e["relation"] == "mentions"]
+    assert {e["source"] for e in mentions} == {"src_001_s00", "src_002_s00"}  # NOT src_000_s00
+
+
+def test_is_self_reference_direct():
+    from agentpack.grapher import _is_self_reference
+    assert _is_self_reference("CORNING", "CORNING 2022 10K") is True
+    assert _is_self_reference("CORNING INCORPORATED", "CORNING 2022 10K") is True
+    assert _is_self_reference("Corning Display Technologies", "CORNING 2022 10K") is False
+    assert _is_self_reference("Anything", None) is False  # no title on record -> never filtered
+    assert _is_self_reference("Anything", "") is False
+
+
 def test_concept_promotion_end_to_end_real_yake(tmp_path):
     """Real pipeline, real YAKE -- proves write_pack -> mapper enrichment ->
     concept promotion actually wires together, not just the isolated gate

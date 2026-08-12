@@ -51,6 +51,46 @@ def _passes_length_gate(slug: str) -> bool:
     return bool(stripped) and not stripped.isdigit()
 
 
+def _dedup_key(slug: str) -> str:
+    """Canonical grouping key for near-duplicate slugs -- the same token
+    SET regardless of order or repetition. YAKE emits overlapping n-gram
+    windows over a repeated phrase, producing slugs like 'fiscal_year' /
+    'fiscal_year_fiscal' / 'year_fiscal_year' for one underlying idea; this
+    key groups them so promotion counts them as one concept's evidence,
+    not three separate (and individually weaker) candidates. Used only
+    for grouping -- a concept's actual id/label always comes from _slug()
+    on the winning surface form, so single-variant concepts (the common
+    case) get exactly the same id as before this existed."""
+    return "_".join(sorted(set(slug.split("_"))))
+
+
+# Generic corporate-entity suffixes (English-language, not specific to any
+# one jurisdiction or corpus) stripped before checking self-reference below.
+_CORPORATE_SUFFIXES = frozenset({
+    "incorporated", "inc", "corporation", "corp", "company", "co",
+    "llc", "ltd", "limited", "plc", "group", "holdings", "holding",
+})
+
+
+def _is_self_reference(phrase: str, doc_title: Optional[str]) -> bool:
+    """True if `phrase` reduces to nothing but the document's own name,
+    once generic corporate-entity suffixes (Incorporated, Corp, LLC, ...)
+    are stripped. Every section of a company's own filing naturally
+    repeats its own name -- that repetition is not cross-document topical
+    evidence the way a genuinely distinct phrase is, even though it can
+    trivially satisfy min_docs across that one company's own multi-year
+    filing history. Deliberately strict (a full-token-set subset check,
+    not a substring/fuzzy match): a phrase merely starting with the
+    entity name -- e.g. a real business segment like 'Corning Display
+    Technologies' -- must NOT be caught, verified against real financebench
+    output before this was implemented."""
+    if not doc_title:
+        return False
+    phrase_tokens = set(_slug(phrase).split("_")) - _CORPORATE_SUFFIXES
+    title_tokens = set(_slug(doc_title).split("_"))
+    return bool(phrase_tokens) and phrase_tokens.issubset(title_tokens)
+
+
 def _iter_all_sections(sections, source_id: str):
     """Yield (section_dict, source_id) for every section in a document's
     map.yml tree, at every depth -- concepts can be promoted from a
@@ -81,6 +121,7 @@ def _promote_concepts(
 
     for map_doc in map_docs_by_id.values():
         source_id = map_doc.get("source_id")
+        doc_title = map_doc.get("title")
         for section, sid in _iter_all_sections(map_doc.get("sections"), source_id):
             total_sections += 1
             node_id = section.get("node_id")
@@ -93,6 +134,8 @@ def _promote_concepts(
                 if not slug or slug in seen_slugs_in_section:
                     continue
                 seen_slugs_in_section.add(slug)
+                if _is_self_reference(phrase, doc_title):
+                    continue
                 contributions.setdefault(slug, []).append((sid, node_id, title, phrase))
 
     new_nodes: List[GraphNode] = []
@@ -103,30 +146,52 @@ def _promote_concepts(
     min_docs = params["min_docs"]
     df_cap = params["df_cap"]
 
-    for slug, occurrences in contributions.items():
-        if not _passes_length_gate(slug):
+    # Merge near-duplicate slugs (same token set, different order/repetition
+    # -- a YAKE artifact, not a semantic difference) before gating, so e.g.
+    # "FISCAL YEAR" / "Fiscal Year Fiscal" / "Year Fiscal Year" count as one
+    # concept's evidence rather than three separate, individually weaker ones.
+    groups: Dict[str, List[str]] = {}
+    for slug in contributions:
+        groups.setdefault(_dedup_key(slug), []).append(slug)
+
+    for slugs in groups.values():
+        if not any(_passes_length_gate(s) for s in slugs):
             continue
-        distinct_docs = {sid for sid, _nid, _title, _phrase in occurrences}
+        raw_occurrences = [occ for s in slugs for occ in contributions[s]]
+
+        # Gate on a per-SECTION basis across the merged slugs -- a section
+        # that independently contributed 2+ near-duplicate slugs (real YAKE
+        # behavior) must still count as ONE section, exactly as it would
+        # have for a single un-merged slug.
+        seen_sections: set = set()
+        gated_occurrences = []
+        for occ in raw_occurrences:
+            _sid, node_id, _title, _phrase = occ
+            if node_id in seen_sections:
+                continue
+            seen_sections.add(node_id)
+            gated_occurrences.append(occ)
+
+        distinct_docs = {sid for sid, _nid, _title, _phrase in gated_occurrences}
         if len(distinct_docs) < min_docs:
             continue
-        # One occurrence per contributing SECTION (already deduped per-section
-        # above), so len(occurrences) is a section count, not a phrase count.
-        if len(occurrences) / total_sections > df_cap:
+        if len(gated_occurrences) / total_sections > df_cap:
             continue
 
-        # Promoted. Label = most frequent surface form; ties broken lexically
-        # (ascending) so the choice is deterministic regardless of collection order.
-        label_counts = Counter(phrase for _sid, _nid, _title, phrase in occurrences)
+        # Promoted. Label = most frequent surface form across ALL merged
+        # variants; ties broken lexically (ascending) so the choice is
+        # deterministic regardless of collection order. The concept's id
+        # always derives from _slug() on the winning label -- never from
+        # the dedup key -- so a concept with no near-duplicate sibling gets
+        # exactly the id it would have gotten before this merge existed.
+        label_counts = Counter(phrase for _sid, _nid, _title, phrase in raw_occurrences)
         label = sorted(label_counts.items(), key=lambda kv: (-kv[1], kv[0]))[0][0]
+        slug = _slug(label)
 
         concept_id = f"c_{slug}"
         new_nodes.append(GraphNode(id=concept_id, kind="concept", label=label))
 
-        seen_sections_for_slug: set = set()
-        for sid, node_id, title, _phrase in occurrences:
-            if node_id in seen_sections_for_slug:
-                continue
-            seen_sections_for_slug.add(node_id)
+        for sid, node_id, title, _phrase in gated_occurrences:
             if node_id not in existing_section_ids:
                 new_nodes.append(GraphNode(id=node_id, kind="section", label=title, doc=sid))
                 existing_section_ids.add(node_id)
