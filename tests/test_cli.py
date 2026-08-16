@@ -99,6 +99,13 @@ def test_cli_gen_eval(mock_run_gen):
     assert result.exit_code == 0
     assert "Gen Eval Output" in result.stdout
 
+@patch("agentpack.eval.generation.run_generation_eval")
+def test_cli_gen_eval_error(mock_run_gen):
+    mock_run_gen.return_value = "Error: Something went wrong"
+    result = runner.invoke(app, ["gen-eval", "fake_dir"])
+    assert result.exit_code == 1
+    assert "Error:" in result.stdout
+
 @patch("agentpack.eval.benchmarks.slice_financebench")
 def test_cli_prep_benchmark(mock_slice):
     result = runner.invoke(app, ["prep-benchmark", "--dataset", "financebench", "--sample-size", "5"])

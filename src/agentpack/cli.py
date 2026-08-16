@@ -341,6 +341,7 @@ def gen_eval(
     )
     if report.startswith("Error"):
         typer.secho(report, fg=typer.colors.RED)
+        raise typer.Exit(code=1)
     else:
         typer.echo(report)
         typer.secho("Generation evaluation complete.", fg=typer.colors.GREEN)

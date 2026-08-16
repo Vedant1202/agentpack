@@ -67,10 +67,22 @@ is no "pre-existing failure" allowance anymore. Record the new count after every
 - GREEN (full suite): `PYTHONPATH="$PWD/src" ./venv/bin/python -m pytest tests/ -q` →
   **297 passed, 0 failed** in 77.37s. New permanent baseline — no failures allowed from here on.
 
-### T0.2 · `gen-eval` exit code (spec §4 T0.2, F6)
-- [ ] RED: CliRunner test asserting exit 1 on an `"Error…"` report (copy `test_cli_eval_error`). Fix: `raise typer.Exit(code=1)` in the error branch.
+### T0.2 · `gen-eval` exit code (spec §4 T0.2, F6) — ✅ DONE
+- [x] RED: CliRunner test asserting exit 1 on an `"Error…"` report (copy `test_cli_eval_error`). Fix: `raise typer.Exit(code=1)` in the error branch.
 **Acceptance:** exit code 1 on failure; success path unchanged.
 **Verify:** targeted + full suite.
+
+**Evidence:**
+- Confirmed F6 location matches spec exactly: `cli.py:342-344`, `gen_eval`'s error branch had
+  `typer.secho(report, fg=typer.colors.RED)` with no `Exit`, unlike `eval`'s branch at `:304-306`.
+- RED: added `test_cli_gen_eval_error` (mirrors `test_cli_eval_error`, patches
+  `agentpack.eval.generation.run_generation_eval`) → `assert 0 == 1`, confirming the missing exit.
+- Fix: added `raise typer.Exit(code=1)` after the `typer.secho` in `gen_eval`'s error branch.
+- GREEN (targeted): `tests/test_cli.py -v` → **13 passed** (includes pre-existing tests using
+  patch targets `agentpack.retrieve.search_pack` / `agentpack.eval.runner.run_eval`, which were
+  already corrected on disk from a prior in-flight edit unrelated to T0.2 — left untouched and
+  unstaged; only the T0.2 hunks (`cli.py` Exit + new `test_cli_gen_eval_error`) were committed).
+- GREEN (full suite): **298 passed, 0 failed** in 68.19s (297 + this 1 new test).
 
 ### T0.3 · Corrupt `lexical_index.db` self-heal (spec §4 T0.3, F4)
 - [ ] Live-verify `DatabaseError` vs `OperationalError` on a garbage file first. RED: truncate a real index → search crashes. Fix: widen catch, unlink, warn once, rebuild; close the probe conn on error paths.
