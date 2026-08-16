@@ -740,9 +740,49 @@ TA.1 before/after citation, TA.2's beyond-scope discovery, TA.5's OQ1 note). Fin
 - GREEN + TB.0: snapshot re-run → still passing, unchanged.
 - GREEN (full suite): **323 passed, 0 failed** in 23.72s (322 + this 1 new test).
 
-### TB.7 · UI: feedback atomicity, umap import order, chunks staleness (spec §4 TB.7, F23/F24)
-- [ ] RED trio per spec. Fix: preserve-corrupt-then-fresh + tmp/os.replace + lock for feedback; umap import after manifest/artifact check (then DELETE the now-unneeded pytest.skips in tests/test_ui.py so the 404 path is really tested); hash-validate in `ensure_lexical_index`.
+### TB.7 · UI: feedback atomicity, umap import order, chunks staleness (spec §4 TB.7, F23/F24) — ✅ DONE
+- [x] RED trio per spec. Fix: preserve-corrupt-then-fresh + tmp/os.replace + lock for feedback; umap import after manifest/artifact check (then DELETE the now-unneeded pytest.skips in tests/test_ui.py so the 404 path is really tested); hash-validate in `ensure_lexical_index`.
 **Verify:** targeted + full suite.
+
+**Evidence (3 sub-parts, per spec):**
+- **(a) `/api/feedback` atomicity (F23):** confirmed the bare `except: pass` (silently
+  turns a corrupt file into `[]`) plus non-atomic direct-write (`open(fb_path, "w")`,
+  truncate-in-place). RED: `test_api_feedback_preserves_corrupt_file_and_persists_both_entries`
+  (corrupt `eval_feedback.json`, POST twice) → `0 == 1` — no `.corrupt-*` file created, original
+  lost. Fix: on JSON parse failure, `fb_path.rename(...corrupt-<epoch>)` before starting fresh;
+  write via a `.tmp` file + `os.replace` (atomic on POSIX); the whole read-modify-write cycle
+  guarded by a module-level `threading.Lock`.
+- **(b) `/api/umap` import order (F24):** confirmed `import umap.umap_` ran BEFORE
+  `load_vector_artifacts` (which owns the manifest/vector-index checks). RED:
+  `test_api_umap_missing_manifest_404s_even_without_umap` — used `patch.dict(sys.modules,
+  {"umap": None, "umap.umap_": None})` to force umap unimportable regardless of this
+  environment's REAL install status (umap-learn happens to be installed here, which is exactly
+  why the ORIGINAL skip-guarded test could never actually catch this in dev) → got 500
+  ("umap-learn is not installed") instead of 404. Fix: moved the import to after
+  `load_vector_artifacts` succeeds. Removed the now-unneeded skip guard from
+  `test_api_umap_missing` per spec (its own docstring explained exactly why it existed and why
+  it's no longer needed); kept `test_api_umap_builds_missing_vector_index`'s skip since THAT test
+  needs real `umap` to construct its own mock (`monkeypatch.setattr(umap.umap_, "UMAP", ...)`) —
+  matches spec's "keep skips only where umap itself must run."
+- **(c) `ensure_lexical_index` staleness (the `/api/chunks` bug, beyond F23/F24's two named
+  facts):** confirmed it only checked `db_path.exists()`, never validated content against the
+  current manifest. RED: `test_api_chunks_reflects_repack_not_stale_index` (pack corpus_a, load
+  `/api/chunks`, re-pack corpus_b into the SAME output dir, `/api/chunks` again) → still served
+  corpus_a's "Alpha content" instead of corpus_b's. Fix: reused `_manifest_hash`/`_fts_stored_hash`
+  from `retrieve.py` (same staleness check `search_fts` uses) — rebuild when the stored hash
+  doesn't match current.
+- **Casualty, fixed:** `test_api_chunks_valid`'s hand-built db had no `_pack_meta` hash table at
+  all, which my new staleness check would now treat as stale (always rebuilding against the
+  test's — empty — real manifest, losing the hand-crafted "c1" row). Added
+  `_fts_write_hash(conn, _manifest_hash(pack_dir))` to the fixture so it's seen as current;
+  `test_api_chunks_builds_missing_db`'s fixture (the "doesn't exist yet" path) was unaffected.
+- Confirmed all 3 RED tests genuinely fail pre-fix via `git stash` (same discipline as prior
+  tasks) — feedback: `0 == 1` (no corrupt-file preserved); umap: `500 != 404`; chunks: stale
+  "Alpha content" still served.
+- GREEN (targeted): `tests/test_ui.py -v` → **23 passed**, incl. all 3 new tests and the fixed
+  `test_api_chunks_valid`.
+- GREEN + TB.0: snapshot re-run → still passing, unchanged.
+- GREEN (full suite): **326 passed, 0 failed** in 22.94s (323 + these 3 new tests).
 
 **▣ CHECKPOINT B — stop; post evidence; open PR 1 (`fix/engineering-hardening` → `dev`); wait for merge before Phase C.**
 
