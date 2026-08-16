@@ -114,6 +114,7 @@ def _to_section_node(title: str, tnode: _TreeNode, node_id: str, enrich: bool) -
     page_span = [min(pages), max(pages)] if pages else None
 
     node_text = " ".join(tnode.own_text).strip()
+    node_text = node_text[:_ENRICH_TEXT_CAP]
     return SectionNode(
         node_id=node_id,
         title=title,

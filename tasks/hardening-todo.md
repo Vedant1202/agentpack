@@ -122,10 +122,32 @@ is no "pre-existing failure" allowance anymore. Record the new count after every
   (`test_fts_unchanged_pack_reuses_index`, `test_fts_invalidated_on_repack`) unaffected.
 - GREEN (full suite): **299 passed, 0 failed** in 72.37s (298 + this 1 new test).
 
-### T0.4 · Cap section-level enrichment — the OOM (spec §4 T0.4, F5)
-- [ ] RED: monkeypatched `_gist` captures >8000-char input today. Fix: `node_text[:_ENRICH_TEXT_CAP]` at the section call site (+ optional 400-sentence guard inside `gist`).
+### T0.4 · Cap section-level enrichment — the OOM (spec §4 T0.4, F5) — ✅ DONE
+- [x] RED: monkeypatched `_gist` captures >8000-char input today. Fix: `node_text[:_ENRICH_TEXT_CAP]` at the section call site (+ optional 400-sentence guard inside `gist`).
 **Acceptance:** enrichment input capped; demo_corpus map still has keyphrases/gists.
 **Verify:** targeted + full suite + `--fast` demo_corpus smoke.
+
+**Evidence:**
+- Confirmed line numbers match spec exactly: `mapper.py:22` (`_ENRICH_TEXT_CAP = 8000`), `:116`
+  (`node_text = " ".join(tnode.own_text).strip()`), `:122-123` (uncapped `_keyphrases`/`_gist`
+  calls), `:176` (existing doc-level cap pattern to mirror); `enrich.py:84-90` (the O(N²)
+  sentence-pair graph).
+- RED: added `test_section_enrichment_text_is_capped` (single section, one 11,207-char paragraph
+  block, no nested subsections — mirrors a `--fast` PDF's one-root-section-is-the-whole-document
+  shape) → monkeypatched `_gist` spy captured **11207 chars**, `assert 11207 <= 8000` failed.
+- Fix: added `node_text = node_text[:_ENRICH_TEXT_CAP]` right after the existing `node_text = ...`
+  line in `_to_section_node` (mirrors the doc-level `[:_ENRICH_TEXT_CAP]` slice at `:176`).
+  Defense-in-depth: `enrich.py::gist` now also caps `sentences = sentences[:400]` after
+  `_sentences()`, guarding any future uncapped caller of `gist()` directly.
+- GREEN (targeted): `tests/test_mapper.py tests/test_enrich.py -v` → **28 passed**, incl.
+  `test_golden_map_snapshot` (structural regression guard — cap didn't change normal-size output)
+  and `test_map_nodes_carry_descriptors_by_default`.
+- GREEN (full suite): **300 passed, 0 failed** in 23.76s (299 + this 1 new test).
+- Real-world smoke (spec-required): `PYTHONPATH="$PWD/src" ./venv/bin/python -m agentpack.cli pack
+  demo_corpus --out /tmp/hardening_t04 --fast --quiet` → exit 0. Inspected `map.yml`: all 4
+  documents (incl. `3M_2018_10K.pdf`) still carry a doc-level summary; section nodes still carry
+  keyphrases/gists (9 and 17 descriptor-bearing nodes on the two largest docs) — the cap does not
+  blank enrichment on normal-sized docs. Temp output removed after inspection.
 
 ### T0.5 · Pin embedding model name (spec §4 T0.5, F12)
 - [ ] RED: assert `TextEmbedding` called with `model_name="BAAI/bge-small-en-v1.5"` (reset the singleton first). Fix: pass it.
