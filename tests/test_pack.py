@@ -240,6 +240,27 @@ def test_output_dir_nested_in_input_is_not_self_ingested(tmp_path):
     )
 
 
+def test_remove_empty_lines_flag_is_part_of_cache_key(tmp_path):
+    """F11: the L1 cache key omitted remove_empty_lines, so toggling the flag on an
+    already-cached file silently served the untransformed cached blocks."""
+    from agentpack.pack import _parse_one
+
+    doc_path = tmp_path / "doc.md"
+    doc_path.write_text("# Title\n\nLine one.\n\nLine two.\n")
+    cache_dir = tmp_path / ".cache"
+
+    first = _parse_one(doc_path, "src_000", fast_pdf=False, remove_empty_lines=False, cache_dir=cache_dir)
+    assert len(first.blocks) == 3, (
+        "fixture must produce 3 separate blocks pre-fix (heading + 2 paragraphs)"
+    )
+
+    second = _parse_one(doc_path, "src_000", fast_pdf=False, remove_empty_lines=True, cache_dir=cache_dir)
+    assert len(second.blocks) == 2, (
+        f"remove_empty_lines=True served stale cached blocks ({len(second.blocks)}, "
+        f"expected 2 after compression)"
+    )
+
+
 def test_incremental_pack_skips_unchanged(tmp_path):
     """Re-packing an unchanged file must hit L1 cache (parser.parse not called twice)."""
     in_dir = tmp_path / "corpus"

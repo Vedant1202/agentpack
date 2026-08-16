@@ -83,11 +83,13 @@ def _parse_one(
                     warnings=[zip_warning],
                 )
 
-        if hasattr(parser, "remove_empty_lines"):
-            parser.remove_empty_lines = remove_empty_lines
+        # Unconditional: a freshly-instantiated parser never already has this attribute, so
+        # a hasattr guard here always evaluates False and the flag never applies. Parsers
+        # that don't use it (CSV, PDF, Docling) simply never read it back.
+        parser.remove_empty_lines = remove_empty_lines
         with open(file_path, "rb") as _f:
             file_hash = hashlib.sha256(_f.read()).hexdigest()
-        cache_key = make_key(file_hash, _parser_cache_version(), str(fast_pdf))
+        cache_key = make_key(file_hash, _parser_cache_version(), str(fast_pdf), str(remove_empty_lines))
         doc = cache_get(cache_dir, cache_key)
         if doc is None:
             doc = parser.parse(file_path, source_id)

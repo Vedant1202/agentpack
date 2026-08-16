@@ -652,9 +652,41 @@ TA.1 before/after citation, TA.2's beyond-scope discovery, TA.5's OQ1 note). Fin
 - GREEN + TB.0: snapshot re-run → still passing, unchanged.
 - GREEN (full suite): **321 passed, 0 failed** in 25.23s (320 + this 1 new test).
 
-### TB.5 · `remove_empty_lines` in the L1 key (spec §4 TB.5, F11)
-- [ ] RED: flag toggle no-ops on cached corpus. Fix: add flag to key.
+### TB.5 · `remove_empty_lines` in the L1 key (spec §4 TB.5, F11) — ✅ DONE
+- [x] RED: flag toggle no-ops on cached corpus. Fix: add flag to key.
 **Verify:** targeted + full suite.
+
+**Evidence:**
+- Confirmed F11's location: `pack.py`, `cache_key = make_key(file_hash, _parser_cache_version(),
+  str(fast_pdf))` — `remove_empty_lines` absent from the key, consistent with how `fast_pdf` is
+  included.
+- RED: `test_remove_empty_lines_flag_is_part_of_cache_key` (parse a fixture once with the flag
+  off, once with it on, same `cache_dir`) → second call still returned **3 blocks**, not the
+  expected 2 (compressed).
+- Applied the spec's fix: added `str(remove_empty_lines)` to the `make_key(...)` call.
+- **Additional discovery beyond F11's literal scope (found because the RED test stayed RED even
+  after the cache-key fix alone):** `remove_empty_lines` has apparently NEVER worked through the
+  real `write_pack` pipeline, cache or no cache. `_parse_one` does
+  `if hasattr(parser, "remove_empty_lines"): parser.remove_empty_lines = remove_empty_lines` —
+  but `get_parser(...)` instantiates a BRAND NEW parser object every call, and neither `Parser`
+  nor any subclass declares `remove_empty_lines` as a class attribute (only
+  `getattr(self, "remove_empty_lines", False)` reads it defensively) — live-verified
+  `hasattr(MarkdownParser(), "remove_empty_lines")` is `False` on a fresh instance, so the
+  conditional NEVER assigns, regardless of the flag's value. The only reason
+  `test_markdown_parser_compression`/`test_text_parser_remove_empty_lines` ever passed is that
+  they set the attribute directly on the parser object, bypassing `_parse_one` entirely — no
+  existing test exercised the flag through the real pipeline. Confirmed no `__slots__` anywhere
+  in the parser hierarchy (safe to set unconditionally on any parser instance, including ones
+  that never read it back). Fixed: `_parse_one` now sets `parser.remove_empty_lines =
+  remove_empty_lines` unconditionally.
+- GREEN (targeted): `tests/test_pack.py -v` → **12 passed**, incl. the new test and all 11
+  pre-existing ones.
+- GREEN (full suite): **322 passed, 0 failed** in 23.60s (321 + this 1 new test).
+- Real end-to-end CLI check (previously-broken flag, verified working for the first time):
+  `agentpack pack <corpus> --out <out> --remove-empty-lines` on a 3-paragraph markdown doc →
+  chunk content correctly compressed to zero blank lines between paragraphs. Temp dir removed
+  after inspection.
+- Per spec: old-key cache entries simply miss once on next access — no migration needed.
 
 ### TB.6 · Conn hygiene + no mkdir-on-read + clean retrieve errors (spec §4 TB.6, F25/F27)
 - [ ] RED: `retrieve <typo-dir>` tracebacks AND creates `.cache/` at the typo path. Fix: try/finally in `search_fts`/`search_pack`; close `build_fts_index`'s returned conn in `ensure_lexical_index`; `cache_get` never mkdirs; manifest pre-check + red exit-1 in retrieve.
