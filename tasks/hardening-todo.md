@@ -488,9 +488,30 @@ the test's `alpha=0.5`, delete the parameter). Proceeding to Phase A.
   pre-existing ones (`test_markdown_parser`, `test_text_parser`, etc. unaffected).
 - GREEN (full suite): **316 passed, 0 failed** in 21.47s (314 + these 2 new tests).
 
-### TA.8 · Close the fitz document (spec §4 TA.8, F29)
-- [ ] Live-verify fitz context-manager support, then `with fitz.open(...)`.
+### TA.8 · Close the fitz document (spec §4 TA.8, F29) — ✅ DONE
+- [x] Live-verify fitz context-manager support, then `with fitz.open(...)`.
 **Verify:** full suite (e2e PDF test green).
+
+**Evidence:**
+- Live-verified in `./venv/bin/python` (fitz/pymupdf 1.27.2.3): `fitz.Document` has both
+  `__enter__`/`__exit__`, and exiting a `with fitz.open(...)` block genuinely closes the document
+  (`doc.is_closed == True` after exit) — unlike sqlite3's context manager (T0.3), which only
+  manages the transaction, not the connection. No gotcha here.
+- Fix: `doc = fitz.open(file_path)` → `with fitz.open(file_path) as doc:`, keeping the whole body
+  (page-count check + per-page loop) inside the `with`, still nested in the existing `try/except`
+  so a failure to even open the file still degrades to a `parse_error` warning as before.
+- Found and fixed a REQUIRED test update while running the suite (not a new test — spec says "no
+  direct test" for this task): `test_pdf_parser_fast`'s `MagicMock` didn't configure `__enter__`,
+  so `with fitz.open(...) as doc:` bound `doc` to an unconfigured auto-generated MagicMock instead
+  of the test's carefully-set-up `mock_doc` — `doc.page_count` resolved to a fresh MagicMock,
+  `range(MagicMock())` raised, caught by the existing broad `except Exception`, and the test
+  silently got 0 blocks instead of 2. Added `mock_doc.__enter__.return_value = mock_doc` and
+  `mock_doc.__exit__.return_value = False` to match real `fitz.Document`'s behavior.
+- GREEN (targeted): `tests/test_parsers.py -v` → **9 passed**, incl. the corrected
+  `test_pdf_parser_fast` and the real-Docling `test_pdf_parser_semantic` (no mocks, unaffected).
+- GREEN (full suite): **316 passed, 0 failed** in 21.68s (unchanged count — no new test, per spec).
+- Live end-to-end sanity check (unmocked): real fast-mode parse of `demo_corpus`'s 160-page 10-K
+  PDF → 160 blocks (one per page with text), 0 warnings, matching the live page-count check above.
 
 **▣ CHECKPOINT A — stop; post evidence incl. the TA.1 before/after citation; wait for human go.**
 

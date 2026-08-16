@@ -114,7 +114,11 @@ def test_pdf_parser_fast(mock_fitz, mock_pdf_file):
         if page_num == 1: return mock_page_2
         raise IndexError
     mock_doc.__getitem__.side_effect = get_page
-    
+
+    # fitz.open(...) is used as a context manager (with fitz.open(...) as doc: ...) --
+    # __enter__ must yield mock_doc itself, matching real fitz.Document's behavior.
+    mock_doc.__enter__.return_value = mock_doc
+    mock_doc.__exit__.return_value = False
     mock_fitz.open.return_value = mock_doc
     
     parser = PDFParser(fast_pdf=True)
