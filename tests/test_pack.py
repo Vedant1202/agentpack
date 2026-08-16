@@ -220,6 +220,26 @@ def test_unreadable_file_does_not_abort_the_pack(tmp_path):
     assert sources_by_path["good.md"]["status"] == "success"
 
 
+def test_output_dir_nested_in_input_is_not_self_ingested(tmp_path):
+    """F15: an output dir nested inside the input dir (e.g. corpus/pack) must never be scanned
+    as input -- otherwise a re-run ingests its own previous chunks/report and grows every time."""
+    corpus = tmp_path / "corpus"
+    corpus.mkdir()
+    (corpus / "doc.md").write_text("# Doc\n\n" + ("Real content here. " * 20))
+    out_dir = corpus / "pack"
+
+    write_pack(str(corpus), str(out_dir), quiet=True)  # first pack
+    write_pack(str(corpus), str(out_dir), quiet=True)  # RED today: ingests its own output
+
+    with open(out_dir / "manifest.yml") as f:
+        manifest = yaml.safe_load(f)
+
+    source_paths = {s["path"] for s in manifest["sources"]}
+    assert source_paths == {"doc.md"}, (
+        f"second pack's sources must be exactly the original corpus files: {source_paths}"
+    )
+
+
 def test_incremental_pack_skips_unchanged(tmp_path):
     """Re-packing an unchanged file must hit L1 cache (parser.parse not called twice)."""
     in_dir = tmp_path / "corpus"

@@ -446,9 +446,24 @@ the test's `alpha=0.5`, delete the parameter). Proceeding to Phase A.
   may assign different `src_NNN` ids ONE TIME (if the filesystem's natural `os.walk` order
   happened to differ from sorted order for that corpus) — a one-time id shift, accepted per OQ1.
 
-### TA.6 · Stop output-dir self-ingestion (spec §4 TA.6, F15)
-- [ ] RED: `write_pack(corpus, corpus/pack)` twice ingests its own output today. Fix: resolved-path exclusion of out_path from the scan.
+### TA.6 · Stop output-dir self-ingestion (spec §4 TA.6, F15) — ✅ DONE
+- [x] RED: `write_pack(corpus, corpus/pack)` twice ingests its own output today. Fix: resolved-path exclusion of out_path from the scan.
 **Verify:** targeted + full suite.
+
+**Evidence:**
+- Confirmed F15's location: `pack.py` — `out_path.mkdir(...)` creates the (nested) output dir
+  before `scan_directory(input_dir, ...)` scans it; on a second run the first run's own chunks/
+  manifest/report are indistinguishable from real input.
+- RED: `test_output_dir_nested_in_input_is_not_self_ingested` (`write_pack(corpus, corpus/pack)`
+  twice) → second manifest's sources included stray entries beyond `{"doc.md"}`. Confirmed
+  genuinely RED pre-fix via `git stash` (same discipline as prior tasks).
+- Fix: filtered the scanner's result in `write_pack` (not a new `scan_directory` parameter — this
+  exclusion is specific to "don't ingest my own output," a concept `write_pack` owns, not a
+  general scanning concern) using `Path.resolve()` + `is_relative_to`, per spec's explicit "real
+  path, not string prefix" instruction — catches a symlinked or relative `out_path` too.
+- GREEN (targeted): `tests/test_pack.py -v` → **11 passed**, incl. the new test and all 10
+  pre-existing ones.
+- GREEN (full suite): **314 passed, 0 failed** in 21.53s (313 + this 1 new test).
 
 ### TA.7 · Encoding: BOM + decode warnings (spec §4 TA.7, F16)
 - [ ] RED pair: BOM markdown loses its heading; UTF-16 txt packs with zero warnings. Fix: `utf-8-sig` + `decode_error` ExtractionWarning when replacement chars present (status stays success).

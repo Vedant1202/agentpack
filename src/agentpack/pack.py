@@ -180,7 +180,15 @@ def write_pack(
         include_patterns=include_patterns,
         exclude_patterns=exclude_patterns
     )
-    
+
+    # Stop self-ingestion: if out_path is nested inside input_dir (e.g. corpus/pack), a
+    # re-run would otherwise scan its own previous output (chunks, manifest, reports) as
+    # if it were input. Compare real paths, not string prefixes, so a symlinked or
+    # relative out_path is still caught.
+    out_path_resolved = out_path.resolve()
+    files = [f for f in files if not f.resolve().is_relative_to(out_path_resolved)]
+
+
     if verbose and not quiet:
         print(f"Found {len(files)} files to pack.")
     
