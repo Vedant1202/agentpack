@@ -174,10 +174,30 @@ is no "pre-existing failure" allowance anymore. Record the new count after every
   entirely) unaffected.
 - GREEN (full suite): **301 passed, 0 failed** in 23.73s (300 + this 1 new test).
 
-### T0.6 · Warn on descriptor-less map in `agentpack graph` (spec §4 T0.6, F28)
-- [ ] RED: graph on an `agentpack map`-rebuilt (keyphrase-less) map prints no warning today. Fix: recursive keyphrase check in `graph_cmd`, yellow warning, behavior otherwise unchanged. Second test: normal map → no warning.
+### T0.6 · Warn on descriptor-less map in `agentpack graph` (spec §4 T0.6, F28) — ✅ DONE
+- [x] RED: graph on an `agentpack map`-rebuilt (keyphrase-less) map prints no warning today. Fix: recursive keyphrase check in `graph_cmd`, yellow warning, behavior otherwise unchanged. Second test: normal map → no warning.
 **Acceptance:** warning text on descriptor-less maps only; exit 0 both ways.
 **Verify:** targeted (`tests/test_graph_cli.py`) + full suite.
+
+**Evidence:**
+- Confirmed F28 location: `mapper.py:261` (the `agentpack map` rebuild's hardcoded `enrich=False`)
+  and `cli.py::graph_cmd`, which had no map.yml/keyphrase awareness at all.
+- RED: `test_graph_warns_on_descriptor_less_map` (pack a real corpus, strip all `keyphrases`
+  recursively from `map.yml` to simulate an `agentpack map` rebuild's shape, run `graph`) →
+  warning text absent from output. `test_graph_no_warning_on_full_fidelity_map` (normal pack-time
+  map) passed trivially pre-fix since nothing warns yet — expected for a stay-green guard test,
+  not itself a RED case.
+- Fix: added `_map_has_any_keyphrases` (recursive walk over nested `nodes`, mirrors the
+  `map.yml` section-tree shape) and wired it into `graph_cmd` right after the `manifest.yml`
+  existence check — reads `map.yml` (if present), warns in yellow (unconditional, not gated by
+  `--quiet`, matching this function's existing warning/error conventions) when no section in any
+  document carries a non-empty `keyphrases` list. A missing or unparseable `map.yml` is swallowed
+  silently here — `write_graph` immediately below already owns reporting that case (existing
+  "graph.yml skipped … missing map.yml" message), so no duplicate/conflicting output.
+- GREEN (targeted): `tests/test_graph_cli.py -v` → **13 passed**, incl.
+  `test_graph_rebuild_parity_with_pack_time` (byte-identical `graph.yml` output — confirms the new
+  check is warn-only, no behavior change) and both new tests.
+- GREEN (full suite): **303 passed, 0 failed** in 23.74s (301 + these 2 new tests).
 
 ### T0.7 · Remove dead `alpha` param (spec §4 T0.7, F30)
 - [ ] Grep first for any caller passing `alpha` (STOP if found). Fix: delete from `search_hybrid` signature.

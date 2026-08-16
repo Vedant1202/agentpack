@@ -177,6 +177,45 @@ def test_graph_without_similarity_flag_leaves_existing_similar_to_edges_alone(tm
     assert [e for e in rebuilt["edges"] if e["relation"] == "similar_to"] == []
 
 
+def _strip_keyphrases(nodes):
+    for n in nodes:
+        n["keyphrases"] = []
+        _strip_keyphrases(n.get("nodes") or [])
+
+
+NO_KEYPHRASES_WARNING = "map.yml has no keyphrases"
+
+
+def test_graph_warns_on_descriptor_less_map(tmp_path):
+    """F28: 'agentpack map' rebuilds hardcode enrich=False, so a subsequent 'agentpack graph'
+    silently produces a zero-concept graph today. Simulate that map.yml shape directly."""
+    in_dir = _two_doc_corpus(tmp_path)
+    out = tmp_path / "out"
+    runner.invoke(app, ["pack", str(in_dir), "--out", str(out), "--quiet"])
+
+    map_path = out / "map.yml"
+    m = yaml.safe_load(map_path.read_text())
+    for doc in m["documents"]:
+        _strip_keyphrases(doc["sections"])
+    with open(map_path, "w") as f:
+        yaml.dump(m, f)
+
+    res = runner.invoke(app, ["graph", str(out)])
+    assert res.exit_code == 0, res.output
+    assert NO_KEYPHRASES_WARNING in res.output
+
+
+def test_graph_no_warning_on_full_fidelity_map(tmp_path):
+    """A normal pack-time map (enrich=True, has real keyphrases) must not trigger the warning."""
+    in_dir = _two_doc_corpus(tmp_path)
+    out = tmp_path / "out"
+    runner.invoke(app, ["pack", str(in_dir), "--out", str(out), "--quiet"])
+
+    res = runner.invoke(app, ["graph", str(out)])
+    assert res.exit_code == 0, res.output
+    assert NO_KEYPHRASES_WARNING not in res.output
+
+
 def test_graph_rebuild_falls_back_to_defaults_when_existing_graph_corrupt(tmp_path):
     in_dir = _two_doc_corpus(tmp_path)
     out = tmp_path / "out"
