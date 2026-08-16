@@ -117,7 +117,12 @@ def retrieve(
     page: int = typer.Option(None, help="Filter results to this page number"),
 ):
     """Retrieves top-k evidence chunks from a pack."""
+    from pathlib import Path as _Path
     from agentpack.retrieve import search_pack
+
+    if not (_Path(pack_dir) / "manifest.yml").exists():
+        typer.secho(f"No manifest.yml found at {pack_dir}", fg=typer.colors.RED)
+        raise typer.Exit(code=1)
 
     typer.echo(f"Searching for '{query}' in {pack_dir} using {mode} mode...")
     results = search_pack(

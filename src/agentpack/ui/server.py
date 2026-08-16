@@ -41,7 +41,7 @@ def ensure_lexical_index(base_path: Path) -> Path:
     indexes_dir.mkdir(exist_ok=True)
     db_path = indexes_dir / "lexical_index.db"
     if not db_path.exists():
-        build_fts_index(base_path, db_path)
+        build_fts_index(base_path, db_path).close()
     return db_path
 
 

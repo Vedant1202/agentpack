@@ -25,14 +25,20 @@ _CREATE_TABLE_SQL = (
 _warned_corrupt = False
 
 
-def _db_path(cache_dir: Path) -> Path:
-    cache_dir.mkdir(parents=True, exist_ok=True)
-    return cache_dir / "cache.db"
-
-
-def _connect(cache_dir: Path) -> sqlite3.Connection:
+def _connect(cache_dir: Path, create: bool = True) -> Optional[sqlite3.Connection]:
+    """Connect to cache.db. When create=False (read paths), never create the cache
+    directory -- if it doesn't exist yet, return None (a clean miss) instead of
+    side-effect-creating .cache/ for e.g. a typo'd pack path. If the directory DOES
+    already exist (read or write), a corrupt db.db still self-heals as usual --
+    deleting/recreating a file inside an already-existing directory isn't the thing
+    read paths must avoid.
+    """
     global _warned_corrupt
-    db_path = _db_path(cache_dir)
+    if not create and not cache_dir.exists():
+        return None
+    if create:
+        cache_dir.mkdir(parents=True, exist_ok=True)
+    db_path = cache_dir / "cache.db"
     try:
         conn = sqlite3.connect(str(db_path))
         conn.execute(_CREATE_TABLE_SQL)
@@ -59,10 +65,14 @@ def make_key(*parts: str) -> str:
 
 
 def cache_get(cache_dir: Path, key: str) -> Optional[Any]:
-    """Return the cached value, or None on miss."""
+    """Return the cached value, or None on miss. Never creates the cache directory -- a
+    query against a path that doesn't exist yet (e.g. a typo'd pack dir) is just a miss,
+    not a side effect."""
     conn = None
     try:
-        conn = _connect(cache_dir)
+        conn = _connect(cache_dir, create=False)
+        if conn is None:
+            return None
         row = conn.execute(
             "SELECT value FROM cache_entries WHERE key = ?", (key,)
         ).fetchone()
@@ -77,11 +87,11 @@ def cache_get(cache_dir: Path, key: str) -> Optional[Any]:
 
 
 def cache_set(cache_dir: Path, key: str, value: Any) -> None:
-    """Store value under key (upsert)."""
+    """Store value under key (upsert). Creates the cache directory if needed."""
     conn = None
     try:
         blob = pickle.dumps(value)
-        conn = _connect(cache_dir)
+        conn = _connect(cache_dir, create=True)
         conn.execute(
             "INSERT OR REPLACE INTO cache_entries (key, value) VALUES (?, ?)",
             (key, blob),

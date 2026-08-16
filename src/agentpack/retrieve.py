@@ -277,55 +277,56 @@ def search_fts(pack_dir: str, query: str, top_k: int = 5) -> List[Dict]:
     else:
         conn = build_fts_index(base_path, db_path)
 
-    cur = conn.cursor()
+    try:
+        cur = conn.cursor()
 
-    and_query = _build_fts_query(query)
-    if not and_query:
-        return []
-
-    def _run(q):
-        try:
-            cur.execute(
-                "SELECT chunk_id, source_id, path, token_count, citation, rank "
-                "FROM chunks_fts WHERE chunks_fts MATCH ? ORDER BY rank LIMIT ?",
-                (q, top_k),
-            )
-            return cur.fetchall()
-        except sqlite3.OperationalError:
+        and_query = _build_fts_query(query)
+        if not and_query:
             return []
 
-    rows = _run(and_query)
-    if not rows:
-        # AND matched nothing — fall back to OR to preserve recall
-        clean_str = re.sub(r'[^a-zA-Z0-9\-\s]', ' ', query)
-        or_query = " OR ".join(f'"{w}"' for w in clean_str.split() if w)
-        rows = _run(or_query) if or_query else []
+        def _run(q):
+            try:
+                cur.execute(
+                    "SELECT chunk_id, source_id, path, token_count, citation, rank "
+                    "FROM chunks_fts WHERE chunks_fts MATCH ? ORDER BY rank LIMIT ?",
+                    (q, top_k),
+                )
+                return cur.fetchall()
+            except sqlite3.OperationalError:
+                return []
 
-    results = []
-    for row in rows:
-        chunk_id, source_id, path, token_count, citation_str, rank = row
-        results.append({
-            "chunk_id": chunk_id,
-            "source_id": source_id,
-            "path": path,
-            "token_count": token_count,
-            "citation": json.loads(citation_str) if isinstance(citation_str, str) else citation_str,
-            "score": abs(rank)
-        })
-        
-    conn.close()
-    
-    if results:
-        max_score = max(r["score"] for r in results)
-        min_score = min(r["score"] for r in results)
-        for r in results:
-            if max_score > min_score:
-                r["norm_score"] = (r["score"] - min_score) / (max_score - min_score)
-            else:
-                r["norm_score"] = 1.0
-                
-    results.sort(key=lambda x: x.get("norm_score", 0), reverse=True)
-    return results
+        rows = _run(and_query)
+        if not rows:
+            # AND matched nothing — fall back to OR to preserve recall
+            clean_str = re.sub(r'[^a-zA-Z0-9\-\s]', ' ', query)
+            or_query = " OR ".join(f'"{w}"' for w in clean_str.split() if w)
+            rows = _run(or_query) if or_query else []
+
+        results = []
+        for row in rows:
+            chunk_id, source_id, path, token_count, citation_str, rank = row
+            results.append({
+                "chunk_id": chunk_id,
+                "source_id": source_id,
+                "path": path,
+                "token_count": token_count,
+                "citation": json.loads(citation_str) if isinstance(citation_str, str) else citation_str,
+                "score": abs(rank)
+            })
+
+        if results:
+            max_score = max(r["score"] for r in results)
+            min_score = min(r["score"] for r in results)
+            for r in results:
+                if max_score > min_score:
+                    r["norm_score"] = (r["score"] - min_score) / (max_score - min_score)
+                else:
+                    r["norm_score"] = 1.0
+
+        results.sort(key=lambda x: x.get("norm_score", 0), reverse=True)
+        return results
+    finally:
+        conn.close()
 
 def search_vector(pack_dir: str, query: str, top_k: int = 5) -> List[Dict]:
     base_path = Path(pack_dir)
@@ -494,6 +495,8 @@ def search_pack(
     page_filter: int = None,
 ) -> List[Dict]:
     base = Path(pack_dir)
+    if not (base / "manifest.yml").exists():
+        return []
     cache_dir = base / ".cache"
     pack_hash = _manifest_hash(base)
     q_cache_key = make_key(
@@ -528,13 +531,15 @@ def search_pack(
     db_path = base / "indexes" / "lexical_index.db"
     if db_path.exists():
         conn = sqlite3.connect(db_path)
-        cur = conn.cursor()
-        for r in results:
-            cur.execute("SELECT content FROM chunks_fts WHERE chunk_id = ?", (r["chunk_id"],))
-            row = cur.fetchone()
-            if row:
-                r["content"] = row[0]
-        conn.close()
+        try:
+            cur = conn.cursor()
+            for r in results:
+                cur.execute("SELECT content FROM chunks_fts WHERE chunk_id = ?", (r["chunk_id"],))
+                row = cur.fetchone()
+                if row:
+                    r["content"] = row[0]
+        finally:
+            conn.close()
 
     cache_set(cache_dir, q_cache_key, results)
     return results

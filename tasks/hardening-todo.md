@@ -688,10 +688,57 @@ TA.1 before/after citation, TA.2's beyond-scope discovery, TA.5's OQ1 note). Fin
   after inspection.
 - Per spec: old-key cache entries simply miss once on next access — no migration needed.
 
-### TB.6 · Conn hygiene + no mkdir-on-read + clean retrieve errors (spec §4 TB.6, F25/F27)
-- [ ] RED: `retrieve <typo-dir>` tracebacks AND creates `.cache/` at the typo path. Fix: try/finally in `search_fts`/`search_pack`; close `build_fts_index`'s returned conn in `ensure_lexical_index`; `cache_get` never mkdirs; manifest pre-check + red exit-1 in retrieve.
+### TB.6 · Conn hygiene + no mkdir-on-read + clean retrieve errors (spec §4 TB.6, F25/F27) — ✅ DONE
+- [x] RED: `retrieve <typo-dir>` tracebacks AND creates `.cache/` at the typo path. Fix: try/finally in `search_fts`/`search_pack`; close `build_fts_index`'s returned conn in `ensure_lexical_index`; `cache_get` never mkdirs; manifest pre-check + red exit-1 in retrieve.
 **Acceptance:** typo path → exit 1, clean message, NO directories created.
 **Verify:** targeted + full suite.
+
+**Evidence (4 sub-parts, per spec):**
+- **(a) `search_fts`/`search_pack` connection leaks:** confirmed `search_fts` leaked on the
+  all-stopword early return (`if not and_query: return []`, before the old explicit
+  `conn.close()`) and on any exception — no try/finally. `search_pack`'s content-attach block had
+  the same gap. Mirrored `ui/server.py:184-211`'s existing pattern (`conn = ...` outside,
+  `try/finally: conn.close()` inside) in both.
+- **(b) `ensure_lexical_index` discarded connection:** `build_fts_index(base_path, db_path)`'s
+  return value (a live connection, confirmed by reading `build_fts_index`'s own `return conn`)
+  was never captured or closed. Fixed: `.close()` chained onto the call.
+- **(c) `cache_get` mkdir on read:** confirmed `_db_path` unconditionally called
+  `cache_dir.mkdir(parents=True, exist_ok=True)`, and both `cache_get`/`cache_set` routed through
+  it via `_connect`. Fixed with the spec's suggested `create` flag: `_connect(cache_dir,
+  create=False)` (used by `cache_get`) returns `None` immediately if `cache_dir` doesn't exist yet
+  — no mkdir, no db file touched. Deliberately scoped the check to "does the directory exist," not
+  "create=False therefore skip corruption-healing" — a corrupt db INSIDE an already-existing
+  directory still self-heals on read (TB.3's guarantee), since deleting/recreating a file in an
+  existing directory isn't the side effect F25 is about.
+- **(d) `search_pack`/CLI `retrieve` manifest check:** added an upfront
+  `if not (base / "manifest.yml").exists(): return []` to `search_pack` itself (consistent
+  regardless of caller), plus the actual user-facing fix in the CLI `retrieve` command: an upfront
+  manifest check producing the same red-message/exit-1 pattern `map_cmd` already uses, before
+  `search_pack` (and all its side-effecting machinery) is ever called.
+- RED: `test_cli_retrieve_missing_pack_dir_no_side_effects` (`runner.invoke(app, ["retrieve",
+  str(tmp/"nope"), "q"])`) → live-verified the exact pre-fix failure mode directly: exit 1 via an
+  uncaught `FileNotFoundError('Manifest not found at .../nope/manifest.yml')` (a real traceback,
+  not a clean exit), AND `.cache/`, `indexes/`, `.cache/cache.db` all created at the typo path
+  despite the crash. Confirmed genuinely RED pre-fix via `git stash` across all 4 changed files
+  together (same discipline as prior tasks).
+- **Casualties, fixed:** `test_cli_retrieve`/`test_cli_retrieve_empty`
+  (`tests/test_cli.py`) and `test_cli_retrieve_csv_citation_shows_row_range`/
+  `test_cli_retrieve_pdf_citation_unchanged` (`tests/test_citation_format.py`) all used a bare
+  `"fake_dir"` string with `search_pack` mocked — the new upfront manifest check now correctly
+  intercepts these before the mock ever runs. Updated all 4 to write a real minimal `manifest.yml`
+  under `tmp_path` instead of a fake string, matching how manifest-requiring CLI tests are
+  structured elsewhere (`map_cmd`/`graph_cmd` tests).
+- **Git hygiene note:** `tests/test_cli.py` carried a pre-existing, unrelated uncommitted diff all
+  session (patch-target renames for `search_pack`/`run_eval`, predating this work — see T0.2's
+  evidence). My edits to `test_cli_retrieve`/`test_cli_retrieve_empty` needed the
+  `agentpack.retrieve.search_pack` rename to function correctly, so that specific pre-existing
+  hunk is now folded into this commit (it was already required for these two tests to pass); the
+  unrelated `run_eval` rename (untouched by this task) was kept unstaged exactly as before, via a
+  temporary revert-stage-restore sequence.
+- GREEN (targeted): `tests/test_cli.py tests/test_cache.py tests/test_retrieve.py tests/test_ui.py`
+  → **62 passed**.
+- GREEN + TB.0: snapshot re-run → still passing, unchanged.
+- GREEN (full suite): **323 passed, 0 failed** in 23.72s (322 + this 1 new test).
 
 ### TB.7 · UI: feedback atomicity, umap import order, chunks staleness (spec §4 TB.7, F23/F24)
 - [ ] RED trio per spec. Fix: preserve-corrupt-then-fresh + tmp/os.replace + lock for feedback; umap import after manifest/artifact check (then DELETE the now-unneeded pytest.skips in tests/test_ui.py so the 404 path is really tested); hash-validate in `ensure_lexical_index`.
