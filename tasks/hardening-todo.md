@@ -149,10 +149,30 @@ is no "pre-existing failure" allowance anymore. Record the new count after every
   keyphrases/gists (9 and 17 descriptor-bearing nodes on the two largest docs) — the cap does not
   blank enrichment on normal-sized docs. Temp output removed after inspection.
 
-### T0.5 · Pin embedding model name (spec §4 T0.5, F12)
-- [ ] RED: assert `TextEmbedding` called with `model_name="BAAI/bge-small-en-v1.5"` (reset the singleton first). Fix: pass it.
+### T0.5 · Pin embedding model name (spec §4 T0.5, F12) — ✅ DONE
+- [x] RED: assert `TextEmbedding` called with `model_name="BAAI/bge-small-en-v1.5"` (reset the singleton first). Fix: pass it.
 **Acceptance:** construction pinned; mocked-embedding tests unaffected.
 **Verify:** targeted + full suite.
+
+**Evidence:**
+- Confirmed location: `retrieve.py:59`, `_embedding_model = TextEmbedding()` (spec cited `:58`; 1-line
+  drift from T0.3's `import sys` addition, trivial).
+- **Patch-target deviation (verified before writing the test):** spec suggests patching
+  `fastembed.TextEmbedding`; live-verified in `./venv/bin/python` that this does NOT intercept the
+  call — `retrieve.py` does `from fastembed import TextEmbedding` (a direct name binding at import
+  time), so patching the origin module `fastembed.TextEmbedding` afterward leaves
+  `agentpack.retrieve.TextEmbedding` (the name actually called) untouched. `mock_te.called` was
+  `False` under `patch("fastembed.TextEmbedding")` vs. `True` under
+  `patch("agentpack.retrieve.TextEmbedding")` — same class of footgun as F22/T0.1. Used the
+  verified-working target.
+- RED: `test_embedding_model_pinned_by_name` (resets the `_embedding_model` singleton, calls
+  `_get_embedding_model()`) → `TextEmbedding()` called with `{}`, expected
+  `{'model_name': 'BAAI/bge-small-en-v1.5'}`.
+- Fix: `TextEmbedding(model_name=_EMBED_MODEL_ID)` at the singleton construction site.
+- GREEN (targeted): `tests/test_retrieve.py -v` → **19 passed**, incl. the new test; the three
+  existing `@patch("agentpack.retrieve._get_embedding_model")` tests (which bypass this code path
+  entirely) unaffected.
+- GREEN (full suite): **301 passed, 0 failed** in 23.73s (300 + this 1 new test).
 
 ### T0.6 · Warn on descriptor-less map in `agentpack graph` (spec §4 T0.6, F28)
 - [ ] RED: graph on an `agentpack map`-rebuilt (keyphrase-less) map prints no warning today. Fix: recursive keyphrase check in `graph_cmd`, yellow warning, behavior otherwise unchanged. Second test: normal map → no warning.

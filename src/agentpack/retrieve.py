@@ -56,7 +56,7 @@ _embedding_model = None
 def _get_embedding_model():
     global _embedding_model
     if _embedding_model is None and TextEmbedding is not None:
-        _embedding_model = TextEmbedding()
+        _embedding_model = TextEmbedding(model_name=_EMBED_MODEL_ID)
     return _embedding_model
 
 

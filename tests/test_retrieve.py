@@ -124,6 +124,18 @@ def test_search_fts_corrupt_db_self_heals(tmp_path, capsys):
     captured = capsys.readouterr()
     assert "corrupt" in captured.err.lower()
 
+@patch("agentpack.retrieve.TextEmbedding")
+def test_embedding_model_pinned_by_name(mock_text_embedding):
+    import agentpack.retrieve as retrieve_mod
+
+    retrieve_mod._embedding_model = None  # reset the module singleton
+    try:
+        retrieve_mod._get_embedding_model()
+    finally:
+        retrieve_mod._embedding_model = None  # don't leak the mock into later tests
+
+    mock_text_embedding.assert_called_once_with(model_name="BAAI/bge-small-en-v1.5")
+
 @patch("agentpack.retrieve._get_embedding_model")
 def test_build_vector_index(mock_get_model, tmp_path):
     mock_embed = MagicMock()
