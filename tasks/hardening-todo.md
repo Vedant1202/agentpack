@@ -596,9 +596,30 @@ TA.1 before/after citation, TA.2's beyond-scope discovery, TA.5's OQ1 note). Fin
   rebuild (FTS + vector) and L5 cache invalidation on next access, since their stored hash was
   computed under the old (id-only) fingerprint. Accepted per OQ2.
 
-### TB.3 · Corrupt `cache.db` self-heal + conn hygiene (spec §4 TB.3, F9)
-- [ ] RED: garbage cache.db → silent dead cache forever. Fix: try/finally everywhere in cache.py; on DatabaseError delete + warn once (module flag) + recreate.
+### TB.3 · Corrupt `cache.db` self-heal + conn hygiene (spec §4 TB.3, F9) — ✅ DONE
+- [x] RED: garbage cache.db → silent dead cache forever. Fix: try/finally everywhere in cache.py; on DatabaseError delete + warn once (module flag) + recreate.
 **Verify:** targeted (capsys, round-trip after heal) + full suite.
+
+**Evidence:**
+- Confirmed F9's two bugs directly in the code: (a) `cache_get`/`cache_set` call
+  `conn.close()` only on the happy path — any exception after `_connect()` (e.g. from
+  `conn.execute`/`pickle.loads`) skips it, leaking the connection; (b) the broad
+  `except Exception` swallows `sqlite3.DatabaseError` from a corrupt db with no heal, so
+  every future call hits the same error forever, silently.
+- RED: `test_corrupt_cache_db_self_heals` (write garbage bytes to `cache.db`, call `cache_get`)
+  → the file was byte-identical to the garbage afterward — confirmed no healing happens today.
+- Fix: centralized corruption-handling in `_connect` (used by both `cache_get`/`cache_set`) —
+  on `sqlite3.DatabaseError`, print one stderr warning (guarded by a module-level
+  `_warned_corrupt` flag, so at most once per process even across many calls), delete the
+  corrupt file, and immediately reconnect to a freshly-created db, returning a WORKING
+  connection so the calling `cache_get`/`cache_set` invocation can still succeed rather than
+  just silently no-op-ing. Both `cache_get`/`cache_set` restructured with `conn = None` +
+  `try/finally: if conn is not None: conn.close()` so the connection is always released
+  regardless of what happens inside the try block — fixes the leak independently of the
+  corruption case.
+- GREEN (targeted): `tests/test_cache.py -v` → **5 passed**, incl. the new test and all 4
+  pre-existing ones.
+- GREEN (full suite): **320 passed, 0 failed** in 25.32s (319 + this 1 new test).
 
 ### TB.4 · HNSW staleness (spec §4 TB.4, F10)
 - [ ] RED: stale bin + fewer rows in meta → wrong/erroring results. Fix: delete bin when hnswlib unavailable at build; guard load/query with count-check (live-verify `get_current_count`) + fallback to brute force, warn, delete bin.

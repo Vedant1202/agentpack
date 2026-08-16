@@ -11,8 +11,18 @@ import hashlib
 import json
 import pickle
 import sqlite3
+import sys
 from pathlib import Path
 from typing import Any, Optional
+
+_CREATE_TABLE_SQL = (
+    "CREATE TABLE IF NOT EXISTS cache_entries "
+    "(key TEXT PRIMARY KEY, value BLOB, created_at TEXT DEFAULT (datetime('now')))"
+)
+
+# Module-level flag: warn about a corrupt cache.db at most once per process, even if
+# multiple cache_get/cache_set calls hit it before the caller stops retrying.
+_warned_corrupt = False
 
 
 def _db_path(cache_dir: Path) -> Path:
@@ -21,13 +31,25 @@ def _db_path(cache_dir: Path) -> Path:
 
 
 def _connect(cache_dir: Path) -> sqlite3.Connection:
-    conn = sqlite3.connect(str(_db_path(cache_dir)))
-    conn.execute(
-        "CREATE TABLE IF NOT EXISTS cache_entries "
-        "(key TEXT PRIMARY KEY, value BLOB, created_at TEXT DEFAULT (datetime('now')))"
-    )
-    conn.commit()
-    return conn
+    global _warned_corrupt
+    db_path = _db_path(cache_dir)
+    try:
+        conn = sqlite3.connect(str(db_path))
+        conn.execute(_CREATE_TABLE_SQL)
+        conn.commit()
+        return conn
+    except sqlite3.DatabaseError:
+        if not _warned_corrupt:
+            print(
+                f"[agentpack] Warning: corrupt cache database at {db_path}, rebuilding.",
+                file=sys.stderr,
+            )
+            _warned_corrupt = True
+        db_path.unlink(missing_ok=True)
+        conn = sqlite3.connect(str(db_path))
+        conn.execute(_CREATE_TABLE_SQL)
+        conn.commit()
+        return conn
 
 
 def make_key(*parts: str) -> str:
@@ -38,21 +60,25 @@ def make_key(*parts: str) -> str:
 
 def cache_get(cache_dir: Path, key: str) -> Optional[Any]:
     """Return the cached value, or None on miss."""
+    conn = None
     try:
         conn = _connect(cache_dir)
         row = conn.execute(
             "SELECT value FROM cache_entries WHERE key = ?", (key,)
         ).fetchone()
-        conn.close()
         if row is None:
             return None
         return pickle.loads(row[0])
     except Exception:
         return None
+    finally:
+        if conn is not None:
+            conn.close()
 
 
 def cache_set(cache_dir: Path, key: str, value: Any) -> None:
     """Store value under key (upsert)."""
+    conn = None
     try:
         blob = pickle.dumps(value)
         conn = _connect(cache_dir)
@@ -61,6 +87,8 @@ def cache_set(cache_dir: Path, key: str, value: Any) -> None:
             (key, blob),
         )
         conn.commit()
-        conn.close()
     except Exception:
         pass  # cache writes must never crash the main pipeline
+    finally:
+        if conn is not None:
+            conn.close()

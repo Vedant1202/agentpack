@@ -33,3 +33,25 @@ def test_cache_db_created(tmp_path):
     key = make_key("y")
     cache_set(tmp_path, key, 42)
     assert (tmp_path / "cache.db").exists()
+
+
+def test_corrupt_cache_db_self_heals(tmp_path, capsys):
+    """F9: a corrupt cache.db must self-heal (delete, warn once, recreate) instead of
+    silently disabling the cache forever with no indication to the user."""
+    db_path = tmp_path / "cache.db"
+    db_path.write_bytes(b"garbage not a sqlite file")
+
+    key = make_key("z")
+    result = cache_get(tmp_path, key)
+
+    assert result is None  # still a miss -- nothing was ever cached under this key
+    assert db_path.read_bytes() != b"garbage not a sqlite file", (
+        "corrupt cache.db was not recreated"
+    )
+
+    captured = capsys.readouterr()
+    assert "corrupt" in captured.err.lower()
+
+    # Subsequent round-trips must work against the healed db.
+    cache_set(tmp_path, key, "healed value")
+    assert cache_get(tmp_path, key) == "healed value"
