@@ -208,6 +208,74 @@ def test_search_vector_returns_empty_after_degenerate_rebuild(tmp_path):
     assert results == [], f"stale vector index served ghost results for a deleted chunk: {results}"
 
 
+def test_search_vector_falls_back_when_hnsw_bin_is_stale(tmp_path, capsys):
+    """F10: hnsw_index.bin sits outside the staleness check and is never deleted/revalidated
+    against the CURRENT vector_meta.json/vector_index.npy -- a stale bin (built with more
+    items than currently exist) can serve labels for chunks that are no longer present."""
+    import yaml
+    from agentpack.retrieve import _manifest_hash
+
+    pack_dir = tmp_path
+    indexes_dir = pack_dir / "indexes"
+    indexes_dir.mkdir(parents=True, exist_ok=True)
+    chunks_dir = pack_dir / "chunks"
+    chunks_dir.mkdir()
+
+    manifest = {
+        "sources": [{"id": "s1", "checksum": "abc"}],
+        "chunks": [
+            {"id": "c1", "source_id": "s1", "path": "chunks/c1.md", "token_count": 1},
+            {"id": "c2", "source_id": "s1", "path": "chunks/c2.md", "token_count": 1},
+            {"id": "c3", "source_id": "s1", "path": "chunks/c3.md", "token_count": 1},
+        ],
+    }
+    for cid, txt in [("c1", "alpha"), ("c2", "beta"), ("c3", "gamma")]:
+        (chunks_dir / f"{cid}.md").write_text(txt)
+    with open(pack_dir / "manifest.yml", "w") as f:
+        yaml.dump(manifest, f)
+
+    vector_path = indexes_dir / "vector_index.npy"
+    meta_path = indexes_dir / "vector_meta.json"
+
+    with patch("agentpack.retrieve._get_embedding_model") as mock_get_model:
+        mock_embed = MagicMock()
+        fixed_vecs = [np.array([1.0, 0.0], dtype=np.float32),
+                      np.array([0.0, 1.0], dtype=np.float32),
+                      np.array([1.0, 1.0], dtype=np.float32)]
+        mock_embed.embed.side_effect = lambda texts, **_: iter(fixed_vecs[:len(texts)])
+        mock_get_model.return_value = mock_embed
+
+        # Real (not mocked) hnswlib build -- hnswlib is installed in this environment.
+        build_vector_index(pack_dir, vector_path, meta_path)
+        assert (indexes_dir / "hnsw_index.bin").exists(), "fixture must build a real HNSW bin"
+
+        # Simulate a re-pack that reduced the chunk count: rewrite npy/meta to 2 rows,
+        # keeping the OLD (3-item) hnsw bin, and write a hash matching the NEW manifest so
+        # search_vector's outer staleness check doesn't trigger a rebuild -- forcing it into
+        # the HNSW load path with a bin that doesn't match the current embeddings.
+        manifest["chunks"] = manifest["chunks"][:2]
+        with open(pack_dir / "manifest.yml", "w") as f:
+            yaml.dump(manifest, f)
+
+        np.save(vector_path, np.array([[1.0, 0.0], [0.0, 1.0]], dtype=np.float32))
+        with open(meta_path, "w") as f:
+            json.dump([
+                {"chunk_id": "c1", "source_id": "s1", "path": "chunks/c1.md", "token_count": 1, "citation": {}},
+                {"chunk_id": "c2", "source_id": "s1", "path": "chunks/c2.md", "token_count": 1, "citation": {}},
+            ], f)
+        (indexes_dir / "vector_index.hash").write_text(_manifest_hash(pack_dir))
+
+        results = search_vector(str(pack_dir), "query", top_k=2)
+
+    ids = {r["chunk_id"] for r in results}
+    assert ids <= {"c1", "c2"}, (
+        f"stale HNSW bin served a label for a chunk no longer present: {ids}"
+    )
+    captured = capsys.readouterr()
+    assert "stale" in captured.err.lower() or "corrupt" in captured.err.lower()
+    assert not (indexes_dir / "hnsw_index.bin").exists(), "stale HNSW bin must be deleted"
+
+
 def test_hybrid_ranking_snapshot_tb0(tmp_path):
     """TB.0: ranking-snapshot guard for Phase B (spec 0004). This test must pass UNCHANGED
     through every remaining Phase B task -- it proves those changes touch storage/invalidation

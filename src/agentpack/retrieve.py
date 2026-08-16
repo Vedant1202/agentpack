@@ -22,6 +22,9 @@ from agentpack.cache import cache_get, cache_set, make_key
 _EMBED_MODEL_ID = "BAAI/bge-small-en-v1.5"  # default fastembed model
 _FTS_QUERY_VERSION = "and-v1"  # bump when query construction changes to invalidate L5 cache
 
+# Warn about a stale/corrupt HNSW bin at most once per process.
+_warned_stale_hnsw = False
+
 _FTS_STOP_WORDS = frozenset({
     "a", "an", "the", "and", "or", "but", "in", "on", "at", "to", "for",
     "of", "with", "by", "from", "is", "are", "was", "were", "be", "been",
@@ -227,7 +230,9 @@ def build_vector_index(pack_dir: Path, vector_path: Path, meta_path: Path):
     with open(meta_path, "w", encoding="utf-8") as f:
         json.dump(metadata, f)
 
-    # Build HNSW index if hnswlib is available (default ANN backend).
+    # Build HNSW index if hnswlib is available (default ANN backend); otherwise clear any
+    # stale bin left over from a previous run so a LATER hnswlib-capable environment never
+    # loads labels against different metadata.
     hnsw_path = vector_path.parent / "hnsw_index.bin"
     if _hnswlib is not None and len(embeddings) > 0:
         dim = embeddings.shape[1]
@@ -235,6 +240,8 @@ def build_vector_index(pack_dir: Path, vector_path: Path, meta_path: Path):
         index.init_index(max_elements=len(embeddings), ef_construction=200, M=16)
         index.add_items(embeddings, list(range(len(embeddings))))
         index.save_index(str(hnsw_path))
+    else:
+        hnsw_path.unlink(missing_ok=True)
 
     hash_path = vector_path.parent / "vector_index.hash"
     hash_path.write_text(_manifest_hash(pack_dir))
@@ -370,16 +377,36 @@ def search_vector(pack_dir: str, query: str, top_k: int = 5) -> List[Dict]:
     if k == 0:
         return []
 
+    hnsw_result = None
     hnsw_path = indexes_dir / "hnsw_index.bin"
     if _hnswlib is not None and hnsw_path.exists():
-        # HNSW ANN search (default backend)
-        dim = embeddings.shape[1]
-        index = _hnswlib.Index(space="ip", dim=dim)
-        index.load_index(str(hnsw_path), max_elements=len(embeddings))
-        index.set_ef(max(k * 2, 50))
-        labels, distances = index.knn_query(query_emb, k=k)
-        top_indices = labels[0]
-        scores = 1.0 - distances[0]  # hnswlib ip returns 1-cosine for normalized vecs
+        try:
+            # HNSW ANN search (default backend)
+            dim = embeddings.shape[1]
+            index = _hnswlib.Index(space="ip", dim=dim)
+            index.load_index(str(hnsw_path), max_elements=len(embeddings))
+            if index.get_current_count() != len(embeddings):
+                raise ValueError(
+                    f"hnsw index has {index.get_current_count()} items but "
+                    f"vector_meta.json has {len(embeddings)}"
+                )
+            index.set_ef(max(k * 2, 50))
+            labels, distances = index.knn_query(query_emb, k=k)
+            # hnswlib ip returns 1-cosine for normalized vecs
+            hnsw_result = (labels[0], 1.0 - distances[0])
+        except Exception:
+            global _warned_stale_hnsw
+            if not _warned_stale_hnsw:
+                print(
+                    "[agentpack] Warning: stale or corrupt HNSW index, "
+                    "falling back to brute-force search.",
+                    file=sys.stderr,
+                )
+                _warned_stale_hnsw = True
+            hnsw_path.unlink(missing_ok=True)
+
+    if hnsw_result is not None:
+        top_indices, scores = hnsw_result
     else:
         # Brute-force fallback
         similarities = np.dot(embeddings, query_emb)

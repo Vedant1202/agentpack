@@ -621,9 +621,36 @@ TA.1 before/after citation, TA.2's beyond-scope discovery, TA.5's OQ1 note). Fin
   pre-existing ones.
 - GREEN (full suite): **320 passed, 0 failed** in 25.32s (319 + this 1 new test).
 
-### TB.4 · HNSW staleness (spec §4 TB.4, F10)
-- [ ] RED: stale bin + fewer rows in meta → wrong/erroring results. Fix: delete bin when hnswlib unavailable at build; guard load/query with count-check (live-verify `get_current_count`) + fallback to brute force, warn, delete bin.
+### TB.4 · HNSW staleness (spec §4 TB.4, F10) — ✅ DONE
+- [x] RED: stale bin + fewer rows in meta → wrong/erroring results. Fix: delete bin when hnswlib unavailable at build; guard load/query with count-check (live-verify `get_current_count`) + fallback to brute force, warn, delete bin.
 **Verify:** targeted + TB.0 + full suite.
+
+**Evidence:**
+- Live-verified `hnswlib.Index.get_current_count()` exists and works (returns the REAL stored
+  item count). Also live-verified a subtlety not explicit in the spec: `load_index(path,
+  max_elements=N)` does NOT validate against `max_elements` — loading a 3-item bin with
+  `max_elements=2` succeeds silently and `get_current_count()` still correctly reports 3. This
+  confirms the count-check must compare against the ACTUAL loaded count, not just trust the
+  caller-supplied `max_elements`.
+- RED: `test_search_vector_falls_back_when_hnsw_bin_is_stale` (real, not mocked, hnswlib build
+  with 3 chunks; then rewrite `vector_index.npy`/`vector_meta.json` to 2 rows — simulating a
+  re-pack that reduced chunk count — while keeping the OLD 3-item bin and writing a hash matching
+  the NEW 2-chunk manifest so the outer staleness check doesn't trigger a rebuild) →
+  `IndexError: list index out of range` (`metadata[2]` on a 2-entry list) — a stale HNSW label
+  pointing past the new, smaller metadata array. Matches F10's "wrong/erroring results from stale
+  labels" exactly. Confirmed genuinely RED pre-fix via `git stash` (same discipline as prior
+  tasks).
+- Fix: (a) in `build_vector_index`, the `else` branch of the hnswlib-available-and-nonempty check
+  now explicitly `hnsw_path.unlink(missing_ok=True)` — clears a stale bin left over when hnswlib
+  becomes unavailable (or embeddings end up empty) so a LATER hnswlib-capable environment never
+  loads it against different metadata; (b) in `search_vector`'s load path, wrapped the
+  load+count-check+query in `try/except Exception`, raising internally on a
+  `get_current_count() != len(embeddings)` mismatch; on any failure, warn once (new module-level
+  `_warned_stale_hnsw` flag, same pattern as `cache.py`'s `_warned_corrupt`), delete the bin, and
+  fall through to the existing brute-force `np.dot` path.
+- GREEN (targeted): `tests/test_retrieve.py -v` → **23 passed**, incl. the new test.
+- GREEN + TB.0: snapshot re-run → still passing, unchanged.
+- GREEN (full suite): **321 passed, 0 failed** in 25.23s (320 + this 1 new test).
 
 ### TB.5 · `remove_empty_lines` in the L1 key (spec §4 TB.5, F11)
 - [ ] RED: flag toggle no-ops on cached corpus. Fix: add flag to key.
