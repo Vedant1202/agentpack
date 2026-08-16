@@ -513,7 +513,9 @@ the test's `alpha=0.5`, delete the parameter). Proceeding to Phase A.
 - Live end-to-end sanity check (unmocked): real fast-mode parse of `demo_corpus`'s 160-page 10-K
   PDF → 160 blocks (one per page with text), 0 warnings, matching the live page-count check above.
 
-**▣ CHECKPOINT A — stop; post evidence incl. the TA.1 before/after citation; wait for human go.**
+**▣ CHECKPOINT A — ✅ reviewed and approved 2026-08-16.** Evidence posted (per-task RED/GREEN,
+TA.1 before/after citation, TA.2's beyond-scope discovery, TA.5's OQ1 note). Final Phase A suite:
+316 passed, 0 failed. Proceeding to Phase B.
 
 ---
 
