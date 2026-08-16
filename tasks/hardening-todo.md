@@ -346,10 +346,43 @@ the test's `alpha=0.5`, delete the parameter). Proceeding to Phase A.
 - Real-corpus check, final: full-precision re-pack of `demo_corpus` → **245 chunks, 0 violations**
   of the absolute property. Temp dirs removed after each inspection.
 
-### TA.3 · Per-file error boundary (spec §4 TA.3, F2)
-- [ ] RED: dangling-symlink corpus aborts the whole pack today. Fix: catch-all inside the submitted per-file callable → failed source + `parse_error` warning, pack continues. PermissionError variant (monkeypatched for determinism).
+### TA.3 · Per-file error boundary (spec §4 TA.3, F2) — ✅ DONE
+- [x] RED: dangling-symlink corpus aborts the whole pack today. Fix: catch-all inside the submitted per-file callable → failed source + `parse_error` warning, pack continues. PermissionError variant (monkeypatched for determinism).
 **Acceptance:** one bad file can no longer lose the run; good files' output intact; audit shows the warning.
 **Verify:** targeted + full suite.
+
+**Evidence:**
+- Read the whole per-file path before editing: `_parse_one` (submitted directly to
+  `pool.submit(...)`) does two `open()` calls outside any try block (zip-safety checksum, main
+  checksum) plus `parser.parse(...)`; `future.result()` at the gather point had no guard at all.
+  Confirmed the note about `SourceDocument.type` being a restricted `Literal` — a naive
+  `suffix.lstrip(".").lower()` (the pattern the existing zip-safety branch already uses, safe only
+  because it's scoped to docx/pptx/xlsx) would produce `"md"` for a markdown file, which isn't a
+  valid Literal value (`"markdown"` is) — added `_doc_type_for_suffix` to map correctly for a
+  catch-all covering ANY of the 5 parser types, not just zip-based ones.
+- RED: `test_dangling_symlink_does_not_abort_the_pack` (symlink to a never-created target) →
+  `FileNotFoundError` propagated out of `write_pack` entirely, matching F2 exactly.
+  `test_unreadable_file_does_not_abort_the_pack` (monkeypatched `builtins.open` to raise
+  `PermissionError` for one specific path — chosen over real `chmod 0` per the spec's own
+  determinism note, since root/CI environments often ignore permission bits) → same crash.
+- Fix: wrapped `_parse_one`'s body (everything after the parser-resolution early-return) in
+  `try/except Exception`, returning `_failed_doc(file_path, source_id, str(e))` — a
+  `SourceDocument` with `blocks=[]` and one `ExtractionWarning(type="parse_error", message=str(e))`
+  — mirroring the EXISTING zip-safety failure branch's shape (kept that branch's own construction
+  untouched, just now inside the try so IT also degrades gracefully if `check_zip_safety`/its
+  `open()` raises). No changes needed to `future.result()` itself or to `write_pack`'s downstream
+  status/warning logic — both already handle a `parse_error`-flagged doc correctly (verified via
+  the pre-existing `test_failed_parse_marked_in_manifest`), confirming the spec's framing that this
+  is a submission-level fix, self-contained to `_parse_one`.
+- GREEN (targeted): `tests/test_pack.py -v` → **9 passed**, incl. both new tests and all 7
+  pre-existing ones (`test_failed_parse_not_cached`, `test_trust_warnings_correct_source_id_on_cache_hit`
+  unaffected).
+- GREEN (full suite): **310 passed, 0 failed** in 21.91s (308 + these 2 new tests).
+- Real `agentpack audit` check (spec-required): packed a 2-file corpus (one good `.md`, one
+  dangling symlink) → pack exit 0, `manifest.yml` lists both sources. `agentpack audit` output:
+  `### parse_error (1)` / `- Source src_001: [Errno 2] No such file or directory:
+  '.../ghost.md'` — warning surfaces exactly as expected; good file's chunk present and correct
+  (1 chunk, 11 tokens). Temp dir removed after inspection.
 
 ### TA.4 · L1 cache-hit remap of `doc.path` + block ids (spec §4 TA.4, F3)
 - [ ] RED: rename-same-content re-pack cites the OLD filename today. Fix: remap path + regenerate block ids under current source_id (find the parser's id-formatting logic first). Must still be a cache HIT (assert via hit-count pattern).

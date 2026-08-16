@@ -162,6 +162,64 @@ def test_failed_parse_not_cached(tmp_path):
     assert manifest["sources"][0]["status"] == "success"
 
 
+def test_dangling_symlink_does_not_abort_the_pack(tmp_path):
+    """F2: a dangling symlink must not crash the whole pack -- it must be recorded as a failed
+    source with a parse_error warning, and the good file's chunks must still exist."""
+    in_dir = tmp_path / "corpus"
+    in_dir.mkdir()
+    (in_dir / "good.md").write_text("# Good\n\n" + ("Real content here. " * 20))
+    (in_dir / "ghost.md").symlink_to(in_dir / "nope.md")  # target never created -- broken
+    out_dir = tmp_path / "out"
+
+    write_pack(str(in_dir), str(out_dir), quiet=True)  # RED today: raises FileNotFoundError
+
+    with open(out_dir / "manifest.yml") as f:
+        manifest = yaml.safe_load(f)
+
+    sources_by_path = {s["path"]: s for s in manifest["sources"]}
+    assert set(sources_by_path) == {"good.md", "ghost.md"}, "both sources must be listed"
+
+    ghost = sources_by_path["ghost.md"]
+    assert ghost["status"] == "failed"
+    assert any(w["type"] == "parse_error" for w in ghost["warnings"])
+
+    good = sources_by_path["good.md"]
+    assert good["status"] == "success"
+    good_chunks = [c for c in manifest["chunks"] if c["source_id"] == good["id"]]
+    assert len(good_chunks) > 0
+    for chunk in good_chunks:
+        assert (out_dir / chunk["path"]).exists()
+
+
+def test_unreadable_file_does_not_abort_the_pack(tmp_path):
+    """F2, PermissionError variant: monkeypatched for determinism (real chmod-based permission
+    tests are flaky when running as root, e.g. in CI containers)."""
+    in_dir = tmp_path / "corpus"
+    in_dir.mkdir()
+    (in_dir / "good.md").write_text("# Good\n\n" + ("Real content here. " * 20))
+    (in_dir / "locked.txt").write_text("unreadable")
+    out_dir = tmp_path / "out"
+
+    real_open = open
+    locked_path = str(in_dir / "locked.txt")
+
+    def guarded_open(file, *args, **kwargs):
+        if str(file) == locked_path:
+            raise PermissionError(f"[Errno 13] Permission denied: '{file}'")
+        return real_open(file, *args, **kwargs)
+
+    with patch("builtins.open", side_effect=guarded_open):
+        write_pack(str(in_dir), str(out_dir), quiet=True)
+
+    with open(out_dir / "manifest.yml") as f:
+        manifest = yaml.safe_load(f)
+
+    sources_by_path = {s["path"]: s for s in manifest["sources"]}
+    assert sources_by_path["locked.txt"]["status"] == "failed"
+    assert any(w["type"] == "parse_error" for w in sources_by_path["locked.txt"]["warnings"])
+    assert sources_by_path["good.md"]["status"] == "success"
+
+
 def test_incremental_pack_skips_unchanged(tmp_path):
     """Re-packing an unchanged file must hit L1 cache (parser.parse not called twice)."""
     in_dir = tmp_path / "corpus"
