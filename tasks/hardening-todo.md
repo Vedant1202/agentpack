@@ -241,10 +241,44 @@ the test's `alpha=0.5`, delete the parameter). Proceeding to Phase A.
 
 ## Phase A — Pack correctness
 
-### TA.1 · Chunk-boundary citation bug (spec §4 TA.1, F1)
-- [ ] RED: two-block page-1/page-2 fixture → first chunk cites page 2 today. Fix: flush with the OLD metadata before adopting the incoming block's. Section-path variant test too.
+### TA.1 · Chunk-boundary citation bug (spec §4 TA.1, F1) — ✅ DONE
+- [x] RED: two-block page-1/page-2 fixture → first chunk cites page 2 today. Fix: flush with the OLD metadata before adopting the incoming block's. Section-path variant test too.
 **Acceptance:** boundary chunks cite the content actually inside them.
 **Verify:** targeted + full suite + demo_corpus re-pack spot-check (record a citation before/after).
+
+**Evidence:**
+- Read the whole `chunk_document` loop (95 lines) before editing, per spec instruction. Confirmed
+  F1 exactly: `current_metadata` was updated from the incoming block unconditionally at the top of
+  the loop, BEFORE the flush-decision that uses it — so a chunk flushed because the NEXT block
+  overflowed capacity got stamped with the NEXT block's page/section, not its own content's.
+- RED: `test_chunker_boundary_chunk_cites_its_own_content_not_next_block` (block1=700tok/page1,
+  block2=700tok/page2, max_tokens=800 — block1 alone fits, block1+block2 overflows, forcing a
+  flush exactly at the boundary) → first chunk's content was pure block1 text but stamped
+  `page=2`. `test_chunker_boundary_chunk_cites_its_own_section_not_next_block` (same shape, section
+  axis) → `AssertionError: first chunk is pure Introduction content but was stamped
+  section='Usage'`. Both match F1 exactly.
+- Fix: reordered the loop so the flush-if-needed check runs BEFORE the metadata update (using
+  `fits = block_tokens <= max_tokens` once instead of duplicating the comparison), then the
+  metadata update runs once, then the append/oversized-split logic — preserving the original
+  "sub-blocks carry correct page/section" behavior for the oversized-split path (verified
+  `test_chunker_oversize_block` still passes) while fixing the flush-of-prior-content case.
+- Verified the overlap-retention path (`:44-51`, unchanged) doesn't need a separate fix: it only
+  *reads* `current_metadata` (via `.copy()` inside `create_chunk`) and never mutates it, so
+  retained-overlap content flushed on a later call now correctly inherits whatever metadata was
+  current AT THAT FLUSH — the same fix covers both paths through one shared mechanism. Traced a
+  small-block scenario by hand (page-1 A+B retained as overlap, then flushed alongside page-2 C) —
+  the dominant/newest content's page wins for a mixed chunk, matching the spec's "acceptable" case.
+- GREEN (targeted): `tests/test_chunker.py -v` → **6 passed**, incl. the 2 new tests and all 4
+  pre-existing ones (`test_chunker_oversize_block`, `test_chunker_metadata` unaffected).
+- GREEN (full suite): **305 passed, 0 failed** in 24.82s (303 + these 2 new tests).
+- **demo_corpus before/after (real 10-K PDF, `--fast`):** stashed just `chunker.py`'s uncommitted
+  fix to get a true A/B, packed twice (identical 260 chunks both times — chunk boundaries
+  unchanged, confirming the fix is metadata-only). **55 of 260 chunks** had their page citation
+  corrected, every single one shifted down by exactly 1 (e.g. `page: 3 -> 2`, `9 -> 8`, `23 -> 22`)
+  — the exact F1 signature. Spot-checked `src_001_chunk_002`: its content starts "Table of
+  Contents / 3M COMPANY / FORM 10-K…", unambiguously page-2 content (right after `chunk_001`'s
+  page-1 cover-page boilerplate) — cited `page: 3` before the fix, `page: 2` after. Temp dirs
+  removed after inspection.
 
 ### TA.2 · Oversize-split token accounting (spec §4 TA.2, F14)
 - [ ] RED: normal block + oversized block → one chunk is 901 real tokens recorded as 800. Fix per spec; acceptance property is absolute: EVERY emitted chunk has real tokenized length ≤ max_tokens AND `token_count` == that length.

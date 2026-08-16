@@ -79,6 +79,62 @@ def test_chunker_oversize_block():
         assert c.metadata.get("section") == "Big Section"
 
 
+def test_chunker_boundary_chunk_cites_its_own_content_not_next_block():
+    """F1: a chunk flushed at a block boundary must cite the page of the content actually
+    inside it. block1 alone fits (700 <= 800); block1+block2 overflows, forcing a flush
+    exactly at the boundary -- the flushed chunk is pure block1 (page 1) text."""
+    block1_text = " ".join(["word"] * 700)
+    block2_text = " ".join(["word"] * 700)
+
+    doc = SourceDocument(
+        source_id="src_bound",
+        path="report.pdf",
+        type="pdf",
+        checksum="x",
+        blocks=[
+            DocumentBlock(block_id="b1", source_id="src_bound", type="paragraph",
+                          text=block1_text, page=1, section_path=["Intro"]),
+            DocumentBlock(block_id="b2", source_id="src_bound", type="paragraph",
+                          text=block2_text, page=2, section_path=["Intro"]),
+        ],
+        warnings=[],
+    )
+
+    chunks = chunk_document(doc, max_tokens=800)
+    assert len(chunks) >= 2, "block1 + block2 must overflow into at least 2 chunks"
+    assert chunks[0].content.strip() == block1_text, "first chunk's content must be block1 only"
+    assert chunks[0].metadata["page"] == 1, (
+        f"first chunk is pure page-1 content but was stamped page={chunks[0].metadata.get('page')}"
+    )
+
+
+def test_chunker_boundary_chunk_cites_its_own_section_not_next_block():
+    """Same bug, section_path axis: the flushed chunk must carry block1's section."""
+    block1_text = " ".join(["word"] * 700)
+    block2_text = " ".join(["word"] * 700)
+
+    doc = SourceDocument(
+        source_id="src_bound2",
+        path="report.pdf",
+        type="pdf",
+        checksum="x",
+        blocks=[
+            DocumentBlock(block_id="b1", source_id="src_bound2", type="paragraph",
+                          text=block1_text, section_path=["Introduction"]),
+            DocumentBlock(block_id="b2", source_id="src_bound2", type="paragraph",
+                          text=block2_text, section_path=["Usage"]),
+        ],
+        warnings=[],
+    )
+
+    chunks = chunk_document(doc, max_tokens=800)
+    assert len(chunks) >= 2
+    assert chunks[0].metadata["section"] == "Introduction", (
+        f"first chunk is pure Introduction content but was stamped "
+        f"section={chunks[0].metadata.get('section')!r}"
+    )
+
+
 def test_chunker_metadata():
     doc = SourceDocument(
         source_id="src_meta",

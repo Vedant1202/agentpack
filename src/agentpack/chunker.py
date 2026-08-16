@@ -57,7 +57,22 @@ def chunk_document(doc: SourceDocument, max_tokens: int = 800, overlap_percent: 
         if not block.text:
             continue
 
-        # Update metadata before any splits so sub-blocks carry correct page/section
+        tokens = encoder.encode(block.text)
+        block_tokens = len(tokens)
+        fits = block_tokens <= max_tokens
+
+        # Flush any accumulated content -- with ITS OWN (old) metadata -- before this
+        # block's page/section overwrites current_metadata below. Otherwise a chunk made
+        # entirely of page-1 content gets stamped with page 2 because it was flushed only
+        # once block 2 arrived.
+        if fits:
+            if current_tokens + block_tokens > max_tokens and current_tokens > 0:
+                create_chunk()
+        elif current_tokens > 0:
+            create_chunk()
+
+        # Update metadata after any flush so sub-blocks/the new chunk carry this block's
+        # own page/section.
         if block.section_path:
             current_metadata["section"] = block.section_path[-1]
             current_metadata["section_path"] = list(block.section_path)
@@ -66,20 +81,12 @@ def chunk_document(doc: SourceDocument, max_tokens: int = 800, overlap_percent: 
         if block.row_range:
             current_metadata["row_range"] = list(block.row_range)
 
-        tokens = encoder.encode(block.text)
-        block_tokens = len(tokens)
-
-        if block_tokens <= max_tokens:
+        if fits:
             # Normal path: block fits in a single chunk slot
-            if current_tokens + block_tokens > max_tokens and current_tokens > 0:
-                create_chunk()
             current_blocks.append({"text": block.text, "tokens": block_tokens, "type": block.type})
             current_tokens += block_tokens
         else:
             # Oversized block: split with overlap, preserving metadata on every sub-block
-            if current_tokens > 0:
-                create_chunk()
-
             overlap = int(max_tokens * overlap_percent)
             start = 0
             while start < block_tokens:
