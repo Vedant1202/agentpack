@@ -199,9 +199,28 @@ is no "pre-existing failure" allowance anymore. Record the new count after every
   check is warn-only, no behavior change) and both new tests.
 - GREEN (full suite): **303 passed, 0 failed** in 23.74s (301 + these 2 new tests).
 
-### T0.7 · Remove dead `alpha` param (spec §4 T0.7, F30)
+### T0.7 · Remove dead `alpha` param (spec §4 T0.7, F30) — ⛔ STOPPED, awaiting human decision
 - [ ] Grep first for any caller passing `alpha` (STOP if found). Fix: delete from `search_hybrid` signature.
 **Acceptance/Verify:** full suite green.
+
+**Findings (per spec's own instruction: STOP and report instead of proceeding):**
+- Confirmed independently that `alpha` is dead in the implementation: `search_hybrid`
+  (`retrieve.py:379-405`) does pure RRF fusion (`_rrf_score`); the parameter is never read anywhere
+  in the function body. F30's core claim holds.
+- `grep -rn "search_hybrid(" src/ tests/` found **4** call sites, not 0:
+  - `retrieve.py:462` (internal, from `search_pack`'s hybrid mode) — no `alpha`.
+  - `ui/server.py:261` — no `alpha`.
+  - `tests/test_retrieve.py:215` (`test_retrieve_error_handling`) — no `alpha`.
+  - `tests/test_retrieve.py:201` (`test_search_hybrid`) — **`alpha=0.5`**. This is the one the
+    spec's stop condition is for.
+- Per spec §4 T0.7 verbatim: "if ANY call site passes alpha, STOP and report instead." This is a
+  test-only call (production code never passes it), and since `alpha` is confirmed unread, the
+  value `0.5` is a no-op today either way — but deleting the parameter as written would break this
+  one test with `TypeError: unexpected keyword argument 'alpha'`.
+- **Not proceeding without a decision.** The obvious fix (drop `alpha=0.5` from the
+  `tests/test_retrieve.py:201` call alongside the signature change) is low-risk, but the spec
+  explicitly carved this exact scenario out for human review rather than pre-authorizing it, so
+  T0.7 is paused here rather than improvised past.
 
 **▣ CHECKPOINT 0 — stop; post evidence; wait for human go.**
 
