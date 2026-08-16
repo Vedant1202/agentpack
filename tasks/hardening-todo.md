@@ -784,6 +784,20 @@ TA.1 before/after citation, TA.2's beyond-scope discovery, TA.5's OQ1 note). Fin
 - GREEN + TB.0: snapshot re-run → still passing, unchanged.
 - GREEN (full suite): **326 passed, 0 failed** in 22.94s (323 + these 3 new tests).
 
+**▣ CHECKPOINT B — evidence posted, awaiting human go before opening PR 1.**
+
+Phases 0 + A + B complete: T0.1–T0.7, TA.1–TA.8, TB.0–TB.7 (23 commits total on
+`fix/engineering-hardening`, off `dev`). Full suite: **326 passed, 0 failed** — permanent
+baseline, up from the starting `296 passed, 1 failed`.
+
+**End-of-PR-1 demo_corpus smoke test** (per the plan's verification strategy), real 10-K PDF +
+3 other docs, `--fast`:
+- `pack` → exit 0, 260 chunks, 1 table, 152505 tokens, 4/4 files processed.
+- `retrieve "3M revenue" --top-k 3` → exit 0, real hybrid results with correct page citations
+  (page 64/63/76 of `3M_2018_10K.pdf`).
+- `audit` → exit 0, **zero extraction warnings** (clean pack).
+- `validate` → exit 0, "Pack validation successful."
+
 **▣ CHECKPOINT B — stop; post evidence; open PR 1 (`fix/engineering-hardening` → `dev`); wait for merge before Phase C.**
 
 ---
