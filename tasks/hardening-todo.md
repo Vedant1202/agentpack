@@ -84,10 +84,43 @@ is no "pre-existing failure" allowance anymore. Record the new count after every
   unstaged; only the T0.2 hunks (`cli.py` Exit + new `test_cli_gen_eval_error`) were committed).
 - GREEN (full suite): **298 passed, 0 failed** in 68.19s (297 + this 1 new test).
 
-### T0.3 · Corrupt `lexical_index.db` self-heal (spec §4 T0.3, F4)
-- [ ] Live-verify `DatabaseError` vs `OperationalError` on a garbage file first. RED: truncate a real index → search crashes. Fix: widen catch, unlink, warn once, rebuild; close the probe conn on error paths.
+### T0.3 · Corrupt `lexical_index.db` self-heal (spec §4 T0.3, F4) — ✅ DONE
+- [x] Live-verify `DatabaseError` vs `OperationalError` on a garbage file first. RED: truncate a real index → search crashes. Fix: widen catch, unlink, warn once, rebuild; close the probe conn on error paths.
 **Acceptance:** corrupt db → transparent rebuild + stderr warning, results returned.
 **Verify:** targeted (capsys asserts warning) + full suite.
+
+**Evidence:**
+- Live-verified in `./venv/bin/python`: `sqlite3.connect()` on a garbage file succeeds (lazy open);
+  the first real query raises `sqlite3.DatabaseError: file is not a database` — an instance of
+  `DatabaseError` itself, NOT `OperationalError` (which is `DatabaseError`'s child), so
+  `except sqlite3.OperationalError` cannot catch it. Matches F4 exactly.
+- RED: added `test_search_fts_corrupt_db_self_heals` (builds a real tiny FTS index via
+  `test_build_fts_index_and_search`'s fixture pattern, then `db_path.write_bytes(b"garbage...")`)
+  → `sqlite3.DatabaseError: file is not a database` raised from `_fts_stored_hash` at
+  `retrieve.py:78`, propagating out of `search_fts` uncaught. Matches spec's predicted RED exactly.
+- **Design note (deviation from the most literal reading of the fix text):** the spec's fix
+  paragraph reads as "catch `DatabaseError` inside `_fts_stored_hash`" AND "caller prints a
+  warning distinct from ordinary hash-mismatch rebuilds." Implementing both literally is
+  self-contradictory: `DatabaseError` is `OperationalError`'s *parent*, so an `except
+  sqlite3.DatabaseError` inside `_fts_stored_hash` swallows the corruption there — nothing
+  propagates for `search_fts` to catch, making a *distinct* corruption warning structurally
+  impossible from the caller side (verified: `_fts_stored_hash` has exactly one call site, in
+  `search_fts`; grepped to confirm). Tried a cheap pre-probe (`SELECT 1`) to detect corruption
+  before calling `_fts_stored_hash` — live-verified it does NOT reproduce the fault (`SELECT 1` is
+  a constant expression that never touches the file's real btree pages, so it succeeds even on
+  total garbage). The only reliable signal is the real query itself. Resolution: `_fts_stored_hash`
+  no longer catches anything (docstring notes why) and lets `DatabaseError` propagate; `search_fts`
+  wraps its sole call in `try/except sqlite3.DatabaseError`, closing `conn`, printing the warning,
+  `unlink(missing_ok=True)`, and rebuilding — while the *unchanged* hash-mismatch `else` branch
+  (valid file, differing content) still silently rebuilds with no warning, exactly as before. Net
+  behavior matches every line of the spec's Bug/Test/Acceptance sections; only the internal
+  try/except boundary moved from the helper to its sole caller. Flagging for reviewer visibility
+  rather than stopping, since this is a fix-text ambiguity, not a code/spec factual mismatch (spec
+  §0's stop condition).
+- GREEN (targeted): `tests/test_retrieve.py -v` → **18 passed**, incl. the new test (capsys
+  confirms `"corrupt"` in stderr) and the two pre-existing invalidation tests
+  (`test_fts_unchanged_pack_reuses_index`, `test_fts_invalidated_on_repack`) unaffected.
+- GREEN (full suite): **299 passed, 0 failed** in 72.37s (298 + this 1 new test).
 
 ### T0.4 · Cap section-level enrichment — the OOM (spec §4 T0.4, F5)
 - [ ] RED: monkeypatched `_gist` captures >8000-char input today. Fix: `node_text[:_ENRICH_TEXT_CAP]` at the section call site (+ optional 400-sentence guard inside `gist`).

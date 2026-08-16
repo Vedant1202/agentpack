@@ -1,5 +1,6 @@
 import hashlib
 import sqlite3
+import sys
 import yaml
 import json
 import numpy as np
@@ -74,11 +75,10 @@ def _manifest_hash(pack_dir: Path) -> str:
 
 
 def _fts_stored_hash(conn: sqlite3.Connection) -> str:
-    try:
-        row = conn.execute("SELECT value FROM _pack_meta WHERE key='content_hash'").fetchone()
-        return row[0] if row else ""
-    except sqlite3.OperationalError:
-        return ""
+    """Raises sqlite3.DatabaseError (not just OperationalError) if db_path is corrupt —
+    the sole caller (search_fts) catches it to trigger a self-heal rebuild."""
+    row = conn.execute("SELECT value FROM _pack_meta WHERE key='content_hash'").fetchone()
+    return row[0] if row else ""
 
 
 def _fts_write_hash(conn: sqlite3.Connection, h: str):
@@ -235,10 +235,18 @@ def search_fts(pack_dir: str, query: str, top_k: int = 5) -> List[Dict]:
     current_hash = _manifest_hash(base_path)
     if db_path.exists():
         conn = sqlite3.connect(db_path)
-        if _fts_stored_hash(conn) != current_hash:
+        try:
+            stored_hash = _fts_stored_hash(conn)
+        except sqlite3.DatabaseError:
             conn.close()
-            db_path.unlink()
+            print("[agentpack] Warning: corrupt lexical index, rebuilding.", file=sys.stderr)
+            db_path.unlink(missing_ok=True)
             conn = build_fts_index(base_path, db_path)
+        else:
+            if stored_hash != current_hash:
+                conn.close()
+                db_path.unlink()
+                conn = build_fts_index(base_path, db_path)
     else:
         conn = build_fts_index(base_path, db_path)
 

@@ -83,11 +83,46 @@ def test_build_fts_index_and_search(tmp_path):
         json.dump({"content": "Hello world"}, f)
         
     build_fts_index(pack_dir, db_path)
-    
+
     # Test FTS search
     res = search_fts(str(pack_dir), "world", top_k=1)
     assert len(res) == 1
     assert res[0]["chunk_id"] == "c1"
+
+def test_search_fts_corrupt_db_self_heals(tmp_path, capsys):
+    pack_dir = tmp_path
+    indexes_dir = pack_dir / "indexes"
+    indexes_dir.mkdir(parents=True, exist_ok=True)
+    db_path = indexes_dir / "lexical_index.db"
+
+    with open(pack_dir / "manifest.yml", "w") as f:
+        yaml_content = """
+        chunks:
+          - id: "c1"
+            source_id: "s1"
+            path: "chunks/c1.json"
+            token_count: 10
+        """
+        f.write(yaml_content)
+
+    chunks_dir = pack_dir / "chunks"
+    chunks_dir.mkdir()
+
+    with open(chunks_dir / "c1.json", "w") as f:
+        json.dump({"content": "Hello world"}, f)
+
+    build_fts_index(pack_dir, db_path)
+
+    # Truncate the built index to garbage bytes to simulate corruption.
+    db_path.write_bytes(b"garbage not a sqlite file")
+
+    res = search_fts(str(pack_dir), "world", top_k=1)
+
+    assert len(res) == 1
+    assert res[0]["chunk_id"] == "c1"
+
+    captured = capsys.readouterr()
+    assert "corrupt" in captured.err.lower()
 
 @patch("agentpack.retrieve._get_embedding_model")
 def test_build_vector_index(mock_get_model, tmp_path):
