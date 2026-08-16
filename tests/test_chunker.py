@@ -135,6 +135,104 @@ def test_chunker_boundary_chunk_cites_its_own_section_not_next_block():
     )
 
 
+def test_chunker_flush_accounts_for_join_separator_overhead():
+    """Many small blocks whose SUMMED token counts land exactly at max_tokens can still have a
+    real (joined with "\\n\\n") length that exceeds it -- the separator itself costs tokens a
+    per-block sum can't see. Same 'absolute property' TA.2 established, different trigger path
+    (normal multi-block accumulation, not the oversized-split loop)."""
+    import tiktoken
+    encoder = tiktoken.get_encoding("cl100k_base")
+
+    blocks = [
+        DocumentBlock(block_id=f"b{i}", source_id="src_join", type="paragraph",
+                      text=" ".join(["word"] * 40))
+        for i in range(20)
+    ]
+    doc = SourceDocument(
+        source_id="src_join", path="report.pdf", type="pdf", checksum="x",
+        blocks=blocks, warnings=[],
+    )
+
+    chunks = chunk_document(doc, max_tokens=800)
+    for c in chunks:
+        real_len = len(encoder.encode(c.content))
+        assert real_len <= 800, f"{c.chunk_id}: real length {real_len} exceeds max_tokens=800"
+        assert c.token_count == real_len, (
+            f"{c.chunk_id}: recorded token_count={c.token_count} != real length {real_len}"
+        )
+
+
+def test_chunker_drops_retention_when_it_still_wont_fit_next_block():
+    """A small retained tail (from a normal flush) immediately followed by a large-but-fitting
+    block: neither alone exceeds max_tokens, but retained + next together do. The chunker must
+    drop the retention rather than silently emit an oversized chunk."""
+    import tiktoken
+    encoder = tiktoken.get_encoding("cl100k_base")
+
+    block1_text = " ".join(["word"] * 700)   # flushes once block2 arrives, too big to retain
+    block2_text = " ".join(["word"] * 60)    # accumulates with block1, small enough to retain
+    block3_text = " ".join(["word"] * 780)   # fits alone, but 60 (retained) + 780 doesn't
+
+    doc = SourceDocument(
+        source_id="src_retain_clash", path="report.pdf", type="pdf", checksum="x",
+        blocks=[
+            DocumentBlock(block_id="b1", source_id="src_retain_clash", type="paragraph", text=block1_text),
+            DocumentBlock(block_id="b2", source_id="src_retain_clash", type="paragraph", text=block2_text),
+            DocumentBlock(block_id="b3", source_id="src_retain_clash", type="paragraph", text=block3_text),
+        ],
+        warnings=[],
+    )
+
+    chunks = chunk_document(doc, max_tokens=800)
+    for c in chunks:
+        real_len = len(encoder.encode(c.content))
+        assert real_len <= 800, f"{c.chunk_id}: real length {real_len} exceeds max_tokens=800"
+        assert c.token_count == real_len, (
+            f"{c.chunk_id}: recorded token_count={c.token_count} != real length {real_len}"
+        )
+    # block3's content must survive somewhere, not get lost by the fallback.
+    assert any("word" in c.content and c.token_count >= 780 for c in chunks), \
+        "block3 must still end up in some chunk"
+
+
+def test_chunker_oversized_split_accounts_for_retained_overlap():
+    """F14: a small block (100 tok, under the ~120-tok overlap target for max_tokens=800) is
+    retained WHOLE as overlap when the next (oversized) block forces a flush. The oversized
+    split's first sub-chunk then = that retained block + a new max_tokens-sized slice, but
+    current_tokens was being OVERWRITTEN with just the new slice's size -- undercounting the
+    real chunk length by the retained amount."""
+    import tiktoken
+    encoder = tiktoken.get_encoding("cl100k_base")
+
+    normal_text = " ".join(["word"] * 100)
+    oversized_text = " ".join(["word"] * 2000)
+    assert len(encoder.encode(oversized_text)) > 800
+
+    doc = SourceDocument(
+        source_id="src_oversize2",
+        path="report.pdf",
+        type="pdf",
+        checksum="x",
+        blocks=[
+            DocumentBlock(block_id="b1", source_id="src_oversize2", type="paragraph",
+                          text=normal_text, page=1),
+            DocumentBlock(block_id="b2", source_id="src_oversize2", type="paragraph",
+                          text=oversized_text, page=1),
+        ],
+        warnings=[],
+    )
+
+    chunks = chunk_document(doc, max_tokens=800)
+    assert len(chunks) > 1
+
+    for c in chunks:
+        real_len = len(encoder.encode(c.content))
+        assert real_len <= 800, f"{c.chunk_id}: real length {real_len} exceeds max_tokens=800"
+        assert c.token_count == real_len, (
+            f"{c.chunk_id}: recorded token_count={c.token_count} != real length {real_len}"
+        )
+
+
 def test_chunker_metadata():
     doc = SourceDocument(
         source_id="src_meta",

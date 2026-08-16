@@ -22,7 +22,7 @@ def chunk_document(doc: SourceDocument, max_tokens: int = 800, overlap_percent: 
     
     overlap_tokens_target = int(max_tokens * overlap_percent)
     
-    def create_chunk():
+    def create_chunk(allow_retention=True):
         nonlocal current_blocks, current_tokens, chunk_index, current_metadata
         if not current_blocks:
             return
@@ -32,12 +32,21 @@ def chunk_document(doc: SourceDocument, max_tokens: int = 800, overlap_percent: 
             chunk_id=chunk_id,
             source_id=doc.source_id,
             path=f"chunks/{chunk_id}.md",
-            token_count=current_tokens,
+            # Recorded from the real joined text, not the incrementally-summed
+            # current_tokens -- the "\n\n" join between blocks (and rare BPE
+            # merge effects at the boundary) mean the sum of parts isn't always
+            # exactly the tokenized length of the whole.
+            token_count=len(encoder.encode(content_str)),
             content=content_str,
             metadata=current_metadata.copy()
         ))
         chunk_index += 1
-        
+
+        if not allow_retention:
+            current_blocks = []
+            current_tokens = 0
+            return
+
         # Keep blocks for overlap
         overlap_blocks = []
         overlap_toks = 0
@@ -49,7 +58,7 @@ def chunk_document(doc: SourceDocument, max_tokens: int = 800, overlap_percent: 
                 break
             overlap_blocks.insert(0, b)
             overlap_toks += b["tokens"]
-            
+
         current_blocks = overlap_blocks
         current_tokens = overlap_toks
 
@@ -66,8 +75,21 @@ def chunk_document(doc: SourceDocument, max_tokens: int = 800, overlap_percent: 
         # entirely of page-1 content gets stamped with page 2 because it was flushed only
         # once block 2 arrived.
         if fits:
-            if current_tokens + block_tokens > max_tokens and current_tokens > 0:
-                create_chunk()
+            if current_tokens > 0:
+                # Real (joined) length, not the summed estimate: "\n\n" between blocks
+                # (and rare BPE merge effects at the join) can push the true total over
+                # max_tokens even when the per-block sum looks like it still fits.
+                candidate = "\n\n".join([b["text"] for b in current_blocks] + [block.text])
+                if len(encoder.encode(candidate)) > max_tokens:
+                    create_chunk()
+                    if current_tokens > 0:
+                        candidate = "\n\n".join([b["text"] for b in current_blocks] + [block.text])
+                        if len(encoder.encode(candidate)) > max_tokens:
+                            # The retained remainder alone still doesn't leave room for
+                            # this block (a small retained tail immediately followed by
+                            # a near-max_tokens block) -- drop the retention rather than
+                            # risk another oversized chunk.
+                            create_chunk(allow_retention=False)
         elif current_tokens > 0:
             create_chunk()
 
@@ -86,15 +108,34 @@ def chunk_document(doc: SourceDocument, max_tokens: int = 800, overlap_percent: 
             current_blocks.append({"text": block.text, "tokens": block_tokens, "type": block.type})
             current_tokens += block_tokens
         else:
-            # Oversized block: split with overlap, preserving metadata on every sub-block
+            # Oversized block: split with overlap, preserving metadata on every sub-block.
+            # current_tokens may still hold retained overlap carried over from the flush
+            # just above -- each slice must leave room for it (accumulate, don't overwrite)
+            # so the chunk's real length never exceeds max_tokens and its recorded
+            # token_count matches its real content.
             overlap = int(max_tokens * overlap_percent)
             start = 0
             while start < block_tokens:
-                end = min(start + max_tokens, block_tokens)
+                available = max(max_tokens - current_tokens, 1)
+                end = min(start + available, block_tokens)
+                sub_text = encoder.decode(tokens[start:end])
+
+                # `available` sums per-block token counts, which can slightly
+                # undercount the real joined length once this slice is glued to
+                # already-retained content with "\n\n" (separator + rare merge
+                # effects at the boundary). Shrink until the real (joined,
+                # re-tokenized) text actually fits -- converges in 1-2 steps
+                # since the overage is always small.
+                while end > start + 1:
+                    candidate = "\n\n".join([b["text"] for b in current_blocks] + [sub_text])
+                    if len(encoder.encode(candidate)) <= max_tokens:
+                        break
+                    end -= 1
+                    sub_text = encoder.decode(tokens[start:end])
+
                 sub_tokens = tokens[start:end]
-                sub_text = encoder.decode(sub_tokens)
                 current_blocks.append({"text": sub_text, "tokens": len(sub_tokens), "type": block.type})
-                current_tokens = len(sub_tokens)
+                current_tokens += len(sub_tokens)
                 create_chunk()
                 start = end - overlap if end < block_tokens else end
 

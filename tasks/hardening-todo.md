@@ -280,9 +280,71 @@ the test's `alpha=0.5`, delete the parameter). Proceeding to Phase A.
   page-1 cover-page boilerplate) — cited `page: 3` before the fix, `page: 2` after. Temp dirs
   removed after inspection.
 
-### TA.2 · Oversize-split token accounting (spec §4 TA.2, F14)
-- [ ] RED: normal block + oversized block → one chunk is 901 real tokens recorded as 800. Fix per spec; acceptance property is absolute: EVERY emitted chunk has real tokenized length ≤ max_tokens AND `token_count` == that length.
+### TA.2 · Oversize-split token accounting (spec §4 TA.2, F14) — ✅ DONE
+- [x] RED: normal block + oversized block → one chunk is 901 real tokens recorded as 800. Fix per spec; acceptance property is absolute: EVERY emitted chunk has real tokenized length ≤ max_tokens AND `token_count` == that length.
 **Verify:** targeted + full suite.
+
+**Evidence:**
+- RED: `test_chunker_oversized_split_accounts_for_retained_overlap` (100-tok block — under the
+  ~120-tok overlap target for max_tokens=800/0.15, so it's retained WHOLE — followed by a
+  2000-tok oversized block) → `src_oversize2_chunk_001: real length 901 exceeds max_tokens=800`.
+  Matches the spec's own predicted number (901 recorded as 800) exactly. Note: the spec's
+  suggested test used a "~200 tok" normal block, but 200 > the 120-tok overlap target, so nothing
+  would actually be retained with that number (retention is whole-block, all-or-nothing) — used
+  100 tokens instead to genuinely trigger the retained-overlap-into-oversized-split path; the
+  reproduced number confirms this was the right scenario.
+- Fix, part 1 (spec's suggested `+=` option): `current_tokens = len(sub_tokens)` →
+  `current_tokens += len(sub_tokens)`, and each slice's size is now
+  `max_tokens - current_tokens` (leaving room for already-retained content) instead of a flat
+  `max_tokens`. This alone reduced the failure from 901/800 to **801/800** — closer, not exact.
+- **Extra finding beyond the spec's two suggested options:** the residual 1-token gap is a real
+  BPE effect, not a logic bug — `create_chunk` joins multiple blocks' pre-decoded text with
+  `"\n\n"`, and that separator (plus rare merge effects at the join boundary) costs a token or two
+  that a sum-of-per-block-token-counts can't predict in advance. Since the spec's acceptance
+  property is stated unconditionally ("EVERY emitted chunk... ≤ max_tokens AND token_count ==
+  actual tokenized length of the chunk's TEXT" — the real, joined text), fixed this exactly rather
+  than papering over it with a margin: (a) `create_chunk` now computes `token_count` from
+  `len(encoder.encode(content_str))` directly (the real joined text) instead of the incrementally
+  summed `current_tokens` — makes property 2 exact everywhere, unconditionally; (b) the oversized-
+  split loop now measures the real candidate joined length and shrinks the slice by 1 token at a
+  time until it actually fits — bounded, converges in 1-2 steps since the overage is always tiny.
+- GREEN (targeted, first pass): `tests/test_chunker.py -v` → **7 passed**.
+- Bonus real-corpus check (not required by this task's Verify line, ran anyway given the "absolute
+  property" framing): full-precision (non-`--fast`) re-pack of all of `demo_corpus` (incl. the
+  real 10-K PDF), validating both properties across every emitted chunk → **7 of 242 real chunks
+  violated the size property** (`token_count` matched `real_len` exactly every time — property 2
+  held — but 7 chunks' real length exceeded 800, e.g. `('src_001_chunk_000', 826, 826)`,
+  `('src_001_chunk_028', 857, 857)`). All from the SAME join-separator mechanism, but via the
+  **normal** (non-oversized) multi-block accumulation path, which TA.2/F14 didn't originally
+  describe — the flush decision there summed per-block token counts too, with the identical blind
+  spot.
+- Fix, part 2: normal-path flush decision now also measures the real joined length (existing
+  `current_blocks` + the incoming block, joined with `"\n\n"`) before deciding whether to flush,
+  instead of comparing summed integers. Re-ran the real-corpus check: **1 of 244 chunks** still
+  violated (`('src_001_chunk_124', 855, 855)`) — down from 7, not yet 0.
+- Investigated the remaining case directly (kept the pack output, inspected the offending chunk):
+  a 3-block chunk ending in a table. Root cause: after a flush-and-retain, the *new* block is
+  appended to `current_blocks` unconditionally, with no re-check that the (small) retained
+  remainder plus the new block still fits — e.g. a 60-token retained tail immediately followed by
+  a 780-token block that fits alone (≤800) but not combined with the tail (840+ real tokens).
+  Reproduced deterministically: `test_chunker_drops_retention_when_it_still_wont_fit_next_block`
+  (700-tok block1 flushes on block2's arrival, too big to retain itself; 60-tok block2 accumulates
+  with block1 first, then gets retained whole; 780-tok block3 then doesn't fit with the retained
+  60) — confirmed RED against the pre-this-fix code via `git stash` (same discipline as prior
+  tasks): failed on the FIRST chunk's `token_count` mismatch, confirming the old code path.
+- Fix, part 3: `create_chunk` gained an `allow_retention` parameter; the normal-path flush now
+  double-checks after the first flush+retain — if the retained remainder still doesn't fit the
+  incoming block, flushes again with `allow_retention=False` (forces `current_blocks`/
+  `current_tokens` to empty) rather than silently accumulate an oversized chunk. Bounded (at most
+  one extra flush), no infinite loop, no duplicate chunk beyond the one legitimate small
+  transitional chunk this produces (consistent with how overlap already duplicates content by
+  design elsewhere in this chunker).
+- GREEN (targeted, final): `tests/test_chunker.py -v` → **9 passed** — all 3 new TA.2 tests plus
+  all 6 pre-existing ones (`test_chunker_oversize_block` unaffected: no join occurs for a
+  standalone oversized block, so its behavior is unchanged; TA.1 boundary tests unaffected).
+- GREEN (full suite): **308 passed, 0 failed** in 23.21s (306 + these 2 additional new tests).
+- Real-corpus check, final: full-precision re-pack of `demo_corpus` → **245 chunks, 0 violations**
+  of the absolute property. Temp dirs removed after each inspection.
 
 ### TA.3 · Per-file error boundary (spec §4 TA.3, F2)
 - [ ] RED: dangling-symlink corpus aborts the whole pack today. Fix: catch-all inside the submitted per-file callable → failed source + `parse_error` warning, pack continues. PermissionError variant (monkeypatched for determinism).
