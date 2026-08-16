@@ -247,6 +247,46 @@ def test_incremental_pack_skips_unchanged(tmp_path):
     )
 
 
+def test_cache_hit_remaps_path_and_block_ids(tmp_path):
+    """F3: a cache HIT only remapped doc.source_id, leaving the doc's own `path` and its
+    blocks' `block_id`s (which bake in source_id as a prefix, e.g. 'src_000_table_0') pointing
+    at the OLD pack's identity when the corpus reshuffles between packs -- e.g. a file renamed
+    but with identical bytes. Same precedent/pattern as test_trust_warnings_correct_source_id_on_cache_hit."""
+    from agentpack.pack import _parse_one
+
+    csv_content = "name,value\nfoo,1\nbar,2\n"
+    dir_a = tmp_path / "corpus_a"
+    dir_a.mkdir()
+    (dir_a / "report_a.csv").write_text(csv_content)
+    cache_dir = tmp_path / ".cache"
+
+    first = _parse_one(dir_a / "report_a.csv", "src_000", fast_pdf=False,
+                        remove_empty_lines=False, cache_dir=cache_dir)
+    first_tables = [b for b in first.blocks if b.type == "table"]
+    assert first_tables, "fixture must produce at least one table block"
+    assert first.path == "report_a.csv"
+
+    # Same bytes, renamed into a fresh dir -> same content hash -> cache HIT below.
+    dir_b = tmp_path / "corpus_b"
+    dir_b.mkdir()
+    (dir_b / "report_b.csv").write_text(csv_content)
+
+    second = _parse_one(dir_b / "report_b.csv", "src_005", fast_pdf=False,
+                         remove_empty_lines=False, cache_dir=cache_dir)
+
+    assert second.source_id == "src_005"
+    assert second.path == "report_b.csv", (
+        f"cache hit left a stale path: {second.path!r}, expected 'report_b.csv'"
+    )
+    second_tables = [b for b in second.blocks if b.type == "table"]
+    assert second_tables, "cache hit must still carry the table block(s)"
+    for b in second_tables:
+        assert b.block_id.startswith("src_005"), (
+            f"table block_id {b.block_id!r} carries a stale source_id namespace"
+        )
+        assert b.source_id == "src_005"
+
+
 def test_trust_warnings_correct_source_id_on_cache_hit(tmp_path):
     """Regression guard for docs/specs/0002-ingestion-trust-layer.md §2: trust
     warnings must always carry the CURRENT source_id, even when the underlying

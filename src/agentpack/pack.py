@@ -95,7 +95,18 @@ def _parse_one(
             if not has_parse_error:
                 cache_set(cache_dir, cache_key, doc)
         else:
+            # Cache HIT: the cached doc's identity (source_id, path, and every block_id,
+            # which bakes in source_id as a prefix -- e.g. "src_000_table_0") reflects
+            # whatever pack first populated the cache. Remap all of it to the current
+            # pack's identity so citations and table ids don't point at a stale filename
+            # or namespace when the corpus reshuffles between packs.
+            old_source_id = doc.source_id
             doc.source_id = source_id
+            doc.path = file_path.name
+            for block in doc.blocks:
+                if block.block_id.startswith(old_source_id):
+                    block.block_id = source_id + block.block_id[len(old_source_id):]
+                block.source_id = source_id
 
         # Runs after the cache block on every call, hit or miss, so trust warnings
         # are never pickled into the L1 cache and always carry the current source_id.

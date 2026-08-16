@@ -384,10 +384,34 @@ the test's `alpha=0.5`, delete the parameter). Proceeding to Phase A.
   '.../ghost.md'` — warning surfaces exactly as expected; good file's chunk present and correct
   (1 chunk, 11 tokens). Temp dir removed after inspection.
 
-### TA.4 · L1 cache-hit remap of `doc.path` + block ids (spec §4 TA.4, F3)
-- [ ] RED: rename-same-content re-pack cites the OLD filename today. Fix: remap path + regenerate block ids under current source_id (find the parser's id-formatting logic first). Must still be a cache HIT (assert via hit-count pattern).
+### TA.4 · L1 cache-hit remap of `doc.path` + block ids (spec §4 TA.4, F3) — ✅ DONE
+- [x] RED: rename-same-content re-pack cites the OLD filename today. Fix: remap path + regenerate block ids under current source_id (find the parser's id-formatting logic first). Must still be a cache HIT (assert via hit-count pattern).
 **Acceptance:** citations name the current file; table ids in the current namespace; cache still hit.
 **Verify:** targeted + full suite.
+
+**Evidence:**
+- Confirmed the id-formatting logic first (`grep -rn "block_id\|_table_" src/agentpack/parsers/`):
+  every parser formats `block_id=f"{source_id}_<type-suffix>"` — the source_id is ALWAYS a plain
+  prefix, so remapping is a generic prefix-swap (strip the old source_id, prepend the new one),
+  not something that needs per-parser-type reimplementation.
+- RED: `test_cache_hit_remaps_path_and_block_ids` (mirrors the existing
+  `test_trust_warnings_correct_source_id_on_cache_hit` precedent exactly: calls `_parse_one`
+  directly with two different `source_id`s on the same `cache_dir` and same-content-different-name
+  files, sidestepping scan-order concerns entirely) → cache-hit doc's `path` stayed
+  `'report_a.csv'` instead of updating to `'report_b.csv'`. Matches F3 exactly (only
+  `doc.source_id` was remapped).
+- Fix: on cache HIT, also set `doc.path = file_path.name` and rewrite every block's `block_id`
+  (prefix-swap from the old to the new source_id) + `block.source_id`.
+- GREEN (targeted): `tests/test_pack.py -v` → **10 passed**, incl. `test_incremental_pack_skips_unchanged`
+  (confirms the fix remaps, not bypasses, the cache — `parser.parse` still called exactly once
+  across two packs) and the pre-existing trust-warning precedent test, both unaffected.
+- GREEN (full suite): **311 passed, 0 failed** in 21.52s (310 + this 1 new test).
+- Real end-to-end check (write_pack/CLI level, not just the `_parse_one` unit): packed
+  `report_a.csv`, then packed a renamed `report_b.csv` (same bytes, plus a filler file to shift
+  scan order) into the SAME output dir (shared `.cache/`) → second manifest:
+  `source: src_000 report_b.csv` (current filename, not stale) and
+  `table: src_000_table_0 src_000` (table block_id/source_id self-consistent with the source's own
+  id). Temp dir removed after inspection.
 
 ### TA.5 · Deterministic scan order (spec §4 TA.5, F13)
 - [ ] Fix: `dirs.sort()` + `sorted(files)` in `scanner.py`. Test via monkeypatched reversed `os.walk` + straight determinism test. OQ1 accepted: note the one-time id-shift in the PR description.
