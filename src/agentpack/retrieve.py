@@ -129,16 +129,29 @@ def build_fts_index(pack_dir: Path, db_path: Path):
     _fts_write_hash(conn, _manifest_hash(pack_dir))
     return conn
 
+def _clear_vector_index(pack_dir: Path, vector_path: Path, meta_path: Path):
+    """Delete any existing vector index artifacts and record the CURRENT (empty) manifest
+    hash, so a degenerate rebuild (zero chunks, or all chunk files missing) never leaves a
+    stale index behind to serve ghost results for chunks that no longer exist."""
+    hnsw_path = vector_path.parent / "hnsw_index.bin"
+    hash_path = vector_path.parent / "vector_index.hash"
+    vector_path.unlink(missing_ok=True)
+    meta_path.unlink(missing_ok=True)
+    hnsw_path.unlink(missing_ok=True)
+    hash_path.write_text(_manifest_hash(pack_dir))
+
+
 def build_vector_index(pack_dir: Path, vector_path: Path, meta_path: Path):
     if TextEmbedding is None:
         raise ImportError("fastembed is required for vector search. Run `pip install agentpack[gpu]` or `pip install fastembed`")
-        
+
     manifest_path = pack_dir / "manifest.yml"
     with open(manifest_path, "r", encoding="utf-8") as f:
         manifest = yaml.safe_load(f)
-        
+
     chunks = manifest.get("chunks", [])
     if not chunks:
+        _clear_vector_index(pack_dir, vector_path, meta_path)
         return
 
     embedding_model = _get_embedding_model()
@@ -173,6 +186,7 @@ def build_vector_index(pack_dir: Path, vector_path: Path, meta_path: Path):
             embeddings_list.append(None)  # placeholder — will batch-embed below
 
     if not texts:
+        _clear_vector_index(pack_dir, vector_path, meta_path)
         return
 
     # Batch-embed only the cache misses
@@ -315,6 +329,16 @@ def search_vector(pack_dir: str, query: str, top_k: int = 5) -> List[Dict]:
         return []
 
     current_hash = _manifest_hash(base_path)
+    if (
+        not vector_path.exists()
+        and hash_path.exists()
+        and hash_path.read_text().strip() == current_hash
+    ):
+        # Already confirmed this exact manifest state has nothing to embed (a degenerate
+        # rebuild cleared the index and recorded the current hash) -- no point re-running
+        # build_vector_index just to no-op again.
+        return []
+
     stale = (
         not vector_path.exists()
         or not meta_path.exists()

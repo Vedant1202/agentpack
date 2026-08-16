@@ -168,6 +168,46 @@ def test_build_vector_index(mock_get_model, tmp_path):
     assert (indexes_dir / "vector_meta.json").exists()
 
 
+def test_search_vector_returns_empty_after_degenerate_rebuild(tmp_path):
+    """F7: build_vector_index's zero-chunks/zero-texts early paths didn't delete stale index
+    files or write the new hash, so a pack rewritten to zero chunks kept serving the OLD
+    vectors forever (ghost results) instead of an empty result."""
+    import yaml
+
+    pack_dir = tmp_path
+    indexes_dir = pack_dir / "indexes"
+    indexes_dir.mkdir(parents=True, exist_ok=True)
+    chunks_dir = pack_dir / "chunks"
+    chunks_dir.mkdir()
+
+    manifest = {
+        "sources": [{"id": "s1", "checksum": "abc"}],
+        "chunks": [{"id": "c1", "source_id": "s1", "path": "chunks/c1.json", "token_count": 10}],
+    }
+    with open(pack_dir / "manifest.yml", "w") as f:
+        yaml.dump(manifest, f)
+
+    with open(chunks_dir / "c1.json", "w") as f:
+        json.dump({"content": "A"}, f)
+
+    with patch("agentpack.retrieve._get_embedding_model") as mock_get_model:
+        mock_embed = MagicMock()
+        mock_embed.embed.side_effect = lambda texts, **_: iter([[0.1, 0.9]] * len(texts))
+        mock_get_model.return_value = mock_embed
+
+        build_vector_index(pack_dir, indexes_dir / "vector_index.npy", indexes_dir / "vector_meta.json")
+        assert (indexes_dir / "vector_index.npy").exists()
+
+        # Rewrite manifest to zero chunks, keeping sources -- the degenerate-rebuild case.
+        manifest["chunks"] = []
+        with open(pack_dir / "manifest.yml", "w") as f:
+            yaml.dump(manifest, f)
+
+        results = search_vector(str(pack_dir), "query", top_k=5)
+
+    assert results == [], f"stale vector index served ghost results for a deleted chunk: {results}"
+
+
 def test_hybrid_ranking_snapshot_tb0(tmp_path):
     """TB.0: ranking-snapshot guard for Phase B (spec 0004). This test must pass UNCHANGED
     through every remaining Phase B task -- it proves those changes touch storage/invalidation
@@ -224,28 +264,44 @@ def test_hybrid_ranking_snapshot_tb0(tmp_path):
 @patch("agentpack.retrieve.np.load")
 @patch("agentpack.retrieve._get_embedding_model")
 def test_search_hybrid(mock_get_model, mock_np_load, tmp_path):
+    """TB.1 note: this fixture used to be a MISMATCHED manifest+index pair (manifest said
+    zero chunks; the index files claimed c1/c2) and passed only because build_vector_index's
+    degenerate-rebuild path was a silent no-op (F7). It now uses a genuinely consistent pair
+    -- a real hash matching a manifest that actually lists c1/c2 -- so search_vector sees the
+    index as current and serves it unchanged, which is what this test is actually about
+    (hybrid fusion), not the invalidation behavior TB.1 fixes."""
+    from agentpack.retrieve import _manifest_hash
+
     mock_embed = MagicMock()
     mock_embed.embed.side_effect = lambda texts, **_: iter([np.array([1.0, 0.0])] * len(texts))
     mock_get_model.return_value = mock_embed
-    
+
     mock_np_load.return_value = np.array([[1.0, 0.0], [0.0, 1.0]])
-    
+
     pack_dir = tmp_path
     indexes_dir = pack_dir / "indexes"
     indexes_dir.mkdir(parents=True, exist_ok=True)
 
     import yaml
+    manifest = {
+        "sources": [{"id": "s1", "checksum": "a"}, {"id": "s2", "checksum": "b"}],
+        "chunks": [
+            {"id": "c1", "source_id": "s1", "path": "p1", "token_count": 1},
+            {"id": "c2", "source_id": "s2", "path": "p2", "token_count": 1},
+        ],
+    }
     with open(pack_dir / "manifest.yml", "w") as f:
-        yaml.dump({"sources": [], "chunks": []}, f)
+        yaml.dump(manifest, f)
 
     with open(indexes_dir / "vector_meta.json", "w") as f:
         json.dump([{"chunk_id": "c1", "source_id": "s1", "path": "p1", "token_count": 1, "citation": {}},
                    {"chunk_id": "c2", "source_id": "s2", "path": "p2", "token_count": 1, "citation": {}}], f)
 
     (indexes_dir / "vector_index.npy").write_bytes(b"")
-    # Write hash so search_vector doesn't try to rebuild
-    (indexes_dir / "vector_index.hash").write_text("placeholder")
-        
+    # A REAL hash matching this manifest, so search_vector sees the index as current and
+    # doesn't attempt a rebuild.
+    (indexes_dir / "vector_index.hash").write_text(_manifest_hash(pack_dir))
+
     with patch("agentpack.retrieve.search_fts") as mock_search_fts:
         # Mock FTS returning c2
         mock_search_fts.return_value = [{"chunk_id": "c2", "score": 1.0, "path": "p", "token_count": 10, "citation": {}}]

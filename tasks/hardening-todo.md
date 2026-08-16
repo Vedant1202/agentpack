@@ -541,9 +541,35 @@ TA.1 before/after citation, TA.2's beyond-scope discovery, TA.5's OQ1 note). Fin
 - This test's snapshot values must stay byte-identical through TB.1–TB.7; will be re-run and
   cited in every subsequent B/C task's evidence per the spec's instruction.
 
-### TB.1 · Ghost results after degenerate rebuild (spec §4 TB.1, F7)
-- [ ] RED: zero-chunk manifest still serves old vectors. Fix: delete npy/meta/hnsw + write new hash on early-return; `search_vector` returns `[]` cleanly. **Expected casualty:** `test_search_hybrid` (tests/test_retrieve.py:125-159) fails against the fix because it depends on the bug — rewrite its fixture to a consistent manifest+index pair and say so in the evidence.
+### TB.1 · Ghost results after degenerate rebuild (spec §4 TB.1, F7) — ✅ DONE
+- [x] RED: zero-chunk manifest still serves old vectors. Fix: delete npy/meta/hnsw + write new hash on early-return; `search_vector` returns `[]` cleanly. **Expected casualty:** `test_search_hybrid` (tests/test_retrieve.py:125-159) fails against the fix because it depends on the bug — rewrite its fixture to a consistent manifest+index pair and say so in the evidence.
 **Verify:** targeted + TB.0 + full suite.
+
+**Evidence:**
+- Confirmed F7's two early-return sites: `build_vector_index`'s zero-chunks path (`if not
+  chunks: return`) and zero-texts path (`if not texts: return`) — neither deleted stale
+  `vector_index.npy`/`vector_meta.json`/`hnsw_index.bin` nor wrote the new hash.
+- RED: `test_search_vector_returns_empty_after_degenerate_rebuild` (build a real 1-chunk vector
+  index with mocked embeddings, then rewrite the manifest to zero chunks, keeping sources) →
+  `search_vector` still returned the deleted chunk `c1` as a ghost result.
+- Fix: added `_clear_vector_index` (delete `vector_path`/`meta_path`/`hnsw_path` if present, write
+  the CURRENT — now-empty-corresponding — manifest hash) and called it from both early-return
+  sites. Also adjusted `search_vector` per spec: an explicit fast-path — if `vector_path` is
+  absent AND the hash file matches the current hash (i.e. we've already confirmed this exact
+  manifest state has nothing to embed) — returns `[]` without re-attempting `build_vector_index`.
+- **Expected casualty, confirmed exactly as predicted:** `test_search_hybrid` failed against the
+  fix (`assert 1 == 2`) — its fixture was a MISMATCHED manifest+index pair (manifest said zero
+  chunks; index files claimed c1/c2 via a hardcoded `"placeholder"` hash string, never a real
+  hash) that only "worked" because the old degenerate-rebuild path was a silent no-op. Rewrote the
+  fixture to a genuinely consistent pair: the manifest now actually lists c1/c2, and the hash file
+  holds `_manifest_hash(pack_dir)`'s real value (not a placeholder) — `search_vector` now
+  correctly sees the index as current, preserving the test's real purpose (verifying hybrid RRF
+  fusion) rather than accidentally depending on invalidation being broken.
+- GREEN (targeted): `tests/test_retrieve.py -v` → **21 passed**, incl. the new test and the
+  rewritten `test_search_hybrid`.
+- GREEN + TB.0: `test_hybrid_ranking_snapshot_tb0` re-run → still **PASSED**, snapshot
+  byte-identical — confirms this task touched storage/invalidation only, not ranking.
+- GREEN (full suite): **318 passed, 0 failed** in 25.11s (317 + this 1 new test).
 
 ### TB.2 · Content-aware manifest hash (spec §4 TB.2, F8)
 - [ ] RED: same ids, different token_counts → equal hashes today. Fix: fold `id:token_count` lines into the fingerprint. OQ2 accepted: note one-time rebuild/L5 invalidation in PR description.
