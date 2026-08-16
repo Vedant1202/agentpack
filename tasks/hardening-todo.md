@@ -233,7 +233,9 @@ delete the parameter, or (b) skip T0.7 for now — chose (a), matching F30's ori
 - GREEN (full suite): **303 passed, 0 failed** in 24.09s — unchanged count from T0.6 (pure
   deletion + one call-site edit, no new tests).
 
-**▣ CHECKPOINT 0 — stop; post evidence; wait for human go.**
+**▣ CHECKPOINT 0 — ✅ reviewed and approved 2026-08-16.** Evidence posted (per-task RED/GREEN,
+303 passed/0 failed final). T0.7's alpha-param stop condition resolved per human decision (drop
+the test's `alpha=0.5`, delete the parameter). Proceeding to Phase A.
 
 ---
 
