@@ -167,6 +167,60 @@ def test_build_vector_index(mock_get_model, tmp_path):
     assert (indexes_dir / "vector_index.npy").exists()
     assert (indexes_dir / "vector_meta.json").exists()
 
+
+def test_hybrid_ranking_snapshot_tb0(tmp_path):
+    """TB.0: ranking-snapshot guard for Phase B (spec 0004). This test must pass UNCHANGED
+    through every remaining Phase B task -- it proves those changes touch storage/invalidation
+    only, never the ranking algorithm itself. Embeddings are deterministic (md5-hash-derived,
+    purely a function of chunk text) so the snapshot is stable across runs without depending on
+    a real ML model, mirroring test_rrf_ordering's use of a small real pack."""
+    import hashlib
+    from agentpack.pack import write_pack
+
+    in_dir = tmp_path / "corpus"
+    in_dir.mkdir()
+    (in_dir / "ml_ops.md").write_text(
+        "# ML Ops\n\nDeploying machine learning models to production requires careful "
+        "monitoring and rollback strategies when a new model underperforms."
+    )
+    (in_dir / "k8s.md").write_text(
+        "# Kubernetes\n\nContainer orchestration with Kubernetes simplifies scaling "
+        "stateless application deployments across a cluster."
+    )
+    (in_dir / "db.md").write_text(
+        "# Database Migrations\n\nDatabase migrations should run inside a transaction "
+        "to allow a safe rollback on failure."
+    )
+    out_dir = tmp_path / "pack"
+
+    def deterministic_embed(texts, **_):
+        for t in texts:
+            digest = hashlib.md5(t.encode("utf-8")).digest()
+            yield np.array([b / 255.0 for b in digest[:8]], dtype=np.float32)
+
+    mock_model = MagicMock()
+    mock_model.embed.side_effect = deterministic_embed
+
+    with patch("agentpack.retrieve._get_embedding_model", return_value=mock_model):
+        write_pack(str(in_dir), str(out_dir), quiet=True, no_map=True, no_graph=True)
+
+        results_rollback = search_pack(str(out_dir), "rollback strategies", top_k=3, mode="hybrid")
+        results_k8s = search_pack(str(out_dir), "container orchestration", top_k=3, mode="hybrid")
+
+    ids_rollback = [r["chunk_id"] for r in results_rollback]
+    ids_k8s = [r["chunk_id"] for r in results_k8s]
+
+    # Snapshot -- literal, ordered chunk-id lists captured from a real run. If either of these
+    # changes, something in Phase B affected RANKING, not just storage/invalidation, and needs
+    # explicit review before proceeding.
+    assert ids_rollback == ["src_002_chunk_000", "src_000_chunk_000", "src_001_chunk_000"], (
+        f"TB.0 ranking snapshot changed for 'rollback strategies': {ids_rollback}"
+    )
+    assert ids_k8s == ["src_001_chunk_000", "src_000_chunk_000", "src_002_chunk_000"], (
+        f"TB.0 ranking snapshot changed for 'container orchestration': {ids_k8s}"
+    )
+
+
 @patch("agentpack.retrieve.np.load")
 @patch("agentpack.retrieve._get_embedding_model")
 def test_search_hybrid(mock_get_model, mock_np_load, tmp_path):

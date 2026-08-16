@@ -521,9 +521,25 @@ TA.1 before/after citation, TA.2's beyond-scope discovery, TA.5's OQ1 note). Fin
 
 ## Phase B — Invalidation & retrieval robustness
 
-### TB.0 · Ranking snapshot guard — FIRST, before any B change (spec §4 TB.0)
-- [ ] Snapshot ordered chunk-id results for 2 fixed hybrid queries on a small real pack (mocked embeddings). This test must pass unchanged through every remaining task.
+### TB.0 · Ranking snapshot guard — FIRST, before any B change (spec §4 TB.0) — ✅ DONE
+- [x] Snapshot ordered chunk-id results for 2 fixed hybrid queries on a small real pack (mocked embeddings). This test must pass unchanged through every remaining task.
 **Verify:** test green pre-change; referenced in every B/C task's evidence.
+
+**Evidence:**
+- `test_hybrid_ranking_snapshot_tb0`: real 3-doc markdown corpus (ML ops / Kubernetes / DB
+  migrations — chosen so FTS keyword overlap differs meaningfully per query), packed via a real
+  `write_pack` (`no_map=True, no_graph=True` to keep the test focused/fast), with a deterministic
+  md5-hash-derived mock embedding (purely a function of chunk text, no real ML model — stable
+  across runs and machines). `search_pack(..., mode="hybrid")` for 2 fixed queries
+  ("rollback strategies", "container orchestration") produces meaningfully DIFFERENT orderings
+  per query (confirmed both queries don't just return docs in the same order), snapshotted as
+  literal chunk-id lists.
+- Verified determinism directly (not just trusting the mock): ran the discovery script twice in
+  one process and the full test 3 additional times → identical ordered results every time.
+- GREEN: `tests/test_retrieve.py::test_hybrid_ranking_snapshot_tb0` → **1 passed** (~1-1.5s).
+- GREEN (full suite): **317 passed, 0 failed** in 24.84s (316 + this 1 new test).
+- This test's snapshot values must stay byte-identical through TB.1–TB.7; will be re-run and
+  cited in every subsequent B/C task's evidence per the spec's instruction.
 
 ### TB.1 · Ghost results after degenerate rebuild (spec §4 TB.1, F7)
 - [ ] RED: zero-chunk manifest still serves old vectors. Fix: delete npy/meta/hnsw + write new hash on early-return; `search_vector` returns `[]` cleanly. **Expected casualty:** `test_search_hybrid` (tests/test_retrieve.py:125-159) fails against the fix because it depends on the bug — rewrite its fixture to a consistent manifest+index pair and say so in the evidence.
