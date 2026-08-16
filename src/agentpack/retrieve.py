@@ -61,16 +61,22 @@ def _get_embedding_model():
 
 
 def _manifest_hash(pack_dir: Path) -> str:
-    """Stable hash of the pack's content: sorted chunk ids + source checksums."""
+    """Stable hash of the pack's content: sorted chunk id:token_count pairs + source checksums.
+
+    token_count is folded in alongside id because chunk ids are positional
+    (f"{source_id}_chunk_{i:03d}") -- re-chunking that redistributes text across the SAME
+    number of chunks keeps every id identical, but almost always shifts token counts.
+    """
     manifest_path = pack_dir / "manifest.yml"
     if not manifest_path.exists():
         return ""
     with open(manifest_path, "r", encoding="utf-8") as f:
         manifest = yaml.safe_load(f)
-    # Use chunk ids (ordering-stable) + source checksums as the content fingerprint
-    chunk_ids = sorted(c.get("id", "") for c in manifest.get("chunks", []))
+    chunk_lines = sorted(
+        f"{c.get('id', '')}:{c.get('token_count', '')}" for c in manifest.get("chunks", [])
+    )
     src_checksums = sorted(s.get("checksum", "") for s in manifest.get("sources", []))
-    fingerprint = "|".join(chunk_ids) + "||" + "|".join(src_checksums)
+    fingerprint = "|".join(chunk_lines) + "||" + "|".join(src_checksums)
     return hashlib.sha256(fingerprint.encode()).hexdigest()
 
 

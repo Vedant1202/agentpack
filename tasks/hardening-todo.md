@@ -571,9 +571,30 @@ TA.1 before/after citation, TA.2's beyond-scope discovery, TA.5's OQ1 note). Fin
   byte-identical — confirms this task touched storage/invalidation only, not ranking.
 - GREEN (full suite): **318 passed, 0 failed** in 25.11s (317 + this 1 new test).
 
-### TB.2 · Content-aware manifest hash (spec §4 TB.2, F8)
-- [ ] RED: same ids, different token_counts → equal hashes today. Fix: fold `id:token_count` lines into the fingerprint. OQ2 accepted: note one-time rebuild/L5 invalidation in PR description.
+### TB.2 · Content-aware manifest hash (spec §4 TB.2, F8) — ✅ DONE
+- [x] RED: same ids, different token_counts → equal hashes today. Fix: fold `id:token_count` lines into the fingerprint. OQ2 accepted: note one-time rebuild/L5 invalidation in PR description.
 **Verify:** targeted + TB.0 + full suite.
+
+**Evidence:**
+- Confirmed F8's location: `retrieve.py:63-74`, `_manifest_hash` fingerprints only sorted chunk
+  ids + source checksums. Since chunk ids are positional (`f"{source_id}_chunk_{i:03d}"`,
+  confirmed in `chunker.py`), re-chunking that redistributes text across the SAME number of
+  chunks leaves every id unchanged, so the old fingerprint can't see the content actually
+  changed — stale FTS/vector indexes and stale L5 cached answers.
+- RED: `test_manifest_hash_changes_with_token_count` (two manifests, identical chunk
+  ids/sources, `token_count: 100` vs `token_count: 250`) → identical hashes
+  (`22809d1e...` both times).
+- Fix: fold `token_count` into the fingerprint alongside id — `f"{id}:{token_count}"` lines,
+  sorted, instead of bare ids.
+- GREEN (targeted): `tests/test_retrieve.py -v` → **22 passed**, incl. the new test and all
+  existing invalidation tests (`test_fts_invalidated_on_repack`,
+  `test_fts_unchanged_pack_reuses_index`, `test_embed_cache_skips_reembedding`) staying green per
+  spec's explicit requirement.
+- GREEN + TB.0: snapshot re-run → still passing, unchanged.
+- GREEN (full suite): **319 passed, 0 failed** in 24.45s (318 + this 1 new test).
+- **OQ2 / migration note for the PR description:** existing packs will see a one-time index
+  rebuild (FTS + vector) and L5 cache invalidation on next access, since their stored hash was
+  computed under the old (id-only) fingerprint. Accepted per OQ2.
 
 ### TB.3 · Corrupt `cache.db` self-heal + conn hygiene (spec §4 TB.3, F9)
 - [ ] RED: garbage cache.db → silent dead cache forever. Fix: try/finally everywhere in cache.py; on DatabaseError delete + warn once (module flag) + recreate.

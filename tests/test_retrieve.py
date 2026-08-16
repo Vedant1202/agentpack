@@ -341,6 +341,35 @@ def _make_pack(pack_dir, chunk_id, text):
         yaml.dump(manifest, f)
 
 
+def test_manifest_hash_changes_with_token_count(tmp_path):
+    """F8: re-chunking that redistributes text across the SAME chunk ids (positional,
+    unchanged) but shifts token_counts must still invalidate stale indexes/L5 cache -- the
+    old fingerprint (ids + source checksums only) can't see this."""
+    from agentpack.retrieve import _manifest_hash
+    import yaml
+
+    pack_dir = tmp_path
+    manifest_v1 = {
+        "sources": [{"id": "s1", "checksum": "abc"}],
+        "chunks": [{"id": "c1", "source_id": "s1", "path": "c1.md", "token_count": 100}],
+    }
+    with open(pack_dir / "manifest.yml", "w") as f:
+        yaml.dump(manifest_v1, f)
+    hash_v1 = _manifest_hash(pack_dir)
+
+    manifest_v2 = {
+        "sources": [{"id": "s1", "checksum": "abc"}],
+        "chunks": [{"id": "c1", "source_id": "s1", "path": "c1.md", "token_count": 250}],
+    }
+    with open(pack_dir / "manifest.yml", "w") as f:
+        yaml.dump(manifest_v2, f)
+    hash_v2 = _manifest_hash(pack_dir)
+
+    assert hash_v1 != hash_v2, (
+        "manifest hash unchanged despite a different token_count for the same chunk id"
+    )
+
+
 def test_fts_invalidated_on_repack(tmp_path):
     """After re-packing with new content the FTS index must be rebuilt."""
     pack_dir = tmp_path / "pack"
