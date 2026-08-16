@@ -26,6 +26,20 @@ def test_text_parser_remove_empty_lines(mock_txt_file):
     assert len(doc.blocks) == 1
     assert "This is a mock text file.\nIt has two paragraphs." in doc.blocks[0].text
 
+def test_text_parser_flags_wrong_encoding_with_decode_error_warning(tmp_path):
+    """F16: reading a UTF-16 file as UTF-8 with errors='replace' silently produces
+    replacement-character mojibake today -- status success, zero warnings."""
+    txt_path = tmp_path / "mojibake.txt"
+    txt_path.write_bytes("Hello world, this is UTF-16 encoded text.".encode("utf-16"))
+
+    parser = TextParser()
+    doc = parser.parse(txt_path, "src_1")
+
+    assert any(w.type == "decode_error" for w in doc.warnings), (
+        "wrong-encoding file must carry a decode_error warning"
+    )
+
+
 def test_markdown_parser(mock_md_file):
     parser = MarkdownParser()
     doc = parser.parse(mock_md_file, "src_1")
@@ -54,6 +68,23 @@ def test_markdown_parser_compression(mock_md_file):
     # or EOF. It compresses text tightly.
     assert len(doc.blocks) == 4
     assert doc.blocks[1].text == "Some text."
+
+def test_markdown_parser_strips_utf8_bom_and_recognizes_heading(tmp_path):
+    """F16: a UTF-8 BOM read as plain 'utf-8' (not 'utf-8-sig') glues onto the first line, so
+    '﻿# Title' doesn't match the heading pattern -- structure is silently lost."""
+    md_path = tmp_path / "bom.md"
+    md_path.write_bytes("# Title\n\nbody text here".encode("utf-8-sig"))
+
+    parser = MarkdownParser()
+    doc = parser.parse(md_path, "src_1")
+
+    assert doc.blocks[0].type == "heading"
+    assert doc.blocks[0].text == "Title"
+    assert doc.blocks[0].section_path == ["Title"]
+    assert not any(w.type == "decode_error" for w in doc.warnings), (
+        "a clean UTF-8-BOM file must not be flagged as a decode error"
+    )
+
 
 def test_csv_parser(mock_csv_file):
     parser = CSVParser()

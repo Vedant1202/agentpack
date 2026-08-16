@@ -5,19 +5,27 @@ from agentpack.parsers.base import Parser
 
 class TextParser(Parser):
     def parse(self, file_path: Path, source_id: str) -> SourceDocument:
-        with open(file_path, "r", encoding="utf-8", errors="replace") as f:
+        with open(file_path, "r", encoding="utf-8-sig", errors="replace") as f:
             content = f.read()
 
         if getattr(self, "remove_empty_lines", False):
             content = "\n".join([line for line in content.split("\n") if line.strip()])
 
         checksum = hashlib.sha256(content.encode("utf-8")).hexdigest()
-        
+
         blocks = []
         warnings = []
-        
+
+        if "�" in content:
+            warnings.append(ExtractionWarning(
+                source_id=source_id,
+                type="decode_error",
+                message="File contains byte sequences invalid for its detected/assumed "
+                        "encoding; some characters were replaced.",
+            ))
+
         paragraphs = [p.strip() for p in content.split("\n\n") if p.strip()]
-        
+
         if not paragraphs:
             warnings.append(ExtractionWarning(
                 source_id=source_id,

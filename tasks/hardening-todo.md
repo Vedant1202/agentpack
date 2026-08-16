@@ -465,9 +465,28 @@ the test's `alpha=0.5`, delete the parameter). Proceeding to Phase A.
   pre-existing ones.
 - GREEN (full suite): **314 passed, 0 failed** in 21.53s (313 + this 1 new test).
 
-### TA.7 · Encoding: BOM + decode warnings (spec §4 TA.7, F16)
-- [ ] RED pair: BOM markdown loses its heading; UTF-16 txt packs with zero warnings. Fix: `utf-8-sig` + `decode_error` ExtractionWarning when replacement chars present (status stays success).
+### TA.7 · Encoding: BOM + decode warnings (spec §4 TA.7, F16) — ✅ DONE
+- [x] RED pair: BOM markdown loses its heading; UTF-16 txt packs with zero warnings. Fix: `utf-8-sig` + `decode_error` ExtractionWarning when replacement chars present (status stays success).
 **Verify:** targeted + full suite.
+
+**Evidence:**
+- Confirmed F16's two locations: `text_parser.py` and `markdown_parser.py::parse` both opened
+  with `encoding="utf-8"` (not `utf-8-sig`) + `errors="replace"`, with no post-decode check at all.
+- RED (a): `test_markdown_parser_strips_utf8_bom_and_recognizes_heading` (real UTF-8-BOM-encoded
+  file, `"# Title\n\nbody text here".encode("utf-8-sig")`) → `doc.blocks[0].type` was `'paragraph'`
+  not `'heading'` — the BOM glued onto `# Title`, so `line.startswith("#")` never matched.
+- RED (b): `test_text_parser_flags_wrong_encoding_with_decode_error_warning` (real UTF-16-encoded
+  `.txt` file) → zero warnings; content silently decoded to replacement-character mojibake.
+- Fix (both parsers): `encoding="utf-8"` → `encoding="utf-8-sig"` (strips a BOM when present,
+  behaves identically to plain `utf-8` when absent — strictly additive, no regression for
+  BOM-less files, verified by the pre-existing `test_markdown_parser`/`test_text_parser` still
+  passing unchanged). After decode, `if "�" in content:` appends
+  `ExtractionWarning(type="decode_error", ...)`, mirroring each parser's existing
+  `empty_file`-warning pattern; `status` stays `"success"` (unchanged — nothing else sets it to
+  `"failed"` here) per spec.
+- GREEN (targeted): `tests/test_parsers.py -v` → **9 passed**, incl. both new tests and all 7
+  pre-existing ones (`test_markdown_parser`, `test_text_parser`, etc. unaffected).
+- GREEN (full suite): **316 passed, 0 failed** in 21.47s (314 + these 2 new tests).
 
 ### TA.8 · Close the fitz document (spec §4 TA.8, F29)
 - [ ] Live-verify fitz context-manager support, then `with fitz.open(...)`.
