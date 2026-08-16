@@ -25,9 +25,9 @@ PYTHONPATH="$PWD/src" ./venv/bin/python -m pytest tests/ -q
 ```
 Bare `python -m pytest` hits the wrong environment and fails spuriously.
 
-**Baseline:** `296 passed, 1 failed` (`tests/test_eval.py::test_run_eval`). **T0.1 fixes that
-failure.** From then on the suite is FULLY green and must stay fully green — there is no
-"pre-existing failure" allowance anymore. Record the new count after every task.
+**Baseline:** ~~`296 passed, 1 failed` (`tests/test_eval.py::test_run_eval`)~~ → **`297 passed, 0
+failed`** as of T0.1 (below). From here the suite is FULLY green and must stay fully green — there
+is no "pre-existing failure" allowance anymore. Record the new count after every task.
 
 **Process rules (non-negotiable):**
 - Work on branch `fix/engineering-hardening` (already exists, off `dev`; this file is on it).
@@ -44,10 +44,28 @@ failure.** From then on the suite is FULLY green and must stay fully green — t
 
 ## Phase 0 — Independent quick wins
 
-### T0.1 · Fix `test_run_eval` (spec §4 T0.1, fact F22)
-- [ ] Verify the import shape first (`grep -n "get_baselines" src/agentpack/eval/runner.py`), then add the third `@patch` so the runner loop is unit-tested with zero real baselines.
+### T0.1 · Fix `test_run_eval` (spec §4 T0.1, fact F22) — ✅ DONE
+- [x] Verify the import shape first (`grep -n "get_baselines" src/agentpack/eval/runner.py`), then add the third `@patch` so the runner loop is unit-tested with zero real baselines.
 **Acceptance:** test passes in ~2s; full suite **297 passed, 0 failed** — new permanent baseline.
 **Verify:** `…pytest tests/test_eval.py -v`; full suite; update the baseline note above.
+
+**Evidence:**
+- Import shape verified: `grep -n "import baselines\|_baselines\|get_baselines" src/agentpack/eval/runner.py`
+  → `from agentpack.eval import baselines as _baselines` (line 7) and
+  `_baselines.get_baselines(...)` (line 50). Confirms spec's claimed patch target
+  `agentpack.eval.runner._baselines.get_baselines` exactly.
+- RED (before fix): `PYTHONPATH="$PWD/src" ./venv/bin/python -m pytest tests/test_eval.py::test_run_eval -v`
+  → `FAILED tests/test_eval.py::test_run_eval - FileNotFoundError: Manifest not fo...`, dying
+  during the "Cross-Encoder Rerank" baseline step — matches F22 exactly (function-local
+  `search_pack` import in the reranker baseline bypasses the mock on
+  `agentpack.eval.runner.search_pack`).
+- Fix applied: added `@patch("agentpack.eval.runner._baselines.get_baselines", return_value=[])`
+  as the outermost decorator + `mock_baselines` param, per spec §4 T0.1.
+- GREEN (targeted): `tests/test_eval.py -v` → `6 passed` in 1.82s (was building 6 real baseline
+  indexes before; now unit-tests only the runner loop + AgentPack's own 3 modes via the existing
+  `search_pack`/`write_pack` mocks).
+- GREEN (full suite): `PYTHONPATH="$PWD/src" ./venv/bin/python -m pytest tests/ -q` →
+  **297 passed, 0 failed** in 77.37s. New permanent baseline — no failures allowed from here on.
 
 ### T0.2 · `gen-eval` exit code (spec §4 T0.2, F6)
 - [ ] RED: CliRunner test asserting exit 1 on an `"Error…"` report (copy `test_cli_eval_error`). Fix: `raise typer.Exit(code=1)` in the error branch.
