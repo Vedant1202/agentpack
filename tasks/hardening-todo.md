@@ -413,9 +413,38 @@ the test's `alpha=0.5`, delete the parameter). Proceeding to Phase A.
   `table: src_000_table_0 src_000` (table block_id/source_id self-consistent with the source's own
   id). Temp dir removed after inspection.
 
-### TA.5 · Deterministic scan order (spec §4 TA.5, F13)
-- [ ] Fix: `dirs.sort()` + `sorted(files)` in `scanner.py`. Test via monkeypatched reversed `os.walk` + straight determinism test. OQ1 accepted: note the one-time id-shift in the PR description.
+### TA.5 · Deterministic scan order (spec §4 TA.5, F13) — ✅ DONE
+- [x] Fix: `dirs.sort()` + `sorted(files)` in `scanner.py`. Test via monkeypatched reversed `os.walk` + straight determinism test. OQ1 accepted: note the one-time id-shift in the PR description.
 **Verify:** targeted + full suite.
+
+**Evidence:**
+- Confirmed F13's location matches spec exactly: `scanner.py:64`, `for root, dirs, files in
+  os.walk(dir_path):`, with no sorting anywhere in the loop.
+- RED (test 1, meaningful on any filesystem): `test_scanner_sorts_despite_reversed_os_walk_order`
+  monkeypatches `os.walk` to yield `dirs`/`files` in reverse order at every level, then compares
+  against the SAME scan without the monkeypatch. Note: `os.walk` yields a directory's own files
+  before recursing into subdirectories, so the canonical order is NOT a naive lexicographic sort
+  of full relative paths (e.g. `'adir/y.md'` sorts before `'zdir/z.md'`, but both come after
+  top-level `.md` files) — the meaningful assertion is invariance: reversing the input order must
+  not change the output. First version of this test asserted a naive `names == sorted(names)`,
+  which is wrong for multi-level trees; corrected before committing.
+- RED (test 2, "RED-ish" per spec's own framing): `test_scanner_output_is_deterministic` — two
+  scans of the same tree, assert identical lists. This one actually PASSED even pre-fix on this
+  filesystem (macOS APFS returns a stable order across repeated `os.walk` calls in the same
+  process) — expected and consistent with the spec calling it "RED-ish," not guaranteed red;
+  test 1 is the one that's reliably meaningful.
+- Confirmed test 1 IS genuinely RED pre-fix via `git stash` (same discipline as prior tasks):
+  `['c.md', 'b.md', 'a.md', ...] != ['b.md', 'c.md', 'a.md', ...]` — output changed when the
+  underlying os.walk order was reversed, confirming the bug is real, not just theoretical.
+- Fix: `valid_dirs.sort()` before `dirs[:] = valid_dirs` (equivalent to spec's suggested in-place
+  `dirs.sort()`, applied to the already-filtered list), and iterate `sorted(files)` instead of
+  `files`.
+- GREEN (targeted): `tests/test_scanner.py -v` → **5 passed**, incl. both new tests and all 3
+  pre-existing ones.
+- GREEN (full suite): **313 passed, 0 failed** in 23.02s (311 + these 2 new tests).
+- **OQ1 / migration note for the PR description:** re-packing an existing corpus after this change
+  may assign different `src_NNN` ids ONE TIME (if the filesystem's natural `os.walk` order
+  happened to differ from sorted order for that corpus) — a one-time id shift, accepted per OQ1.
 
 ### TA.6 · Stop output-dir self-ingestion (spec §4 TA.6, F15)
 - [ ] RED: `write_pack(corpus, corpus/pack)` twice ingests its own output today. Fix: resolved-path exclusion of out_path from the scan.

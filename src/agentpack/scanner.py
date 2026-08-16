@@ -81,9 +81,10 @@ def scan_directory(
             
             valid_dirs.append(d)
             
+        valid_dirs.sort()
         dirs[:] = valid_dirs
-        
-        for file in files:
+
+        for file in sorted(files):
             if not include_hidden and file.startswith("."):
                 continue
                 
