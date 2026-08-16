@@ -198,7 +198,7 @@ def test_search_hybrid(mock_get_model, mock_np_load, tmp_path):
         
         # Vector should prefer c1 (score 1.0) over c2 (score 0.0)
         # Hybrid should combine them
-        results = search_hybrid(str(pack_dir), "query", top_k=2, alpha=0.5)
+        results = search_hybrid(str(pack_dir), "query", top_k=2)
         
         assert len(results) == 2
         ids = [r["chunk_id"] for r in results]

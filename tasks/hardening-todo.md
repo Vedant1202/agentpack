@@ -199,9 +199,12 @@ is no "pre-existing failure" allowance anymore. Record the new count after every
   check is warn-only, no behavior change) and both new tests.
 - GREEN (full suite): **303 passed, 0 failed** in 23.74s (301 + these 2 new tests).
 
-### T0.7 · Remove dead `alpha` param (spec §4 T0.7, F30) — ⛔ STOPPED, awaiting human decision
-- [ ] Grep first for any caller passing `alpha` (STOP if found). Fix: delete from `search_hybrid` signature.
+### T0.7 · Remove dead `alpha` param (spec §4 T0.7, F30) — ✅ DONE
+- [x] Grep first for any caller passing `alpha` (STOP if found). Fix: delete from `search_hybrid` signature.
 **Acceptance/Verify:** full suite green.
+
+**Human decision:** given the choice between (a) drop `alpha=0.5` from the one test call and
+delete the parameter, or (b) skip T0.7 for now — chose (a), matching F30's original intent.
 
 **Findings (per spec's own instruction: STOP and report instead of proceeding):**
 - Confirmed independently that `alpha` is dead in the implementation: `search_hybrid`
@@ -221,6 +224,14 @@ is no "pre-existing failure" allowance anymore. Record the new count after every
   `tests/test_retrieve.py:201` call alongside the signature change) is low-risk, but the spec
   explicitly carved this exact scenario out for human review rather than pre-authorizing it, so
   T0.7 is paused here rather than improvised past.
+
+**Resolution:**
+- Dropped `alpha=0.5` from `tests/test_retrieve.py:201`'s `search_hybrid(...)` call (now
+  `search_hybrid(str(pack_dir), "query", top_k=2)`).
+- Deleted `alpha: float = 0.5` from `search_hybrid`'s signature (`retrieve.py`).
+- GREEN (targeted): `tests/test_retrieve.py -v` → **19 passed**.
+- GREEN (full suite): **303 passed, 0 failed** in 24.09s — unchanged count from T0.6 (pure
+  deletion + one call-site edit, no new tests).
 
 **▣ CHECKPOINT 0 — stop; post evidence; wait for human go.**
 

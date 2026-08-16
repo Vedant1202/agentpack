@@ -376,7 +376,7 @@ def _rrf_score(rank: int, k: int = 60) -> float:
     return 1.0 / (k + rank)
 
 
-def search_hybrid(pack_dir: str, query: str, top_k: int = 5, alpha: float = 0.5) -> List[Dict]:
+def search_hybrid(pack_dir: str, query: str, top_k: int = 5) -> List[Dict]:
     fts_results = search_fts(pack_dir, query, top_k=top_k * 2)
     vec_results = search_vector(pack_dir, query, top_k=top_k * 2)
 
