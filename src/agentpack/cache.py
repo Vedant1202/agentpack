@@ -26,19 +26,20 @@ _warned_corrupt = False
 
 
 def _connect(cache_dir: Path, create: bool = True) -> Optional[sqlite3.Connection]:
-    """Connect to cache.db. When create=False (read paths), never create the cache
-    directory -- if it doesn't exist yet, return None (a clean miss) instead of
-    side-effect-creating .cache/ for e.g. a typo'd pack path. If the directory DOES
-    already exist (read or write), a corrupt db.db still self-heals as usual --
-    deleting/recreating a file inside an already-existing directory isn't the thing
-    read paths must avoid.
+    """Connect to cache.db. When create=False (read paths), never create the cache.db
+    file (or its parent directory) -- if it doesn't exist yet, return None (a clean miss)
+    instead of side-effect-creating it for e.g. a typo'd pack path, or a cache dir that
+    exists (created by other tooling) but has never been written to. If the db FILE
+    already exists (read or write), a corrupt cache.db still self-heals as usual --
+    deleting/recreating a file that's already there isn't the side effect read paths
+    must avoid.
     """
     global _warned_corrupt
-    if not create and not cache_dir.exists():
+    db_path = cache_dir / "cache.db"
+    if not create and not db_path.exists():
         return None
     if create:
         cache_dir.mkdir(parents=True, exist_ok=True)
-    db_path = cache_dir / "cache.db"
     try:
         conn = sqlite3.connect(str(db_path))
         conn.execute(_CREATE_TABLE_SQL)
