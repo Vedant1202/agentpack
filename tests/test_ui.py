@@ -2,6 +2,7 @@ import pytest
 import os
 import json
 import sqlite3
+import sys
 import asyncio
 import numpy as np
 import httpx
@@ -119,6 +120,8 @@ def test_api_chunks_builds_missing_db(monkeypatch, tmp_path):
     assert built["called"][1] == pack_dir / "indexes" / "lexical_index.db"
 
 def test_api_chunks_valid(monkeypatch, tmp_path):
+    from agentpack.retrieve import _manifest_hash, _fts_write_hash
+
     pack_dir = tmp_path / "agentpack_output"
     indexes_dir = pack_dir / "indexes"
     chunks_dir = pack_dir / "chunks"
@@ -144,6 +147,10 @@ def test_api_chunks_valid(monkeypatch, tmp_path):
             ("c1", "s1", "chunks/src_000_chunk_000.md", 2, json.dumps({"source_path": "sample.md"}), "Chunk text"),
         )
         conn.commit()
+        # Match the current manifest's hash so ensure_lexical_index's staleness check
+        # (TB.7c) sees this hand-built index as current, not stale -- this test is about
+        # /api/chunks reading back an EXISTING, valid index, not invalidation.
+        _fts_write_hash(conn, _manifest_hash(pack_dir))
     finally:
         conn.close()
 
@@ -155,17 +162,61 @@ def test_api_chunks_valid(monkeypatch, tmp_path):
     chunk = response.json()["chunks"][0]
     assert chunk["id"] == "c1"
 
+
+def test_api_chunks_reflects_repack_not_stale_index(monkeypatch, tmp_path):
+    """TB.7c: /api/chunks (via ensure_lexical_index) trusted mere file existence over
+    content -- a re-pack that replaced the corpus (same output dir) kept serving the OLD
+    index's chunks forever."""
+    from agentpack.pack import write_pack
+
+    in_dir_a = tmp_path / "corpus_a"
+    in_dir_a.mkdir()
+    (in_dir_a / "doc_a.md").write_text("# Doc A\n\n" + ("Alpha content here. " * 20))
+    pack_dir = tmp_path / "agentpack_output"
+    write_pack(str(in_dir_a), str(pack_dir), quiet=True, no_map=True, no_graph=True)
+
+    import agentpack.ui.server as server
+    monkeypatch.setattr(server, "PACK_DIR", pack_dir)
+
+    first = client.get("/api/chunks")
+    assert first.status_code == 200
+    first_content = " ".join(c["content"] for c in first.json()["chunks"])
+    assert "Alpha content" in first_content
+
+    # Re-pack a DIFFERENT corpus into the SAME output dir.
+    in_dir_b = tmp_path / "corpus_b"
+    in_dir_b.mkdir()
+    (in_dir_b / "doc_b.md").write_text("# Doc B\n\n" + ("Beta content here. " * 20))
+    write_pack(str(in_dir_b), str(pack_dir), quiet=True, no_map=True, no_graph=True)
+
+    second = client.get("/api/chunks")
+    assert second.status_code == 200
+    second_content = " ".join(c["content"] for c in second.json()["chunks"])
+
+    assert "Alpha content" not in second_content, "stale index still serving corpus_a's chunks"
+    assert "Beta content" in second_content, "must reflect the re-packed corpus_b"
+
+
 def test_api_umap_missing(monkeypatch, tmp_path):
-    # The /api/umap endpoint imports umap before the manifest check, so without
-    # umap-learn it returns 500 instead of the 404 this test exercises. Guard
-    # consistently with the other umap tests below.
-    try:
-        import umap.umap_
-    except ImportError:
-        pytest.skip("umap-learn not installed")
+    # F24: /api/umap now checks the manifest (via load_vector_artifacts) BEFORE
+    # importing umap, so this 404 path no longer depends on umap-learn being
+    # installed -- no skip guard needed.
     import agentpack.ui.server as server
     monkeypatch.setattr(server, "PACK_DIR", tmp_path)
     response = client.get("/api/umap")
+    assert response.status_code == 404
+
+
+def test_api_umap_missing_manifest_404s_even_without_umap(monkeypatch, tmp_path):
+    """F24: forces umap to be unimportable (regardless of whether it's actually installed
+    in this environment) to conclusively prove the import-order fix -- a missing manifest
+    must 404, never the misleading 500 'umap-learn is not installed'."""
+    import agentpack.ui.server as server
+    monkeypatch.setattr(server, "PACK_DIR", tmp_path)
+
+    with patch.dict(sys.modules, {"umap": None, "umap.umap_": None}):
+        response = client.get("/api/umap")
+
     assert response.status_code == 404
 
 
@@ -383,6 +434,31 @@ def test_api_feedback(monkeypatch, tmp_path):
         data = json.load(f)
         assert len(data) == 1
         assert data[0]["chunk_id"] == "c1"
+
+
+def test_api_feedback_preserves_corrupt_file_and_persists_both_entries(monkeypatch, tmp_path):
+    """F23: a corrupt eval_feedback.json used to be silently wiped (bare except: pass) and
+    the next write overwrote it non-atomically -- the corrupt original was lost forever."""
+    import agentpack.ui.server as server
+    monkeypatch.setattr(server, "PACK_DIR", tmp_path)
+
+    fb_path = tmp_path / "eval_feedback.json"
+    fb_path.write_text("{not valid json", encoding="utf-8")
+
+    r1 = client.post("/api/feedback", json={"chunk_id": "c1", "query": "q1", "rating": 1})
+    assert r1.status_code == 200
+    r2 = client.post("/api/feedback", json={"chunk_id": "c2", "query": "q2", "rating": -1})
+    assert r2.status_code == 200
+
+    with open(fb_path, "r", encoding="utf-8") as f:
+        data = json.load(f)
+    assert len(data) == 2, f"both entries must be present in the new file: {data}"
+    assert {d["chunk_id"] for d in data} == {"c1", "c2"}
+
+    corrupt_files = list(tmp_path.glob("eval_feedback.json.corrupt-*"))
+    assert len(corrupt_files) == 1, "the corrupt original must be preserved, not wiped"
+    assert corrupt_files[0].read_text(encoding="utf-8") == "{not valid json"
+
 
 def test_api_graph_manifest_not_found(monkeypatch, tmp_path):
     import agentpack.ui.server as server

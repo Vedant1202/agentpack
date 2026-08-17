@@ -11,7 +11,16 @@ class MarkdownParser(Parser):
         checksum = hashlib.sha256(content.encode("utf-8")).hexdigest()
         blocks = []
         warnings = []
-        
+
+        if "�" in content:
+            warnings.append(ExtractionWarning(
+                source_id=source_id,
+                type="decode_error",
+                message="File contains byte sequences invalid for its detected/assumed "
+                        "encoding; some characters were replaced.",
+            ))
+
+
         lines = content.split("\n")
         current_section_path = []
         current_paragraph_lines = []
@@ -79,6 +88,6 @@ class MarkdownParser(Parser):
         )
 
     def parse(self, file_path: Path, source_id: str) -> SourceDocument:
-        with open(file_path, "r", encoding="utf-8", errors="replace") as f:
+        with open(file_path, "r", encoding="utf-8-sig", errors="replace") as f:
             content = f.read()
         return self.parse_string(content, file_path, source_id)

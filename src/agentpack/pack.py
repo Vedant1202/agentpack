@@ -14,7 +14,7 @@ from agentpack.parsers.csv_parser import CSVParser
 from agentpack.parsers.pdf_parser import PDFParser
 from agentpack.parsers.docling_parser import DoclingParser
 from agentpack.chunker import chunk_document, Chunk
-from agentpack.models import SourceDocument
+from agentpack.models import SourceDocument, ExtractionWarning
 from agentpack.cache import cache_get, cache_set, make_key
 from agentpack.trust import check_zip_safety, scan_for_hidden_content
 
@@ -32,6 +32,24 @@ def _parser_cache_version() -> str:
     """Version string for L1 parse cache keys — bump when parse output schema changes."""
     return f"parser_v{_get_pack_version()}"
 
+def _doc_type_for_suffix(suffix: str) -> str:
+    """Map a file suffix to SourceDocument.type's Literal values. Only markdown's spelling
+    ("markdown", not "md") differs from a plain lowercased, dot-stripped suffix."""
+    suffix = suffix.lower()
+    return "markdown" if suffix == ".md" else suffix.lstrip(".")
+
+
+def _failed_doc(file_path: Path, source_id: str, message: str) -> "SourceDocument":
+    return SourceDocument(
+        source_id=source_id,
+        path=file_path.name,
+        type=_doc_type_for_suffix(file_path.suffix),
+        checksum="",
+        blocks=[],
+        warnings=[ExtractionWarning(source_id=source_id, type="parse_error", message=message)],
+    )
+
+
 def _parse_one(
     file_path: Path,
     source_id: str,
@@ -39,43 +57,65 @@ def _parse_one(
     remove_empty_lines: bool,
     cache_dir: Path,
 ) -> Optional["SourceDocument"]:
-    """Parse one file, respecting the L1 parse cache. Returns None if unsupported."""
+    """Parse one file, respecting the L1 parse cache. Returns None if unsupported.
+
+    Never raises: any exception here (a dangling symlink, an unreadable file, a parser
+    crash) degrades to a failed SourceDocument so one bad file can't abort the whole pack.
+    This is the callable submitted to the executor, so future.result() at the gather point
+    can only raise on true executor faults.
+    """
     parser = get_parser(file_path.suffix, fast_pdf=fast_pdf)
     if parser is None:
         return None
 
-    if file_path.suffix.lower() in _ZIP_BASED_SUFFIXES:
-        zip_warning = check_zip_safety(file_path, source_id)
-        if zip_warning is not None:
-            with open(file_path, "rb") as _f:
-                checksum = hashlib.sha256(_f.read()).hexdigest()
-            return SourceDocument(
-                source_id=source_id,
-                path=file_path.name,
-                type=file_path.suffix.lstrip(".").lower(),
-                checksum=checksum,
-                blocks=[],
-                warnings=[zip_warning],
-            )
+    try:
+        if file_path.suffix.lower() in _ZIP_BASED_SUFFIXES:
+            zip_warning = check_zip_safety(file_path, source_id)
+            if zip_warning is not None:
+                with open(file_path, "rb") as _f:
+                    checksum = hashlib.sha256(_f.read()).hexdigest()
+                return SourceDocument(
+                    source_id=source_id,
+                    path=file_path.name,
+                    type=file_path.suffix.lstrip(".").lower(),
+                    checksum=checksum,
+                    blocks=[],
+                    warnings=[zip_warning],
+                )
 
-    if hasattr(parser, "remove_empty_lines"):
+        # Unconditional: a freshly-instantiated parser never already has this attribute, so
+        # a hasattr guard here always evaluates False and the flag never applies. Parsers
+        # that don't use it (CSV, PDF, Docling) simply never read it back.
         parser.remove_empty_lines = remove_empty_lines
-    with open(file_path, "rb") as _f:
-        file_hash = hashlib.sha256(_f.read()).hexdigest()
-    cache_key = make_key(file_hash, _parser_cache_version(), str(fast_pdf))
-    doc = cache_get(cache_dir, cache_key)
-    if doc is None:
-        doc = parser.parse(file_path, source_id)
-        has_parse_error = any(w.type == "parse_error" for w in doc.warnings)
-        if not has_parse_error:
-            cache_set(cache_dir, cache_key, doc)
-    else:
-        doc.source_id = source_id
+        with open(file_path, "rb") as _f:
+            file_hash = hashlib.sha256(_f.read()).hexdigest()
+        cache_key = make_key(file_hash, _parser_cache_version(), str(fast_pdf), str(remove_empty_lines))
+        doc = cache_get(cache_dir, cache_key)
+        if doc is None:
+            doc = parser.parse(file_path, source_id)
+            has_parse_error = any(w.type == "parse_error" for w in doc.warnings)
+            if not has_parse_error:
+                cache_set(cache_dir, cache_key, doc)
+        else:
+            # Cache HIT: the cached doc's identity (source_id, path, and every block_id,
+            # which bakes in source_id as a prefix -- e.g. "src_000_table_0") reflects
+            # whatever pack first populated the cache. Remap all of it to the current
+            # pack's identity so citations and table ids don't point at a stale filename
+            # or namespace when the corpus reshuffles between packs.
+            old_source_id = doc.source_id
+            doc.source_id = source_id
+            doc.path = file_path.name
+            for block in doc.blocks:
+                if block.block_id.startswith(old_source_id):
+                    block.block_id = source_id + block.block_id[len(old_source_id):]
+                block.source_id = source_id
 
-    # Runs after the cache block on every call, hit or miss, so trust warnings
-    # are never pickled into the L1 cache and always carry the current source_id.
-    doc.warnings.extend(scan_for_hidden_content(file_path, doc.type, source_id, doc.blocks))
-    return doc
+        # Runs after the cache block on every call, hit or miss, so trust warnings
+        # are never pickled into the L1 cache and always carry the current source_id.
+        doc.warnings.extend(scan_for_hidden_content(file_path, doc.type, source_id, doc.blocks))
+        return doc
+    except Exception as e:
+        return _failed_doc(file_path, source_id, str(e))
 
 
 def get_parser(suffix: str, fast_pdf: bool = False):
@@ -142,7 +182,15 @@ def write_pack(
         include_patterns=include_patterns,
         exclude_patterns=exclude_patterns
     )
-    
+
+    # Stop self-ingestion: if out_path is nested inside input_dir (e.g. corpus/pack), a
+    # re-run would otherwise scan its own previous output (chunks, manifest, reports) as
+    # if it were input. Compare real paths, not string prefixes, so a symlinked or
+    # relative out_path is still caught.
+    out_path_resolved = out_path.resolve()
+    files = [f for f in files if not f.resolve().is_relative_to(out_path_resolved)]
+
+
     if verbose and not quiet:
         print(f"Found {len(files)} files to pack.")
     

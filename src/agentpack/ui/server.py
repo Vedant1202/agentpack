@@ -1,6 +1,8 @@
 import os
 import json
 import sys
+import threading
+import time
 import yaml
 import sqlite3
 import numpy as np
@@ -10,7 +12,10 @@ from fastapi import FastAPI, HTTPException, Request
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.staticfiles import StaticFiles
 from pydantic import BaseModel
-from agentpack.retrieve import build_fts_index, build_vector_index, search_hybrid
+from agentpack.retrieve import (
+    build_fts_index, build_vector_index, search_hybrid,
+    _manifest_hash, _fts_stored_hash,
+)
 
 app = FastAPI(title="AgentPack Corpus Intelligence API")
 
@@ -40,8 +45,24 @@ def ensure_lexical_index(base_path: Path) -> Path:
     indexes_dir = base_path / "indexes"
     indexes_dir.mkdir(exist_ok=True)
     db_path = indexes_dir / "lexical_index.db"
-    if not db_path.exists():
-        build_fts_index(base_path, db_path)
+
+    if db_path.exists():
+        # Same staleness check search_fts uses: a re-pack that replaces manifest.yml
+        # (different corpus, same output dir) must invalidate the existing index --
+        # trusting mere file existence serves the OLD corpus's chunks forever.
+        conn = sqlite3.connect(db_path)
+        try:
+            stored_hash = _fts_stored_hash(conn)
+        except sqlite3.DatabaseError:
+            stored_hash = None
+        finally:
+            conn.close()
+        if stored_hash != _manifest_hash(base_path):
+            db_path.unlink()
+            build_fts_index(base_path, db_path).close()
+    else:
+        build_fts_index(base_path, db_path).close()
+
     return db_path
 
 
@@ -212,13 +233,17 @@ def get_chunks():
 
 @app.get("/api/umap")
 def get_umap():
+    # Manifest/vector-index checks (inside load_vector_artifacts) run before the umap
+    # import, so a missing manifest 404s even in an environment without umap-learn
+    # installed, instead of a misleading 500.
+    embeddings, meta = load_vector_artifacts(get_base_path())
+
     try:
         import umap.umap_ as umap
     except ImportError:
         raise HTTPException(status_code=500, detail="umap-learn is not installed. Run pip install agentpack[ui]")
-        
-    embeddings, meta = load_vector_artifacts(get_base_path())
-        
+
+
     # Compute UMAP
     reducer = umap.UMAP(n_components=2, metric='cosine', random_state=42)
     reduced = reducer.fit_transform(embeddings)
@@ -374,27 +399,39 @@ class Feedback(BaseModel):
     query: str
     rating: int  # 1 for thumb up, -1 for thumb down, 2 for pinned
 
+# Guards the feedback file's read-modify-write cycle -- concurrent requests must not
+# interleave and clobber each other's read.
+_feedback_lock = threading.Lock()
+
 @app.post("/api/feedback")
 def submit_feedback(fb: Feedback):
     fb_path = get_base_path() / "eval_feedback.json"
-    data = []
-    if fb_path.exists():
-        try:
-            with open(fb_path, "r", encoding="utf-8") as f:
-                data = json.load(f)
-        except:
-            pass
-            
-    data.append({
-        "chunk_id": fb.chunk_id,
-        "query": fb.query,
-        "rating": fb.rating,
-        "timestamp": __import__("time").time()
-    })
-    
-    with open(fb_path, "w", encoding="utf-8") as f:
-        json.dump(data, f, indent=2)
-        
+
+    with _feedback_lock:
+        data = []
+        if fb_path.exists():
+            try:
+                with open(fb_path, "r", encoding="utf-8") as f:
+                    data = json.load(f)
+            except Exception:
+                # Preserve the corrupt file for inspection instead of silently
+                # discarding whatever feedback it held, then start fresh.
+                corrupt_path = fb_path.with_name(f"{fb_path.name}.corrupt-{int(time.time())}")
+                fb_path.rename(corrupt_path)
+                data = []
+
+        data.append({
+            "chunk_id": fb.chunk_id,
+            "query": fb.query,
+            "rating": fb.rating,
+            "timestamp": time.time()
+        })
+
+        tmp_path = fb_path.with_name(f"{fb_path.name}.tmp")
+        with open(tmp_path, "w", encoding="utf-8") as f:
+            json.dump(data, f, indent=2)
+        os.replace(tmp_path, fb_path)
+
     return {"status": "success"}
 
 from fastapi.responses import FileResponse

@@ -62,9 +62,10 @@ def test_slice_financebench(mock_requests, mock_load_dataset, tmp_path):
 
 # We will skip generation.py and runner.py tests as they likely use other unavailable classes.
 # But let's add a basic test for runner.py if we can mock it simply.
+@patch("agentpack.eval.runner._baselines.get_baselines", return_value=[])
 @patch("agentpack.eval.runner.search_pack")
 @patch("agentpack.eval.runner.write_pack")
-def test_run_eval(mock_write_pack, mock_search, tmp_path):
+def test_run_eval(mock_write_pack, mock_search, mock_baselines, tmp_path):
     from agentpack.eval.runner import run_eval
 
     mock_search.return_value = [{"citation": {"source_path": "docA.pdf"}, "path": "c1.md", "token_count": 10}]

@@ -1,5 +1,6 @@
 import hashlib
 import sqlite3
+import sys
 import yaml
 import json
 import numpy as np
@@ -20,6 +21,9 @@ from agentpack.cache import cache_get, cache_set, make_key
 
 _EMBED_MODEL_ID = "BAAI/bge-small-en-v1.5"  # default fastembed model
 _FTS_QUERY_VERSION = "and-v1"  # bump when query construction changes to invalidate L5 cache
+
+# Warn about a stale/corrupt HNSW bin at most once per process.
+_warned_stale_hnsw = False
 
 _FTS_STOP_WORDS = frozenset({
     "a", "an", "the", "and", "or", "but", "in", "on", "at", "to", "for",
@@ -55,30 +59,35 @@ _embedding_model = None
 def _get_embedding_model():
     global _embedding_model
     if _embedding_model is None and TextEmbedding is not None:
-        _embedding_model = TextEmbedding()
+        _embedding_model = TextEmbedding(model_name=_EMBED_MODEL_ID)
     return _embedding_model
 
 
 def _manifest_hash(pack_dir: Path) -> str:
-    """Stable hash of the pack's content: sorted chunk ids + source checksums."""
+    """Stable hash of the pack's content: sorted chunk id:token_count pairs + source checksums.
+
+    token_count is folded in alongside id because chunk ids are positional
+    (f"{source_id}_chunk_{i:03d}") -- re-chunking that redistributes text across the SAME
+    number of chunks keeps every id identical, but almost always shifts token counts.
+    """
     manifest_path = pack_dir / "manifest.yml"
     if not manifest_path.exists():
         return ""
     with open(manifest_path, "r", encoding="utf-8") as f:
         manifest = yaml.safe_load(f)
-    # Use chunk ids (ordering-stable) + source checksums as the content fingerprint
-    chunk_ids = sorted(c.get("id", "") for c in manifest.get("chunks", []))
+    chunk_lines = sorted(
+        f"{c.get('id', '')}:{c.get('token_count', '')}" for c in manifest.get("chunks", [])
+    )
     src_checksums = sorted(s.get("checksum", "") for s in manifest.get("sources", []))
-    fingerprint = "|".join(chunk_ids) + "||" + "|".join(src_checksums)
+    fingerprint = "|".join(chunk_lines) + "||" + "|".join(src_checksums)
     return hashlib.sha256(fingerprint.encode()).hexdigest()
 
 
 def _fts_stored_hash(conn: sqlite3.Connection) -> str:
-    try:
-        row = conn.execute("SELECT value FROM _pack_meta WHERE key='content_hash'").fetchone()
-        return row[0] if row else ""
-    except sqlite3.OperationalError:
-        return ""
+    """Raises sqlite3.DatabaseError (not just OperationalError) if db_path is corrupt —
+    the sole caller (search_fts) catches it to trigger a self-heal rebuild."""
+    row = conn.execute("SELECT value FROM _pack_meta WHERE key='content_hash'").fetchone()
+    return row[0] if row else ""
 
 
 def _fts_write_hash(conn: sqlite3.Connection, h: str):
@@ -129,16 +138,29 @@ def build_fts_index(pack_dir: Path, db_path: Path):
     _fts_write_hash(conn, _manifest_hash(pack_dir))
     return conn
 
+def _clear_vector_index(pack_dir: Path, vector_path: Path, meta_path: Path):
+    """Delete any existing vector index artifacts and record the CURRENT (empty) manifest
+    hash, so a degenerate rebuild (zero chunks, or all chunk files missing) never leaves a
+    stale index behind to serve ghost results for chunks that no longer exist."""
+    hnsw_path = vector_path.parent / "hnsw_index.bin"
+    hash_path = vector_path.parent / "vector_index.hash"
+    vector_path.unlink(missing_ok=True)
+    meta_path.unlink(missing_ok=True)
+    hnsw_path.unlink(missing_ok=True)
+    hash_path.write_text(_manifest_hash(pack_dir))
+
+
 def build_vector_index(pack_dir: Path, vector_path: Path, meta_path: Path):
     if TextEmbedding is None:
         raise ImportError("fastembed is required for vector search. Run `pip install agentpack[gpu]` or `pip install fastembed`")
-        
+
     manifest_path = pack_dir / "manifest.yml"
     with open(manifest_path, "r", encoding="utf-8") as f:
         manifest = yaml.safe_load(f)
-        
+
     chunks = manifest.get("chunks", [])
     if not chunks:
+        _clear_vector_index(pack_dir, vector_path, meta_path)
         return
 
     embedding_model = _get_embedding_model()
@@ -173,6 +195,7 @@ def build_vector_index(pack_dir: Path, vector_path: Path, meta_path: Path):
             embeddings_list.append(None)  # placeholder — will batch-embed below
 
     if not texts:
+        _clear_vector_index(pack_dir, vector_path, meta_path)
         return
 
     # Batch-embed only the cache misses
@@ -207,7 +230,9 @@ def build_vector_index(pack_dir: Path, vector_path: Path, meta_path: Path):
     with open(meta_path, "w", encoding="utf-8") as f:
         json.dump(metadata, f)
 
-    # Build HNSW index if hnswlib is available (default ANN backend).
+    # Build HNSW index if hnswlib is available (default ANN backend); otherwise clear any
+    # stale bin left over from a previous run so a LATER hnswlib-capable environment never
+    # loads labels against different metadata.
     hnsw_path = vector_path.parent / "hnsw_index.bin"
     if _hnswlib is not None and len(embeddings) > 0:
         dim = embeddings.shape[1]
@@ -215,6 +240,8 @@ def build_vector_index(pack_dir: Path, vector_path: Path, meta_path: Path):
         index.init_index(max_elements=len(embeddings), ef_construction=200, M=16)
         index.add_items(embeddings, list(range(len(embeddings))))
         index.save_index(str(hnsw_path))
+    else:
+        hnsw_path.unlink(missing_ok=True)
 
     hash_path = vector_path.parent / "vector_index.hash"
     hash_path.write_text(_manifest_hash(pack_dir))
@@ -235,62 +262,71 @@ def search_fts(pack_dir: str, query: str, top_k: int = 5) -> List[Dict]:
     current_hash = _manifest_hash(base_path)
     if db_path.exists():
         conn = sqlite3.connect(db_path)
-        if _fts_stored_hash(conn) != current_hash:
+        try:
+            stored_hash = _fts_stored_hash(conn)
+        except sqlite3.DatabaseError:
             conn.close()
-            db_path.unlink()
+            print("[agentpack] Warning: corrupt lexical index, rebuilding.", file=sys.stderr)
+            db_path.unlink(missing_ok=True)
             conn = build_fts_index(base_path, db_path)
+        else:
+            if stored_hash != current_hash:
+                conn.close()
+                db_path.unlink()
+                conn = build_fts_index(base_path, db_path)
     else:
         conn = build_fts_index(base_path, db_path)
 
-    cur = conn.cursor()
+    try:
+        cur = conn.cursor()
 
-    and_query = _build_fts_query(query)
-    if not and_query:
-        return []
-
-    def _run(q):
-        try:
-            cur.execute(
-                "SELECT chunk_id, source_id, path, token_count, citation, rank "
-                "FROM chunks_fts WHERE chunks_fts MATCH ? ORDER BY rank LIMIT ?",
-                (q, top_k),
-            )
-            return cur.fetchall()
-        except sqlite3.OperationalError:
+        and_query = _build_fts_query(query)
+        if not and_query:
             return []
 
-    rows = _run(and_query)
-    if not rows:
-        # AND matched nothing — fall back to OR to preserve recall
-        clean_str = re.sub(r'[^a-zA-Z0-9\-\s]', ' ', query)
-        or_query = " OR ".join(f'"{w}"' for w in clean_str.split() if w)
-        rows = _run(or_query) if or_query else []
+        def _run(q):
+            try:
+                cur.execute(
+                    "SELECT chunk_id, source_id, path, token_count, citation, rank "
+                    "FROM chunks_fts WHERE chunks_fts MATCH ? ORDER BY rank LIMIT ?",
+                    (q, top_k),
+                )
+                return cur.fetchall()
+            except sqlite3.OperationalError:
+                return []
 
-    results = []
-    for row in rows:
-        chunk_id, source_id, path, token_count, citation_str, rank = row
-        results.append({
-            "chunk_id": chunk_id,
-            "source_id": source_id,
-            "path": path,
-            "token_count": token_count,
-            "citation": json.loads(citation_str) if isinstance(citation_str, str) else citation_str,
-            "score": abs(rank)
-        })
-        
-    conn.close()
-    
-    if results:
-        max_score = max(r["score"] for r in results)
-        min_score = min(r["score"] for r in results)
-        for r in results:
-            if max_score > min_score:
-                r["norm_score"] = (r["score"] - min_score) / (max_score - min_score)
-            else:
-                r["norm_score"] = 1.0
-                
-    results.sort(key=lambda x: x.get("norm_score", 0), reverse=True)
-    return results
+        rows = _run(and_query)
+        if not rows:
+            # AND matched nothing — fall back to OR to preserve recall
+            clean_str = re.sub(r'[^a-zA-Z0-9\-\s]', ' ', query)
+            or_query = " OR ".join(f'"{w}"' for w in clean_str.split() if w)
+            rows = _run(or_query) if or_query else []
+
+        results = []
+        for row in rows:
+            chunk_id, source_id, path, token_count, citation_str, rank = row
+            results.append({
+                "chunk_id": chunk_id,
+                "source_id": source_id,
+                "path": path,
+                "token_count": token_count,
+                "citation": json.loads(citation_str) if isinstance(citation_str, str) else citation_str,
+                "score": abs(rank)
+            })
+
+        if results:
+            max_score = max(r["score"] for r in results)
+            min_score = min(r["score"] for r in results)
+            for r in results:
+                if max_score > min_score:
+                    r["norm_score"] = (r["score"] - min_score) / (max_score - min_score)
+                else:
+                    r["norm_score"] = 1.0
+
+        results.sort(key=lambda x: x.get("norm_score", 0), reverse=True)
+        return results
+    finally:
+        conn.close()
 
 def search_vector(pack_dir: str, query: str, top_k: int = 5) -> List[Dict]:
     base_path = Path(pack_dir)
@@ -332,16 +368,36 @@ def search_vector(pack_dir: str, query: str, top_k: int = 5) -> List[Dict]:
     if k == 0:
         return []
 
+    hnsw_result = None
     hnsw_path = indexes_dir / "hnsw_index.bin"
     if _hnswlib is not None and hnsw_path.exists():
-        # HNSW ANN search (default backend)
-        dim = embeddings.shape[1]
-        index = _hnswlib.Index(space="ip", dim=dim)
-        index.load_index(str(hnsw_path), max_elements=len(embeddings))
-        index.set_ef(max(k * 2, 50))
-        labels, distances = index.knn_query(query_emb, k=k)
-        top_indices = labels[0]
-        scores = 1.0 - distances[0]  # hnswlib ip returns 1-cosine for normalized vecs
+        try:
+            # HNSW ANN search (default backend)
+            dim = embeddings.shape[1]
+            index = _hnswlib.Index(space="ip", dim=dim)
+            index.load_index(str(hnsw_path), max_elements=len(embeddings))
+            if index.get_current_count() != len(embeddings):
+                raise ValueError(
+                    f"hnsw index has {index.get_current_count()} items but "
+                    f"vector_meta.json has {len(embeddings)}"
+                )
+            index.set_ef(max(k * 2, 50))
+            labels, distances = index.knn_query(query_emb, k=k)
+            # hnswlib ip returns 1-cosine for normalized vecs
+            hnsw_result = (labels[0], 1.0 - distances[0])
+        except Exception:
+            global _warned_stale_hnsw
+            if not _warned_stale_hnsw:
+                print(
+                    "[agentpack] Warning: stale or corrupt HNSW index, "
+                    "falling back to brute-force search.",
+                    file=sys.stderr,
+                )
+                _warned_stale_hnsw = True
+            hnsw_path.unlink(missing_ok=True)
+
+    if hnsw_result is not None:
+        top_indices, scores = hnsw_result
     else:
         # Brute-force fallback
         similarities = np.dot(embeddings, query_emb)
@@ -368,7 +424,7 @@ def _rrf_score(rank: int, k: int = 60) -> float:
     return 1.0 / (k + rank)
 
 
-def search_hybrid(pack_dir: str, query: str, top_k: int = 5, alpha: float = 0.5) -> List[Dict]:
+def search_hybrid(pack_dir: str, query: str, top_k: int = 5) -> List[Dict]:
     fts_results = search_fts(pack_dir, query, top_k=top_k * 2)
     vec_results = search_vector(pack_dir, query, top_k=top_k * 2)
 
@@ -429,6 +485,8 @@ def search_pack(
     page_filter: int = None,
 ) -> List[Dict]:
     base = Path(pack_dir)
+    if not (base / "manifest.yml").exists():
+        return []
     cache_dir = base / ".cache"
     pack_hash = _manifest_hash(base)
     q_cache_key = make_key(
@@ -463,13 +521,15 @@ def search_pack(
     db_path = base / "indexes" / "lexical_index.db"
     if db_path.exists():
         conn = sqlite3.connect(db_path)
-        cur = conn.cursor()
-        for r in results:
-            cur.execute("SELECT content FROM chunks_fts WHERE chunk_id = ?", (r["chunk_id"],))
-            row = cur.fetchone()
-            if row:
-                r["content"] = row[0]
-        conn.close()
+        try:
+            cur = conn.cursor()
+            for r in results:
+                cur.execute("SELECT content FROM chunks_fts WHERE chunk_id = ?", (r["chunk_id"],))
+                row = cur.fetchone()
+                if row:
+                    r["content"] = row[0]
+        finally:
+            conn.close()
 
     cache_set(cache_dir, q_cache_key, results)
     return results

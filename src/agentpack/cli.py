@@ -117,7 +117,12 @@ def retrieve(
     page: int = typer.Option(None, help="Filter results to this page number"),
 ):
     """Retrieves top-k evidence chunks from a pack."""
+    from pathlib import Path as _Path
     from agentpack.retrieve import search_pack
+
+    if not (_Path(pack_dir) / "manifest.yml").exists():
+        typer.secho(f"No manifest.yml found at {pack_dir}", fg=typer.colors.RED)
+        raise typer.Exit(code=1)
 
     typer.echo(f"Searching for '{query}' in {pack_dir} using {mode} mode...")
     results = search_pack(
@@ -203,6 +208,15 @@ def map_cmd(
         typer.secho("map.yml written.", fg=typer.colors.GREEN)
 
 
+def _map_has_any_keyphrases(sections) -> bool:
+    for node in sections or []:
+        if node.get("keyphrases"):
+            return True
+        if _map_has_any_keyphrases(node.get("nodes")):
+            return True
+    return False
+
+
 @app.command(name="graph")
 def graph_cmd(
     pack_dir: str,
@@ -221,6 +235,22 @@ def graph_cmd(
     if not (base / "manifest.yml").exists():
         typer.secho(f"No manifest.yml found at {pack_dir}", fg=typer.colors.RED)
         raise typer.Exit(code=1)
+
+    map_path = base / "map.yml"
+    if map_path.exists():
+        try:
+            with open(map_path, "r", encoding="utf-8") as f:
+                map_data = _yaml.safe_load(f)
+            documents = (map_data or {}).get("documents") or []
+            has_keyphrases = any(_map_has_any_keyphrases(d.get("sections")) for d in documents)
+            if not has_keyphrases:
+                typer.secho(
+                    "map.yml has no keyphrases (built by 'agentpack map'?) — the graph will "
+                    "contain no concepts; run 'agentpack pack' for a full-fidelity map.",
+                    fg=typer.colors.YELLOW,
+                )
+        except Exception:
+            pass  # map.yml unreadable -- write_graph below handles/reports that itself
 
     # Reuse the params recorded in an existing graph.yml (spec §3: rebuild is
     # the same code path as pack-time, not a re-read of ambient config) --
@@ -341,6 +371,7 @@ def gen_eval(
     )
     if report.startswith("Error"):
         typer.secho(report, fg=typer.colors.RED)
+        raise typer.Exit(code=1)
     else:
         typer.echo(report)
         typer.secho("Generation evaluation complete.", fg=typer.colors.GREEN)
