@@ -96,14 +96,14 @@ def test_cli_retrieve_missing_pack_dir_no_side_effects(tmp_path):
     assert "No manifest.yml found" in result.stdout
     assert not nope_dir.exists(), "typo'd pack_dir must not be side-effect-created"
 
-@patch("agentpack.cli.run_eval")
+@patch("agentpack.eval.runner.run_eval")
 def test_cli_eval(mock_run_eval):
     mock_run_eval.return_value = "Eval Output"
     result = runner.invoke(app, ["eval", "fake_dir"])
     assert result.exit_code == 0
     assert "Eval Output" in result.stdout
 
-@patch("agentpack.cli.run_eval")
+@patch("agentpack.eval.runner.run_eval")
 def test_cli_eval_error(mock_run_eval):
     mock_run_eval.return_value = "Error: Something went wrong"
     result = runner.invoke(app, ["eval", "fake_dir"])
