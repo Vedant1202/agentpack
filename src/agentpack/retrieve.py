@@ -343,16 +343,6 @@ def search_vector(pack_dir: str, query: str, top_k: int = 5) -> List[Dict]:
         return []
 
     current_hash = _manifest_hash(base_path)
-    if (
-        not vector_path.exists()
-        and hash_path.exists()
-        and hash_path.read_text().strip() == current_hash
-    ):
-        # Already confirmed this exact manifest state has nothing to embed (a degenerate
-        # rebuild cleared the index and recorded the current hash) -- no point re-running
-        # build_vector_index just to no-op again.
-        return []
-
     stale = (
         not vector_path.exists()
         or not meta_path.exists()

@@ -208,6 +208,50 @@ def test_search_vector_returns_empty_after_degenerate_rebuild(tmp_path):
     assert results == [], f"stale vector index served ghost results for a deleted chunk: {results}"
 
 
+def test_search_vector_rebuilds_after_partial_npy_deletion(tmp_path):
+    """FU.2: the TB.1 fast path (npy absent + hash matches current -> confirmed-empty,
+    return []) can't distinguish a genuinely empty pack from a pack that HAS chunks but had
+    only vector_index.npy manually deleted (partial cleanup, crash between writes, etc) --
+    the hash still matches since the manifest never changed. Must still rebuild and return
+    real results, not silently serve an empty list forever."""
+    import yaml
+
+    pack_dir = tmp_path
+    indexes_dir = pack_dir / "indexes"
+    indexes_dir.mkdir(parents=True, exist_ok=True)
+    chunks_dir = pack_dir / "chunks"
+    chunks_dir.mkdir()
+
+    manifest = {
+        "sources": [{"id": "s1", "checksum": "abc"}],
+        "chunks": [{"id": "c1", "source_id": "s1", "path": "chunks/c1.json", "token_count": 10}],
+    }
+    with open(pack_dir / "manifest.yml", "w") as f:
+        yaml.dump(manifest, f)
+
+    with open(chunks_dir / "c1.json", "w") as f:
+        json.dump({"content": "A"}, f)
+
+    with patch("agentpack.retrieve._get_embedding_model") as mock_get_model:
+        mock_embed = MagicMock()
+        mock_embed.embed.side_effect = lambda texts, **_: iter([[0.1, 0.9]] * len(texts))
+        mock_get_model.return_value = mock_embed
+
+        vector_path = indexes_dir / "vector_index.npy"
+        meta_path = indexes_dir / "vector_meta.json"
+        build_vector_index(pack_dir, vector_path, meta_path)
+        assert vector_path.exists()
+
+        # Delete ONLY the npy -- hash and meta survive untouched, manifest is unchanged.
+        vector_path.unlink()
+
+        results = search_vector(str(pack_dir), "query", top_k=5)
+
+    assert results, "partial npy deletion must trigger a rebuild, not a silent empty result"
+    assert results[0]["chunk_id"] == "c1"
+    assert vector_path.exists(), "search_vector must have rebuilt the deleted npy"
+
+
 def test_search_vector_falls_back_when_hnsw_bin_is_stale(tmp_path, capsys):
     """F10: hnsw_index.bin sits outside the staleness check and is never deleted/revalidated
     against the CURRENT vector_meta.json/vector_index.npy -- a stale bin (built with more
