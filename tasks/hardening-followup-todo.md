@@ -58,7 +58,7 @@ a clean checkout.
   commit because its own tests required it, but deliberately left the `run_eval` hunk unstaged —
   correct scoping at the time, but it means every full-suite run this session silently depended
   on an uncommitted fix.
-- [ ] **Fix:** commit the working-tree `tests/test_cli.py` diff as its own commit (it is exactly
+- [x] **Fix:** commit the working-tree `tests/test_cli.py` diff as its own commit (it is exactly
   2 decorator lines — verify with `git diff tests/test_cli.py` first; if anything else appears in
   the diff, STOP and report). Suggested message:
   `test(cli): patch run_eval where it resolves — lazy import means agentpack.cli.run_eval never exists`
@@ -67,6 +67,15 @@ a clean checkout.
 - **Acceptance:** `git status` shows NO modified tracked files; full suite **326 passed, 0
   failed** with a clean tree.
 - **Verify:** `git diff` (empty for tracked files) → full suite → record count.
+
+**Evidence:**
+- Re-confirmed RED via `git stash push -- tests/test_cli.py`: `test_cli_eval` and
+  `test_cli_eval_error` both failed with `AttributeError: <module 'agentpack.cli' ...> does not
+  have the attribute 'run_eval'` → `git stash pop` restored the fix.
+- Diff staged and committed was exactly the 2 decorator lines, confirmed via
+  `git diff --cached` before committing — nothing else included.
+- GREEN (targeted): `test_cli_eval`/`test_cli_eval_error` → 2 passed.
+- GREEN (full suite): **326 passed, 0 failed** on a clean tree (commit `4f8f28f`).
 
 ## FU.2 · Remove `search_vector`'s TB.1 fast path — it eats legitimate rebuilds
 
@@ -86,7 +95,7 @@ a clean checkout.
   `if not vector_path.exists(): return []`. The fast path only saved a cheap no-op rebuild per
   query on an empty pack (reads the manifest, loops zero/missing chunks, rewrites the hash — 
   trivial, and empty packs are a dev-only edge). Delete the whole block; do not replace it.
-- [ ] **Test (RED first):** in `tests/test_retrieve.py`, next to
+- [x] **Test (RED first):** in `tests/test_retrieve.py`, next to
   `test_search_vector_returns_empty_after_degenerate_rebuild` (reuse its fixture pattern —
   mocked `_get_embedding_model`, real 1-chunk manifest + chunk file): build the index, assert npy
   exists, `vector_path.unlink()` ONLY (leave hash + meta), call `search_vector` → assert results
@@ -96,6 +105,19 @@ a clean checkout.
   still green (the degenerate case must still return `[]`); TB.0 snapshot
   (`test_hybrid_ranking_snapshot_tb0`) byte-identical; full suite green (expect **327**).
 - **Verify:** targeted + TB.0 + full suite.
+
+**Evidence:**
+- RED: `test_search_vector_rebuilds_after_partial_npy_deletion` →
+  `AssertionError: partial npy deletion must trigger a rebuild, not a silent empty result` —
+  `assert []`, confirming the fast path swallowed a legitimate rebuild.
+- Fix: deleted the whole fast-path block (the `current_hash = _manifest_hash(...)` line stays,
+  still used by the `stale` check immediately below).
+- GREEN (targeted): `tests/test_retrieve.py -v` → **24 passed**, incl. the new test AND
+  `test_search_vector_returns_empty_after_degenerate_rebuild` (TB.1's own test — degenerate-empty
+  case still correctly returns `[]` via the flow beneath the removed fast path).
+- GREEN + TB.0: `test_hybrid_ranking_snapshot_tb0` → still passing, unchanged.
+- GREEN (full suite): **327 passed, 0 failed** (commit `dd97cf1`) — matches the plan's predicted
+  count exactly.
 
 ## FU.3 · `cache_get`: miss on absent db *file*, not just absent directory
 
@@ -107,23 +129,41 @@ a clean checkout.
   `CREATE TABLE` **creates `cache.db` as a side effect of the read**. The F25 typo-path scenario
   is unaffected (the dir doesn't exist there), so this is a fidelity tighten, not a user-facing
   bug — but it is a one-line fix.
-- [ ] **Fix:** in `_connect`, change the read-path guard to file-level:
+- [x] **Fix:** in `_connect`, change the read-path guard to file-level:
   `if not create and not (cache_dir / "cache.db").exists(): return None` — return **before** any
   `sqlite3.connect`. Keep `mkdir` under `create=True` only. Do NOT touch the corruption-heal
   branch: a *present-but-corrupt* db on a read path must still connect, fail, warn once, and
   self-heal (TB.3's guarantee — deleting/recreating a file that exists is not the side effect
   F25 is about; hardening-todo.md TB.6(c) records this rationale).
-- [ ] **Test (RED first):** in `tests/test_cache.py`: create the cache dir (empty), call
+- [x] **Test (RED first):** in `tests/test_cache.py`: create the cache dir (empty), call
   `cache_get` → assert `None` AND `not (cache_dir / "cache.db").exists()`. RED today: the file
   exists after the read.
 - **Acceptance:** new test green; `test_corrupt_cache_db_self_heals` and the round-trip tests
   still green; full suite green (expect **328**).
 - **Verify:** targeted + full suite.
 
-**▣ CHECKPOINT FU — stop; post evidence; push to PR #12; wait for human go.**
-Final gate before pushing: `git status` shows no modified tracked files, full suite green on that
-clean tree. Push `fix/engineering-hardening`; note the new commits in a PR comment or by
-updating the PR description's test plan.
+**Evidence:**
+- RED: `test_cache_get_does_not_create_db_file_for_existing_empty_dir` (uses `tmp_path` directly
+  as `cache_dir`, matching existing test conventions — pytest already creates it, with no
+  `cache.db` inside) →
+  `AssertionError: cache_get must not create cache.db as a side effect of a read` —
+  `assert not True`.
+- Fix: moved `db_path = cache_dir / "cache.db"` computation (pure, no filesystem I/O) before the
+  guard, and checks `db_path.exists()` instead of `cache_dir.exists()`.
+- GREEN (targeted): `tests/test_cache.py -v` → **6 passed**, incl. the new test and
+  `test_corrupt_cache_db_self_heals` (corruption self-heal on a read path confirmed unaffected —
+  a present-but-corrupt file still passes the file-level existence check and proceeds to
+  connect/fail/heal).
+- Also re-verified `test_cli_retrieve_missing_pack_dir_no_side_effects` (the original F25
+  typo-path scenario TB.6 fixed) — still passing, confirming this tighten doesn't regress it.
+- GREEN (full suite): **328 passed, 0 failed** (commit `ac849c3`) — matches the plan's predicted
+  count exactly.
+
+**▣ CHECKPOINT FU — evidence posted, gate passed, ready to push.**
+
+FU.1–FU.3 complete across 3 commits (`4f8f28f`, `dd97cf1`, `ac849c3`). Final gate verified: `git
+status` shows no modified tracked files; full suite **328 passed, 0 failed** on that clean tree —
+matches the plan's predicted count exactly at every step (326 → 327 → 328).
 
 ---
 
