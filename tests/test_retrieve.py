@@ -83,11 +83,58 @@ def test_build_fts_index_and_search(tmp_path):
         json.dump({"content": "Hello world"}, f)
         
     build_fts_index(pack_dir, db_path)
-    
+
     # Test FTS search
     res = search_fts(str(pack_dir), "world", top_k=1)
     assert len(res) == 1
     assert res[0]["chunk_id"] == "c1"
+
+def test_search_fts_corrupt_db_self_heals(tmp_path, capsys):
+    pack_dir = tmp_path
+    indexes_dir = pack_dir / "indexes"
+    indexes_dir.mkdir(parents=True, exist_ok=True)
+    db_path = indexes_dir / "lexical_index.db"
+
+    with open(pack_dir / "manifest.yml", "w") as f:
+        yaml_content = """
+        chunks:
+          - id: "c1"
+            source_id: "s1"
+            path: "chunks/c1.json"
+            token_count: 10
+        """
+        f.write(yaml_content)
+
+    chunks_dir = pack_dir / "chunks"
+    chunks_dir.mkdir()
+
+    with open(chunks_dir / "c1.json", "w") as f:
+        json.dump({"content": "Hello world"}, f)
+
+    build_fts_index(pack_dir, db_path)
+
+    # Truncate the built index to garbage bytes to simulate corruption.
+    db_path.write_bytes(b"garbage not a sqlite file")
+
+    res = search_fts(str(pack_dir), "world", top_k=1)
+
+    assert len(res) == 1
+    assert res[0]["chunk_id"] == "c1"
+
+    captured = capsys.readouterr()
+    assert "corrupt" in captured.err.lower()
+
+@patch("agentpack.retrieve.TextEmbedding")
+def test_embedding_model_pinned_by_name(mock_text_embedding):
+    import agentpack.retrieve as retrieve_mod
+
+    retrieve_mod._embedding_model = None  # reset the module singleton
+    try:
+        retrieve_mod._get_embedding_model()
+    finally:
+        retrieve_mod._embedding_model = None  # don't leak the mock into later tests
+
+    mock_text_embedding.assert_called_once_with(model_name="BAAI/bge-small-en-v1.5")
 
 @patch("agentpack.retrieve._get_embedding_model")
 def test_build_vector_index(mock_get_model, tmp_path):
@@ -120,38 +167,260 @@ def test_build_vector_index(mock_get_model, tmp_path):
     assert (indexes_dir / "vector_index.npy").exists()
     assert (indexes_dir / "vector_meta.json").exists()
 
+
+def test_search_vector_returns_empty_after_degenerate_rebuild(tmp_path):
+    """F7: build_vector_index's zero-chunks/zero-texts early paths didn't delete stale index
+    files or write the new hash, so a pack rewritten to zero chunks kept serving the OLD
+    vectors forever (ghost results) instead of an empty result."""
+    import yaml
+
+    pack_dir = tmp_path
+    indexes_dir = pack_dir / "indexes"
+    indexes_dir.mkdir(parents=True, exist_ok=True)
+    chunks_dir = pack_dir / "chunks"
+    chunks_dir.mkdir()
+
+    manifest = {
+        "sources": [{"id": "s1", "checksum": "abc"}],
+        "chunks": [{"id": "c1", "source_id": "s1", "path": "chunks/c1.json", "token_count": 10}],
+    }
+    with open(pack_dir / "manifest.yml", "w") as f:
+        yaml.dump(manifest, f)
+
+    with open(chunks_dir / "c1.json", "w") as f:
+        json.dump({"content": "A"}, f)
+
+    with patch("agentpack.retrieve._get_embedding_model") as mock_get_model:
+        mock_embed = MagicMock()
+        mock_embed.embed.side_effect = lambda texts, **_: iter([[0.1, 0.9]] * len(texts))
+        mock_get_model.return_value = mock_embed
+
+        build_vector_index(pack_dir, indexes_dir / "vector_index.npy", indexes_dir / "vector_meta.json")
+        assert (indexes_dir / "vector_index.npy").exists()
+
+        # Rewrite manifest to zero chunks, keeping sources -- the degenerate-rebuild case.
+        manifest["chunks"] = []
+        with open(pack_dir / "manifest.yml", "w") as f:
+            yaml.dump(manifest, f)
+
+        results = search_vector(str(pack_dir), "query", top_k=5)
+
+    assert results == [], f"stale vector index served ghost results for a deleted chunk: {results}"
+
+
+def test_search_vector_rebuilds_after_partial_npy_deletion(tmp_path):
+    """FU.2: the TB.1 fast path (npy absent + hash matches current -> confirmed-empty,
+    return []) can't distinguish a genuinely empty pack from a pack that HAS chunks but had
+    only vector_index.npy manually deleted (partial cleanup, crash between writes, etc) --
+    the hash still matches since the manifest never changed. Must still rebuild and return
+    real results, not silently serve an empty list forever."""
+    import yaml
+
+    pack_dir = tmp_path
+    indexes_dir = pack_dir / "indexes"
+    indexes_dir.mkdir(parents=True, exist_ok=True)
+    chunks_dir = pack_dir / "chunks"
+    chunks_dir.mkdir()
+
+    manifest = {
+        "sources": [{"id": "s1", "checksum": "abc"}],
+        "chunks": [{"id": "c1", "source_id": "s1", "path": "chunks/c1.json", "token_count": 10}],
+    }
+    with open(pack_dir / "manifest.yml", "w") as f:
+        yaml.dump(manifest, f)
+
+    with open(chunks_dir / "c1.json", "w") as f:
+        json.dump({"content": "A"}, f)
+
+    with patch("agentpack.retrieve._get_embedding_model") as mock_get_model:
+        mock_embed = MagicMock()
+        mock_embed.embed.side_effect = lambda texts, **_: iter([[0.1, 0.9]] * len(texts))
+        mock_get_model.return_value = mock_embed
+
+        vector_path = indexes_dir / "vector_index.npy"
+        meta_path = indexes_dir / "vector_meta.json"
+        build_vector_index(pack_dir, vector_path, meta_path)
+        assert vector_path.exists()
+
+        # Delete ONLY the npy -- hash and meta survive untouched, manifest is unchanged.
+        vector_path.unlink()
+
+        results = search_vector(str(pack_dir), "query", top_k=5)
+
+    assert results, "partial npy deletion must trigger a rebuild, not a silent empty result"
+    assert results[0]["chunk_id"] == "c1"
+    assert vector_path.exists(), "search_vector must have rebuilt the deleted npy"
+
+
+def test_search_vector_falls_back_when_hnsw_bin_is_stale(tmp_path, capsys):
+    """F10: hnsw_index.bin sits outside the staleness check and is never deleted/revalidated
+    against the CURRENT vector_meta.json/vector_index.npy -- a stale bin (built with more
+    items than currently exist) can serve labels for chunks that are no longer present."""
+    import yaml
+    from agentpack.retrieve import _manifest_hash
+
+    pack_dir = tmp_path
+    indexes_dir = pack_dir / "indexes"
+    indexes_dir.mkdir(parents=True, exist_ok=True)
+    chunks_dir = pack_dir / "chunks"
+    chunks_dir.mkdir()
+
+    manifest = {
+        "sources": [{"id": "s1", "checksum": "abc"}],
+        "chunks": [
+            {"id": "c1", "source_id": "s1", "path": "chunks/c1.md", "token_count": 1},
+            {"id": "c2", "source_id": "s1", "path": "chunks/c2.md", "token_count": 1},
+            {"id": "c3", "source_id": "s1", "path": "chunks/c3.md", "token_count": 1},
+        ],
+    }
+    for cid, txt in [("c1", "alpha"), ("c2", "beta"), ("c3", "gamma")]:
+        (chunks_dir / f"{cid}.md").write_text(txt)
+    with open(pack_dir / "manifest.yml", "w") as f:
+        yaml.dump(manifest, f)
+
+    vector_path = indexes_dir / "vector_index.npy"
+    meta_path = indexes_dir / "vector_meta.json"
+
+    with patch("agentpack.retrieve._get_embedding_model") as mock_get_model:
+        mock_embed = MagicMock()
+        fixed_vecs = [np.array([1.0, 0.0], dtype=np.float32),
+                      np.array([0.0, 1.0], dtype=np.float32),
+                      np.array([1.0, 1.0], dtype=np.float32)]
+        mock_embed.embed.side_effect = lambda texts, **_: iter(fixed_vecs[:len(texts)])
+        mock_get_model.return_value = mock_embed
+
+        # Real (not mocked) hnswlib build -- hnswlib is installed in this environment.
+        build_vector_index(pack_dir, vector_path, meta_path)
+        assert (indexes_dir / "hnsw_index.bin").exists(), "fixture must build a real HNSW bin"
+
+        # Simulate a re-pack that reduced the chunk count: rewrite npy/meta to 2 rows,
+        # keeping the OLD (3-item) hnsw bin, and write a hash matching the NEW manifest so
+        # search_vector's outer staleness check doesn't trigger a rebuild -- forcing it into
+        # the HNSW load path with a bin that doesn't match the current embeddings.
+        manifest["chunks"] = manifest["chunks"][:2]
+        with open(pack_dir / "manifest.yml", "w") as f:
+            yaml.dump(manifest, f)
+
+        np.save(vector_path, np.array([[1.0, 0.0], [0.0, 1.0]], dtype=np.float32))
+        with open(meta_path, "w") as f:
+            json.dump([
+                {"chunk_id": "c1", "source_id": "s1", "path": "chunks/c1.md", "token_count": 1, "citation": {}},
+                {"chunk_id": "c2", "source_id": "s1", "path": "chunks/c2.md", "token_count": 1, "citation": {}},
+            ], f)
+        (indexes_dir / "vector_index.hash").write_text(_manifest_hash(pack_dir))
+
+        results = search_vector(str(pack_dir), "query", top_k=2)
+
+    ids = {r["chunk_id"] for r in results}
+    assert ids <= {"c1", "c2"}, (
+        f"stale HNSW bin served a label for a chunk no longer present: {ids}"
+    )
+    captured = capsys.readouterr()
+    assert "stale" in captured.err.lower() or "corrupt" in captured.err.lower()
+    assert not (indexes_dir / "hnsw_index.bin").exists(), "stale HNSW bin must be deleted"
+
+
+def test_hybrid_ranking_snapshot_tb0(tmp_path):
+    """TB.0: ranking-snapshot guard for Phase B (spec 0004). This test must pass UNCHANGED
+    through every remaining Phase B task -- it proves those changes touch storage/invalidation
+    only, never the ranking algorithm itself. Embeddings are deterministic (md5-hash-derived,
+    purely a function of chunk text) so the snapshot is stable across runs without depending on
+    a real ML model, mirroring test_rrf_ordering's use of a small real pack."""
+    import hashlib
+    from agentpack.pack import write_pack
+
+    in_dir = tmp_path / "corpus"
+    in_dir.mkdir()
+    (in_dir / "ml_ops.md").write_text(
+        "# ML Ops\n\nDeploying machine learning models to production requires careful "
+        "monitoring and rollback strategies when a new model underperforms."
+    )
+    (in_dir / "k8s.md").write_text(
+        "# Kubernetes\n\nContainer orchestration with Kubernetes simplifies scaling "
+        "stateless application deployments across a cluster."
+    )
+    (in_dir / "db.md").write_text(
+        "# Database Migrations\n\nDatabase migrations should run inside a transaction "
+        "to allow a safe rollback on failure."
+    )
+    out_dir = tmp_path / "pack"
+
+    def deterministic_embed(texts, **_):
+        for t in texts:
+            digest = hashlib.md5(t.encode("utf-8")).digest()
+            yield np.array([b / 255.0 for b in digest[:8]], dtype=np.float32)
+
+    mock_model = MagicMock()
+    mock_model.embed.side_effect = deterministic_embed
+
+    with patch("agentpack.retrieve._get_embedding_model", return_value=mock_model):
+        write_pack(str(in_dir), str(out_dir), quiet=True, no_map=True, no_graph=True)
+
+        results_rollback = search_pack(str(out_dir), "rollback strategies", top_k=3, mode="hybrid")
+        results_k8s = search_pack(str(out_dir), "container orchestration", top_k=3, mode="hybrid")
+
+    ids_rollback = [r["chunk_id"] for r in results_rollback]
+    ids_k8s = [r["chunk_id"] for r in results_k8s]
+
+    # Snapshot -- literal, ordered chunk-id lists captured from a real run. If either of these
+    # changes, something in Phase B affected RANKING, not just storage/invalidation, and needs
+    # explicit review before proceeding.
+    assert ids_rollback == ["src_002_chunk_000", "src_000_chunk_000", "src_001_chunk_000"], (
+        f"TB.0 ranking snapshot changed for 'rollback strategies': {ids_rollback}"
+    )
+    assert ids_k8s == ["src_001_chunk_000", "src_000_chunk_000", "src_002_chunk_000"], (
+        f"TB.0 ranking snapshot changed for 'container orchestration': {ids_k8s}"
+    )
+
+
 @patch("agentpack.retrieve.np.load")
 @patch("agentpack.retrieve._get_embedding_model")
 def test_search_hybrid(mock_get_model, mock_np_load, tmp_path):
+    """TB.1 note: this fixture used to be a MISMATCHED manifest+index pair (manifest said
+    zero chunks; the index files claimed c1/c2) and passed only because build_vector_index's
+    degenerate-rebuild path was a silent no-op (F7). It now uses a genuinely consistent pair
+    -- a real hash matching a manifest that actually lists c1/c2 -- so search_vector sees the
+    index as current and serves it unchanged, which is what this test is actually about
+    (hybrid fusion), not the invalidation behavior TB.1 fixes."""
+    from agentpack.retrieve import _manifest_hash
+
     mock_embed = MagicMock()
     mock_embed.embed.side_effect = lambda texts, **_: iter([np.array([1.0, 0.0])] * len(texts))
     mock_get_model.return_value = mock_embed
-    
+
     mock_np_load.return_value = np.array([[1.0, 0.0], [0.0, 1.0]])
-    
+
     pack_dir = tmp_path
     indexes_dir = pack_dir / "indexes"
     indexes_dir.mkdir(parents=True, exist_ok=True)
 
     import yaml
+    manifest = {
+        "sources": [{"id": "s1", "checksum": "a"}, {"id": "s2", "checksum": "b"}],
+        "chunks": [
+            {"id": "c1", "source_id": "s1", "path": "p1", "token_count": 1},
+            {"id": "c2", "source_id": "s2", "path": "p2", "token_count": 1},
+        ],
+    }
     with open(pack_dir / "manifest.yml", "w") as f:
-        yaml.dump({"sources": [], "chunks": []}, f)
+        yaml.dump(manifest, f)
 
     with open(indexes_dir / "vector_meta.json", "w") as f:
         json.dump([{"chunk_id": "c1", "source_id": "s1", "path": "p1", "token_count": 1, "citation": {}},
                    {"chunk_id": "c2", "source_id": "s2", "path": "p2", "token_count": 1, "citation": {}}], f)
 
     (indexes_dir / "vector_index.npy").write_bytes(b"")
-    # Write hash so search_vector doesn't try to rebuild
-    (indexes_dir / "vector_index.hash").write_text("placeholder")
-        
+    # A REAL hash matching this manifest, so search_vector sees the index as current and
+    # doesn't attempt a rebuild.
+    (indexes_dir / "vector_index.hash").write_text(_manifest_hash(pack_dir))
+
     with patch("agentpack.retrieve.search_fts") as mock_search_fts:
         # Mock FTS returning c2
         mock_search_fts.return_value = [{"chunk_id": "c2", "score": 1.0, "path": "p", "token_count": 10, "citation": {}}]
         
         # Vector should prefer c1 (score 1.0) over c2 (score 0.0)
         # Hybrid should combine them
-        results = search_hybrid(str(pack_dir), "query", top_k=2, alpha=0.5)
+        results = search_hybrid(str(pack_dir), "query", top_k=2)
         
         assert len(results) == 2
         ids = [r["chunk_id"] for r in results]
@@ -182,6 +451,35 @@ def _make_pack(pack_dir, chunk_id, text):
     }
     with open(pack_dir / "manifest.yml", "w") as f:
         yaml.dump(manifest, f)
+
+
+def test_manifest_hash_changes_with_token_count(tmp_path):
+    """F8: re-chunking that redistributes text across the SAME chunk ids (positional,
+    unchanged) but shifts token_counts must still invalidate stale indexes/L5 cache -- the
+    old fingerprint (ids + source checksums only) can't see this."""
+    from agentpack.retrieve import _manifest_hash
+    import yaml
+
+    pack_dir = tmp_path
+    manifest_v1 = {
+        "sources": [{"id": "s1", "checksum": "abc"}],
+        "chunks": [{"id": "c1", "source_id": "s1", "path": "c1.md", "token_count": 100}],
+    }
+    with open(pack_dir / "manifest.yml", "w") as f:
+        yaml.dump(manifest_v1, f)
+    hash_v1 = _manifest_hash(pack_dir)
+
+    manifest_v2 = {
+        "sources": [{"id": "s1", "checksum": "abc"}],
+        "chunks": [{"id": "c1", "source_id": "s1", "path": "c1.md", "token_count": 250}],
+    }
+    with open(pack_dir / "manifest.yml", "w") as f:
+        yaml.dump(manifest_v2, f)
+    hash_v2 = _manifest_hash(pack_dir)
+
+    assert hash_v1 != hash_v2, (
+        "manifest hash unchanged despite a different token_count for the same chunk id"
+    )
 
 
 def test_fts_invalidated_on_repack(tmp_path):

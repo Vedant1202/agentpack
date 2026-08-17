@@ -61,31 +61,49 @@ def test_cli_validate():
         assert result.exit_code == 0
         assert "Pack validation successful" in result.stdout
 
-@patch("agentpack.cli.search_pack")
-def test_cli_retrieve(mock_search_pack):
+def _write_minimal_manifest(pack_dir: Path):
+    pack_dir.mkdir(parents=True, exist_ok=True)
+    with open(pack_dir / "manifest.yml", "w") as f:
+        yaml.dump({"pack": {"name": "test"}, "sources": [], "chunks": [], "tables": []}, f)
+
+
+@patch("agentpack.retrieve.search_pack")
+def test_cli_retrieve(mock_search_pack, tmp_path):
     mock_search_pack.return_value = [
         {"path": "c1.json", "token_count": 10, "score": 0.9, "source_id": "s1", "citation": {"source_path": "a.txt"}}
     ]
-    result = runner.invoke(app, ["retrieve", "fake_dir", "query"])
+    _write_minimal_manifest(tmp_path / "pack")
+    result = runner.invoke(app, ["retrieve", str(tmp_path / "pack"), "query"])
     assert result.exit_code == 0
     assert "c1.json" in result.stdout
     assert "a.txt" in result.stdout
 
-@patch("agentpack.cli.search_pack")
-def test_cli_retrieve_empty(mock_search_pack):
+@patch("agentpack.retrieve.search_pack")
+def test_cli_retrieve_empty(mock_search_pack, tmp_path):
     mock_search_pack.return_value = []
-    result = runner.invoke(app, ["retrieve", "fake_dir", "query"])
+    _write_minimal_manifest(tmp_path / "pack")
+    result = runner.invoke(app, ["retrieve", str(tmp_path / "pack"), "query"])
     assert result.exit_code == 0
     assert "No results found" in result.stdout
 
-@patch("agentpack.cli.run_eval")
+def test_cli_retrieve_missing_pack_dir_no_side_effects(tmp_path):
+    """F25/TB.6: a typo'd/nonexistent pack_dir must not side-effect-create .cache/ or
+    indexes/ before failing -- clean exit 1 + red message instead of a traceback."""
+    nope_dir = tmp_path / "nope"
+    result = runner.invoke(app, ["retrieve", str(nope_dir), "q"])
+
+    assert result.exit_code == 1
+    assert "No manifest.yml found" in result.stdout
+    assert not nope_dir.exists(), "typo'd pack_dir must not be side-effect-created"
+
+@patch("agentpack.eval.runner.run_eval")
 def test_cli_eval(mock_run_eval):
     mock_run_eval.return_value = "Eval Output"
     result = runner.invoke(app, ["eval", "fake_dir"])
     assert result.exit_code == 0
     assert "Eval Output" in result.stdout
 
-@patch("agentpack.cli.run_eval")
+@patch("agentpack.eval.runner.run_eval")
 def test_cli_eval_error(mock_run_eval):
     mock_run_eval.return_value = "Error: Something went wrong"
     result = runner.invoke(app, ["eval", "fake_dir"])
@@ -98,6 +116,13 @@ def test_cli_gen_eval(mock_run_gen):
     result = runner.invoke(app, ["gen-eval", "fake_dir"])
     assert result.exit_code == 0
     assert "Gen Eval Output" in result.stdout
+
+@patch("agentpack.eval.generation.run_generation_eval")
+def test_cli_gen_eval_error(mock_run_gen):
+    mock_run_gen.return_value = "Error: Something went wrong"
+    result = runner.invoke(app, ["gen-eval", "fake_dir"])
+    assert result.exit_code == 1
+    assert "Error:" in result.stdout
 
 @patch("agentpack.eval.benchmarks.slice_financebench")
 def test_cli_prep_benchmark(mock_slice):

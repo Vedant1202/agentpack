@@ -322,6 +322,42 @@ def test_map_nodes_carry_descriptors_by_default():
     assert m["corpus"]["summary"], "corpus should carry an extractive summary"
 
 
+def test_section_enrichment_text_is_capped(monkeypatch):
+    """A single oversized section (e.g. a --fast PDF with one root section = whole doc) must not
+    feed its full, uncapped text into gist()'s O(N^2) sentence graph — that's the OOM (F5)."""
+    import agentpack.mapper as mapper_mod
+    from agentpack.mapper import build_map, _ENRICH_TEXT_CAP
+
+    captured = []
+    original_gist = mapper_mod._gist
+
+    def spy_gist(text):
+        captured.append(text)
+        return original_gist(text)
+
+    monkeypatch.setattr(mapper_mod, "_gist", spy_gist)
+
+    huge_text = "lorem ipsum dolor sit amet consectetur adipiscing elit. " * 200
+    assert len(huge_text) > _ENRICH_TEXT_CAP, "fixture must exceed the cap to be a real test"
+
+    doc = SourceDocument(
+        source_id="src_000", path="huge.md", type="markdown", checksum="x",
+        blocks=[
+            DocumentBlock(block_id="b0", source_id="src_000", type="heading",
+                          text="Section", section_path=["Section"]),
+            DocumentBlock(block_id="b1", source_id="src_000", type="paragraph",
+                          text=huge_text, section_path=["Section"]),
+        ],
+        warnings=[],
+    )
+    chunks = chunk_document(doc, max_tokens=800)
+    build_map({"name": "c", "generated_at": "t", "manifest": "manifest.yml"}, [doc], chunks)
+
+    assert captured, "_gist was never called — fixture didn't reach section enrichment"
+    max_len = max(len(arg) for arg in captured)
+    assert max_len <= _ENRICH_TEXT_CAP, f"section enrichment text not capped: {max_len} chars"
+
+
 def test_enrich_false_yields_no_descriptors():
     from agentpack.mapper import build_map
     doc = _nested_doc()

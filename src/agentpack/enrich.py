@@ -75,6 +75,9 @@ def _similarity(a: set, b: set) -> float:
 def gist(text: Optional[str], max_sentences: int = 1) -> str:
     """A short extractive summary: the most central sentence(s) by TextRank, in original order."""
     sentences = _sentences((text or "").strip())
+    # Defense in depth for future uncapped callers: the O(N^2) graph below is unusable well
+    # before 400 sentences (~well past any 8000-char caller-side cap).
+    sentences = sentences[:400]
     if len(sentences) <= max_sentences:
         return " ".join(sentences)
 
