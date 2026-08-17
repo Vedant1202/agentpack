@@ -178,12 +178,12 @@ matches the plan's predicted count exactly at every step (326 → 327 → 328).
   are bounded (≤ max_tokens per encode) — a constant-factor increase in tokenization work, not
   asymptotic. demo_corpus packs showed no noticeable wall-time change, but chunking is a small
   fraction of pack time there (Docling dominates); a text-heavy corpus might notice.
-- [ ] **Measure first:** benchmark `chunk_document` alone (not `write_pack`) on the parsed 10-K
+- [x] **Measure first:** benchmark `chunk_document` alone (not `write_pack`) on the parsed 10-K
   (`PDFParser(fast_pdf=True).parse(demo_corpus/3M_2018_10K.pdf, ...)` → time
   `chunk_document(doc)` over ~10 runs) at HEAD vs. pre-TA.2 chunker
   (`git show 897dc61:src/agentpack/chunker.py` — TA.1 applied, TA.2 not). Record both numbers in
   this file.
-- [ ] **Gate:** only if chunking wall-time regressed **>20%**, add the cheap skip: when
+- [x] **Gate:** only if chunking wall-time regressed **>20%**, add the cheap skip: when
   `current_tokens + block_tokens + 2 * (len(current_blocks) + 1) <= max_tokens`, skip the flush
   check entirely (the joined text cannot overflow — each `"\n\n"` separator costs ≤2 tokens, so
   the bound is safe). Otherwise record the numbers and close this task as **no-action**.
@@ -193,6 +193,54 @@ matches the plan's predicted count exactly at every step (326 → 327 → 328).
   methodology as TA.2's evidence.
 - **Verify:** benchmark numbers recorded either way; if changed: targeted chunker tests + full
   suite + re-pack check.
+
+**Evidence:**
+- **Measured (before any fix):** `chunk_document(doc)` on the parsed 10-K (160 blocks → 254
+  chunks), 10 runs each: HEAD (TA.1+TA.2) mean=**197.36ms** median=182.24ms stdev=32.96ms;
+  pre-TA.2 (TA.1 only) mean=**59.21ms** median=58.82ms stdev=1.28ms. **+233.3% mean / +209.8%
+  median** — far past the 20% gate. Much larger than the plan's "constant-factor" expectation
+  written when scoping this task.
+- **Gate triggered** → profiled with `cProfile` (5 runs): 3195 `encoder.encode()` calls total
+  (639/run), 0.785s of the 1.006s total (78%) — confirmed tokenization, not something else, is
+  the cost.
+- **Fix, part 1 (the plan's specified skip):** added the cheap `safe_bound` check before the
+  per-block flush-check's real encode — empirically verified the safety margin first (20,000
+  random boundary-text samples: max observed extra cost from one `"\n\n"` join was **1 token**,
+  comfortably under the plan's 2-token margin). Re-measured: mean=174.18ms (+194.0%),
+  median=165.31ms (+180.1%) — a real but partial improvement.
+- **Fix, part 2 (found via re-profiling, not in the plan's original text):** re-profiled after
+  part 1 — encode calls dropped to 1950/5runs (390/run) but `create_chunk`'s own
+  `token_count=len(encoder.encode(content_str))` (line ~46, only 5 calls after part 1 since most
+  chunks are single-block) wasn't the issue; the real remainder was 198/390 calls (~51%) in the
+  oversized-split shrink-loop and 160/390 in the unavoidable per-source-block encode. Applied the
+  same "no join, no extra cost" principle the plan's own fix relies on, one level up: for
+  `create_chunk`, when `len(current_blocks) <= 1` there is no `"\n\n"` join at all, so
+  `current_tokens` (sum of real per-block `encoder.encode()` results) already IS the exact real
+  length — skip the re-encode entirely rather than approximate it. Verified this is exact (not
+  approximate) for oversized-split sub-blocks too, whose `tokens` value comes from a
+  `decode()`-then-implicit-re-encode round trip: checked 173 varied slice boundaries across
+  ~24k tokens of realistic mixed text, **0 mismatches**.
+- **Final measured:** mean=124.23ms (**+113.5%**), median=115.77ms (**+99.3%**). Re-profiled:
+  encode calls down to 1950/5runs → wait, re-checked directly: 390/run at this point, remaining
+  concentration is the oversized-split shrink-loop (`while end > start + 1` re-check,
+  ~198 calls/run) — a third, more specialized optimization not attempted here. **Stopped at this
+  point deliberately**: the plan's specified fix (part 1) plus one directly-analogous companion
+  (part 2) closed most of the gap using the exact reasoning the plan itself established; going
+  further into the oversized-split path trades more code complexity for a benefit that's already
+  in the "imperceptible in absolute terms" range (~115ms total for a 254-chunk document, against
+  a `pack` pipeline that takes single-digit seconds dominated by parsing). Flagging the remaining
+  ~99-114% relative regression for a human call rather than continuing to optimize unprompted.
+- GREEN (targeted, both fixes applied): `tests/test_chunker.py -v` → **9 passed**, unchanged.
+- GREEN (full suite): **328 passed, 0 failed**.
+- Real-corpus absolute-property re-verification (full-precision, not `--fast`, re-pack of all of
+  `demo_corpus` incl. the real 10-K): **245 chunks, 0 violations** of "real tokenized length ≤
+  max_tokens AND token_count == real length" — matches TA.2's own original evidence count (245)
+  exactly, confirming both optimizations preserve the exact-token guarantee on real content, not
+  just the synthetic slice-boundary check above.
+- **Not closed as no-action** (the gate fired) but also not fully resolved to <20% — see the "why
+  stopped here" note above. Recommend: accept as-is (~115ms is negligible in the real `pack`
+  pipeline) unless a genuinely text-heavy, chunk-dense corpus reports a noticeable slowdown, at
+  which point the oversized-split shrink-loop is the next, clearly-identified target.
 
 ---
 
