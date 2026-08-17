@@ -123,7 +123,7 @@ Re-runs pay only for what changed. Three cache layers are stored in `.cache/cach
 
 | Layer | Key | What's cached |
 |---|---|---|
-| L1 Parse | `sha256(file_bytes) + parser_version + fast_flag` | Serialized `SourceDocument` — skips Docling on unchanged files |
+| L1 Parse | `sha256(file_bytes) + parser_version + fast_flag + remove_empty_lines` | Serialized `SourceDocument` — skips Docling on unchanged files |
 | L3 Embed | `sha256(chunk_text) + model_id` | Embedding vector — unchanged chunks are never re-embedded |
 | L5 Query | `sha256(query + mode + top_k + filters + pack_hash)` | Result set — repeated queries served without re-searching |
 
@@ -133,8 +133,8 @@ Keys carry a version component so a logic change auto-invalidates only the affec
 Instead of forcing agents to process thousands of tokens for every query, AgentPack creates dual indexes for lightning-fast retrieval:
 
 - **Lexical Index (SQLite FTS5)**: Full-text search optimized for keyword matching. Queries are OR-of-terms by default.
-- **Vector Index (FastEmbed + HNSW)**: `BAAI/bge-small-en-v1.5` ONNX embeddings via FastEmbed; stored as pre-normalized float32 vectors. The default backend is **HNSW** (`hnswlib`, inner-product space = cosine on normalized vectors). Falls back to brute-force `np.dot` when `hnswlib` is absent or for very small corpora.
+- **Vector Index (FastEmbed + HNSW)**: `BAAI/bge-small-en-v1.5` ONNX embeddings via FastEmbed; stored as pre-normalized float32 vectors. The default backend is **HNSW** (`hnswlib`, inner-product space = cosine on normalized vectors). Falls back to brute-force `np.dot` when `hnswlib` is absent, for very small corpora, or when a stale/corrupt HNSW file is detected at load time (the bin is deleted and rebuilt on the next index).
 - **Hybrid Search (default)**: Combines lexical and vector rank lists using **Reciprocal Rank Fusion** (`score = 1 / (60 + rank)`) — rank-stable across heterogeneous score scales.
 
 ### Index Invalidation
-Both indexes store a content hash (SHA-256 of sorted chunk IDs + source checksums) at build time. Before every query, the stored hash is compared against the current manifest. A mismatch triggers an automatic rebuild — re-packing a corpus never silently serves stale results.
+Both indexes store a content hash (SHA-256 of sorted `chunk_id:token_count` pairs + source checksums) at build time — token count is folded in alongside id because chunk ids are positional, so a re-chunk that redistributes text across the same number of chunks would otherwise leave every id (and thus the hash) unchanged. Before every query, the stored hash is compared against the current manifest. A mismatch triggers an automatic rebuild — re-packing a corpus never silently serves stale results.
