@@ -11,7 +11,7 @@
         <link rel="canonical" href="https://vedant1202.github.io/agentpack/architecture/">
       
       
-        <link rel="prev" href="..">
+        <link rel="prev" href="../worked-example/">
       
       
         <link rel="next" href="../knowledge-map/">
@@ -216,6 +216,33 @@
     
   
     Home
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../worked-example/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    A Worked Example
   
 
     
@@ -606,10 +633,10 @@
       
         
         
-        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_9" >
+        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_10" >
         
           
-          <label class="md-nav__link" for="__nav_9" id="__nav_9_label" tabindex="0">
+          <label class="md-nav__link" for="__nav_10" id="__nav_10_label" tabindex="0">
             
   
   
@@ -627,8 +654,8 @@
             <span class="md-nav__icon md-icon"></span>
           </label>
         
-        <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_9_label" aria-expanded="false">
-          <label class="md-nav__title" for="__nav_9">
+        <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_10_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_10">
             <span class="md-nav__icon md-icon"></span>
             
   
@@ -873,6 +900,9 @@
 
 <h1 id="agentpack-architecture">AgentPack Architecture</h1>
 <p>AgentPack acts as a bridge between raw, unstructured knowledge and LLM-powered agents. It performs the heavy lifting of parsing, chunking, and indexing offline, so agents receive clean, high-signal context.</p>
+<blockquote>
+<p>Prefer to see it before reading about it? <a href="../worked-example/">A Worked Example</a> runs a four-file corpus through the whole pipeline and shows every artifact this page describes.</p>
+</blockquote>
 <h2 id="high-level-data-flow">High-Level Data Flow</h2>
 <pre class="mermaid"><code>flowchart TD
     subgraph Raw Data
@@ -946,6 +976,37 @@
 </code></pre></div>
 <h3 id="manifestyml"><code>manifest.yml</code></h3>
 <p>The registry for the pack. Maps original document sources to their chunks and maintains citation metadata (source path, page number, section, and the full <code>section_path</code>) so every piece of text sent to an agent can be traced back to its origin. The <code>version</code> field reflects the installed package version.</p>
+<div class="highlight"><pre><span></span><code><span class="nt">pack</span><span class="p">:</span>
+<span class="w">  </span><span class="nt">name</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">docs_example_corpus</span>
+<span class="w">  </span><span class="nt">version</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">0.5.1</span>
+<span class="w">  </span><span class="nt">generated_at</span><span class="p">:</span><span class="w"> </span><span class="s">&#39;2026-09-21T22:16:10.891275+00:00&#39;</span>
+<span class="nt">sources</span><span class="p">:</span>
+<span class="p p-Indicator">-</span><span class="w"> </span><span class="nt">id</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">src_002</span>
+<span class="w">  </span><span class="nt">path</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">incident-response.md</span>
+<span class="w">  </span><span class="nt">type</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">markdown</span>
+<span class="w">  </span><span class="nt">checksum</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">e5402e0890698c500cf2ed573ab7c11bbf9d6a917638f45d966ebf30b66659e3</span>
+<span class="w">  </span><span class="nt">status</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">success</span>
+<span class="w">  </span><span class="nt">warnings</span><span class="p">:</span><span class="w"> </span><span class="p p-Indicator">[]</span>
+<span class="nt">chunks</span><span class="p">:</span>
+<span class="p p-Indicator">-</span><span class="w"> </span><span class="nt">id</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">src_002_chunk_001</span>
+<span class="w">  </span><span class="nt">source_id</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">src_002</span>
+<span class="w">  </span><span class="nt">path</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">chunks/src_002_chunk_001.md</span>
+<span class="w">  </span><span class="nt">token_count</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">233</span>
+<span class="w">  </span><span class="nt">citation</span><span class="p">:</span>
+<span class="w">    </span><span class="nt">source_path</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">incident-response.md</span>
+<span class="w">    </span><span class="nt">section</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">Closing An Incident</span>
+<span class="w">    </span><span class="nt">section_path</span><span class="p">:</span>
+<span class="w">    </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">Incident Response Runbook</span>
+<span class="w">    </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">Closing An Incident</span>
+<span class="nt">tables</span><span class="p">:</span><span class="w"> </span><span class="p p-Indicator">[]</span>
+<span class="nt">agent</span><span class="p">:</span>
+<span class="w">  </span><span class="nt">instructions</span><span class="p">:</span>
+<span class="w">  </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">Use citations when answering.</span>
+<span class="w">  </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">Prefer raw chunks over summaries.</span>
+<span class="w">  </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">Say not found when the corpus does not contain the answer.</span>
+</code></pre></div>
+<p>A chunk's <code>citation</code> gains <code>page</code> for paged formats (PDF, DOCX, PPTX) and <code>row_range</code> for CSVs. Because a chunk is filled to the token budget across section boundaries, <code>section</code> names the section the chunk <strong>ended</strong> in — see <a href="../worked-example/#5-where-a-chunk-came-from-manifestyml">A Worked Example</a> for the same manifest in full, next to the chunk file it describes.</p>
+<p>The <code>checksum</code> is the SHA-256 that keys the L1 parse cache, which is what makes a re-pack of an unchanged file free.</p>
 <h3 id="mapyml"><code>map.yml</code></h3>
 <p>A hierarchical <strong>knowledge map</strong> — <code>corpus → document → section → chunk</code> — that an agent reads to locate <em>where</em> information lives, then pulls only the chunks it needs. The tree structure is reconstructed from the parsed section hierarchy; each section also carries deterministic, offline descriptors (YAKE <code>keyphrases</code> + a TextRank <code>gist</code>). The map is purely additive and <strong>never enters the retrieval indexes</strong>. Built by default (<code>--no-map</code> to skip; <code>agentpack map</code> to rebuild). See <strong><a href="../knowledge-map/">Knowledge Map</a></strong> for the full schema and rationale.</p>
 <h3 id="graphyml"><code>graph.yml</code></h3>
@@ -983,7 +1044,7 @@
 <tbody>
 <tr>
 <td>L1 Parse</td>
-<td><code>sha256(file_bytes) + parser_version + fast_flag</code></td>
+<td><code>sha256(file_bytes) + parser_version + fast_flag + remove_empty_lines</code></td>
 <td>Serialized <code>SourceDocument</code> — skips Docling on unchanged files</td>
 </tr>
 <tr>
@@ -1002,12 +1063,12 @@
 <h3 id="indexing">Indexing</h3>
 <p>Instead of forcing agents to process thousands of tokens for every query, AgentPack creates dual indexes for lightning-fast retrieval:</p>
 <ul>
-<li><strong>Lexical Index (SQLite FTS5)</strong>: Full-text search optimized for keyword matching. Queries are OR-of-terms by default.</li>
-<li><strong>Vector Index (FastEmbed + HNSW)</strong>: <code>BAAI/bge-small-en-v1.5</code> ONNX embeddings via FastEmbed; stored as pre-normalized float32 vectors. The default backend is <strong>HNSW</strong> (<code>hnswlib</code>, inner-product space = cosine on normalized vectors). Falls back to brute-force <code>np.dot</code> when <code>hnswlib</code> is absent or for very small corpora.</li>
+<li><strong>Lexical Index (SQLite FTS5)</strong>: Full-text search optimized for keyword matching. A query is run as an AND of its non-stop-word terms first; if that matches nothing, it is retried as an OR to preserve recall.</li>
+<li><strong>Vector Index (FastEmbed + HNSW)</strong>: <code>BAAI/bge-small-en-v1.5</code> ONNX embeddings via FastEmbed; stored as pre-normalized float32 vectors. The default backend is <strong>HNSW</strong> (<code>hnswlib</code>, inner-product space = cosine on normalized vectors). Falls back to brute-force <code>np.dot</code> when <code>hnswlib</code> is absent, for very small corpora, or when a stale/corrupt HNSW file is detected at load time (the bin is deleted and rebuilt on the next index).</li>
 <li><strong>Hybrid Search (default)</strong>: Combines lexical and vector rank lists using <strong>Reciprocal Rank Fusion</strong> (<code>score = 1 / (60 + rank)</code>) — rank-stable across heterogeneous score scales.</li>
 </ul>
 <h3 id="index-invalidation">Index Invalidation</h3>
-<p>Both indexes store a content hash (SHA-256 of sorted chunk IDs + source checksums) at build time. Before every query, the stored hash is compared against the current manifest. A mismatch triggers an automatic rebuild — re-packing a corpus never silently serves stale results.</p>
+<p>Both indexes store a content hash (SHA-256 of sorted <code>chunk_id:token_count</code> pairs + source checksums) at build time — token count is folded in alongside id because chunk ids are positional, so a re-chunk that redistributes text across the same number of chunks would otherwise leave every id (and thus the hash) unchanged. Before every query, the stored hash is compared against the current manifest. A mismatch triggers an automatic rebuild — re-packing a corpus never silently serves stale results.</p>
 
 
 
