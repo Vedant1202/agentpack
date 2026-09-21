@@ -1,0 +1,11 @@
+# Example configuration for the docs walkthrough.
+#
+# These are the defaults written out explicitly, so the walkthrough has
+# something concrete to point at. Deleting this file changes nothing about
+# the resulting pack.
+
+[graph]
+enabled              = true
+df_cap               = 0.30
+min_docs             = 2
+similarity_threshold = 0.80

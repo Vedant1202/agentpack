@@ -47,6 +47,75 @@ documents:
 | **document** | `title`, `status`, `pages`, `summary`, `stats`, `sections` |
 | **section** (recursive) | `node_id`, `title`, `pages`, `has_tables`, `keyphrases`, `gist`, `chunk_ids`, `nodes` |
 
+## A real excerpt
+
+The schema above is abstract; this is what an actual `map.yml` looks like. It comes from packing [`examples/docs_example_corpus/`](https://github.com/Vedant1202/agentpack/tree/main/examples/docs_example_corpus), four short Markdown files that ship with the repository:
+
+```yaml
+map_version: 1
+pack:
+  name: docs_example_corpus
+  generated_at: '2026-09-21T22:16:10.891275+00:00'
+  manifest: manifest.yml
+corpus:
+  summary: An unowned alert is a bug in the service definition, and Routing The API
+    gateway matches an incoming request against a route table and forwards If a bad
+    release is the cause, roll it back through the deployment pipeline.
+  stats:
+    documents: 4
+    sections: 21
+    tables: 0
+    chunks: 6
+documents:
+- source_id: src_000
+  path: alerting.md
+  title: Alerting
+  status: success
+  pages: null
+  summary: An unowned alert is a bug in the service definition, and
+  stats:
+    sections: 4
+    tables: 0
+    chunks: 1
+  sections:
+  - node_id: src_000_s00
+    title: Alerting
+    pages: null
+    has_tables: false
+    keyphrases:
+    - Alerting This document
+    - document describes
+    - routed
+    - alerts are defined
+    - Alerting
+    - defined
+    gist: Alerting This document describes how alerts are defined, routed, and tuned.
+    chunk_ids: []
+    nodes:
+    - node_id: src_000_s00-01
+      title: Routing
+      pages: null
+      has_tables: false
+      keyphrases:
+      - alerting system
+      - alerting system routes
+      - alerting system notifies
+      - Routing The alerting
+      - alerting system stops
+      - service ownership
+      gist: An unowned alert is a bug in the service definition, and
+      chunk_ids: []
+      nodes: []
+```
+
+Three things this excerpt shows that the schema does not:
+
+- **`pages: null` is normal.** Markdown, TXT, and CSV sources have no page numbers; only paged formats populate the field.
+- **`chunk_ids` is empty on most sections.** A chunk is stamped with the section it *ended* in, so it attaches to that one node rather than to every section it covers. In this document the single chunk attaches to `Tuning`, the last section it absorbed.
+- **Extractive descriptors sometimes break mid-clause.** `gist: An unowned alert is a bug in the service definition, and` is a verbatim span chosen by TextRank, not a sentence written for you. That is the trade for being deterministic and running with no LLM and no network.
+
+The full file, alongside the manifest and graph built from the same corpus, is in [A Worked Example](worked-example.md#9-the-knowledge-map).
+
 - **Structure** (`node_id`, `title`, `pages`, `has_tables`, `chunk_ids`, `nodes`) is reconstructed deterministically from the parsed `DocumentBlock.section_path` + page numbers — so sections whose prose merged into a neighbouring chunk are still represented.
 - **`chunk_ids`** at every node point back to `manifest.chunks`. A document's chunks attach to the section matching their `section_path`; chunks with no section land under a synthetic `__root__` node.
 - **`status: failed`** flags sources that did not parse / produced no chunks — they are kept (with empty sections) so the agent sees the full corpus.
