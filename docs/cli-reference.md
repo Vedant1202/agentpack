@@ -2,6 +2,12 @@
 
 The AgentPack CLI provides several commands to manage, validate, and query your context packs.
 
+Every output sample on this page is real, produced by running the command against
+[`examples/docs_example_corpus/`](https://github.com/Vedant1202/agentpack/tree/main/examples/docs_example_corpus)
+— four short Markdown files that ship with the repository. For the same corpus followed
+end to end, with the files each command reads and writes, see
+[A Worked Example](worked-example.md).
+
 ## Core Commands
 
 ### `agentpack pack`
@@ -26,14 +32,39 @@ agentpack pack <input_dir> --out <output_dir> [OPTIONS]
 
 > **Deprecated:** `--fast-pdf` is an alias for `--fast` and will be removed in a future release. Use `--fast` instead.
 
+#### Example
+
+```bash
+$ agentpack pack ./examples/docs_example_corpus --out ./out
+Packing ./examples/docs_example_corpus into ./out...
+Pack generated at ./out
+Done.
+```
+
+Four Markdown files become six chunks and this tree:
+
+```text
+out/
+├── manifest.yml        # every chunk, with its citation
+├── map.yml             # corpus → document → section → chunk
+├── graph.yml           # how the documents relate to each other
+├── chunks/             # six .md files, one per chunk
+├── .cache/cache.db     # so a re-pack only pays for what changed
+└── reports/
+    ├── pack_report.md
+    └── graph_report.md
+```
+
+`tables/` appears only when a source yields extracted tables, and `indexes/` is created by
+`agentpack index` or by the first `retrieve`. Extraction warnings — unreadable PDFs, empty
+files — print here and are also recorded in `manifest.yml` under each source's `warnings`.
+
 #### Config file (`agentpack.toml`)
 
 Pack settings can be stored in an `agentpack.toml` file in `<input_dir>`. CLI flags take precedence over config values.
 
 ```toml
 [pack]
-chunk_max_tokens = 800    # max tokens per chunk (default: 800)
-chunk_overlap    = 0.15   # overlap fraction between chunks (default: 0.15)
 fast             = false  # use fast mode (default: false)
 remove_empty_lines = false
 include = []              # glob patterns to include
@@ -48,6 +79,10 @@ similarity_threshold = 0.80   # (0, 1]  cosine floor for similar_to edges
 
 An out-of-range or wrong-typed `[graph]` value produces a warning and falls back to its default rather than failing the pack. See [Concept Graph](concept-graph.md) for what each gate does and how to tune it per corpus shape.
 
+> **Heads up — `chunk_max_tokens` and `chunk_overlap` are not yet wired up**
+>
+> Both keys are accepted and validated by the config loader, but nothing currently reads them, so setting either has no effect on chunking. Chunks are produced at the built-in defaults — 800 max tokens, 0.15 overlap. This is tracked as a bug; until it is fixed, treat those two settings as unavailable rather than as tuning knobs.
+
 ### `agentpack index`
 Pre-build FTS and vector indexes for a compiled pack. Running this before the first `retrieve` avoids paying the index-build cost at query time.
 
@@ -57,6 +92,31 @@ agentpack index <pack_dir>
 
 The command is idempotent — if the pack content hasn't changed since the last build, both indexes are reused without rebuilding.
 
+#### Example
+
+```bash
+$ agentpack index ./out
+Building FTS index…
+Building vector index…
+[agentpack] Warning: similarity edge build failed, graph.yml left unchanged ('src_000_s00-02').
+Index build complete.
+```
+
+Writing:
+
+```text
+out/indexes/
+├── lexical_index.db       # SQLite FTS5
+├── vector_index.npy       # pre-normalized float32 vectors
+├── vector_meta.json       # per-vector chunk metadata
+├── hnsw_index.bin         # approximate nearest-neighbour index
+└── vector_index.hash      # content hash, for invalidation
+```
+
+The warning is a [known bug](concept-graph.md#similarity-edges) in the `similar_to` edge
+refresh, not a problem with your pack. Both indexes build normally and retrieval is
+unaffected.
+
 ### `agentpack map`
 (Re)builds the hierarchical knowledge map (`map.yml`) for an existing pack — useful after packing with `--no-map`, or to regenerate the map without re-parsing.
 
@@ -65,6 +125,18 @@ agentpack map <pack_dir>
 ```
 
 The map is reconstructed from the pack's `manifest.yml` alone (no re-parse), so it is a lighter-weight version than the map produced during `pack`: it cannot recover `has_tables`, sections with no chunks, or text descriptors. Run `agentpack pack` for the full-fidelity map. See [Knowledge Map](knowledge-map.md).
+
+#### Example
+
+```bash
+$ agentpack map ./out
+Rebuilding map.yml from manifest (run `pack` for full-fidelity has_tables / chunkless sections)…
+map.yml written.
+```
+
+> **Heads up — This overwrites the keyphrases a full pack produced**
+>
+> The rebuilt map has no `keyphrases`, because those come from parsed section text that `manifest.yml` does not retain. Concept promotion reads keyphrases, so running `agentpack graph` afterwards yields a graph with **zero concepts** — it warns you when this happens. If you want both, re-run `agentpack pack`.
 
 ### `agentpack graph`
 (Re)builds the corpus concept graph (`graph.yml`) for an existing pack — useful after packing with `--no-graph`, or to regenerate the graph after tuning gates.
@@ -80,12 +152,54 @@ The rebuild reads `manifest.yml` and `map.yml` off disk — the same code path `
 
 The graph is skipped (with a note, not an error) when the pack has fewer than two successfully parsed sources. See [Concept Graph](concept-graph.md).
 
+#### Example
+
+```bash
+$ agentpack graph ./out
+Rebuilding graph.yml from manifest + map…
+graph.yml written.
+```
+
+Run after `agentpack map`, the keyphrases are gone and it says so before producing a
+concept-free graph:
+
+```bash
+$ agentpack graph ./out
+map.yml has no keyphrases (built by 'agentpack map'?) — the graph will contain no concepts; run 'agentpack pack' for a full-fidelity map.
+Rebuilding graph.yml from manifest + map…
+graph.yml written.
+```
+
 ### `agentpack audit`
 Generates an audit report for a context pack, highlighting extraction warnings (e.g., empty files, PDFs with no readable text) and statistics.
 
 ```bash
 agentpack audit <pack_dir>
 ```
+
+#### Example
+
+```bash
+$ agentpack audit ./out
+Auditing pack at ./out...
+# AgentPack Audit Report for 'docs_example_corpus'
+Generated at: 2026-09-21T22:16:10.891275+00:00
+
+## Statistics
+- **Files Processed:** 4
+- **Total Chunks:** 6
+- **Total Tables:** 0
+- **Total Tokens:** 3435
+- **Largest Chunk:** 797 tokens (ID: src_002_chunk_000)
+
+## Extraction Warnings
+- No extraction warnings.
+
+Audit report generated.
+```
+
+"Extraction Warnings" is where scanned PDFs with no text layer, empty files, and other
+silent failures surface. A clean corpus reports none.
 
 ### `agentpack retrieve`
 Retrieves top-k evidence chunks from a pack using hybrid search (SQLite FTS5 + HNSW vector index, fused with RRF).
@@ -100,11 +214,80 @@ agentpack retrieve <pack_dir> "<query>" --top-k 5 --mode hybrid
 - `--section`: Filter results to chunks whose `citation.section` contains this string (substring match).
 - `--page`: Filter results to chunks from this page number.
 
+#### Example
+
+```bash
+$ agentpack retrieve ./out "what should I do about a bad release during an incident" --top-k 3
+Searching for 'what should I do about a bad release during an incident' in ./out using hybrid mode...
+
+1. incident-response.md, Closing An Incident
+   chunk: chunks/src_002_chunk_000.md
+   tokens: 797
+   score: 0.03
+
+2. onboarding.md, Where Things Live
+   chunk: chunks/src_003_chunk_001.md
+   tokens: 326
+   score: 0.03
+
+3. incident-response.md, Closing An Incident
+   chunk: chunks/src_002_chunk_001.md
+   tokens: 233
+   score: 0.02
+```
+
+Each result is a citation (`source file, section`, plus `page N` or `rows N-M` where the
+format provides them), the chunk file holding the text, its token cost, and a ranking
+score. **The command prints citations, not chunk text** — open the `chunk:` path to read
+it, or use [`search_pack`](worked-example.md#8-calling-it-from-python) from Python, which
+returns the content inline.
+
+Scores are not comparable across modes. In `hybrid` they are Reciprocal Rank Fusion sums
+(`1 / (60 + rank)` per ranker), so they are small and tightly clustered and mean rank
+order only. In `fts` they are BM25-derived, and in `vector` they are cosine similarity in
+`[0, 1]`.
+
+Filters narrow by substring match on the citation:
+
+```bash
+$ agentpack retrieve ./out "routing" --top-k 2 --source alerting
+Searching for 'routing' in ./out using hybrid mode...
+
+1. alerting.md, Tuning
+   chunk: chunks/src_000_chunk_000.md
+   tokens: 601
+   score: 0.03
+```
+
+An empty result set is reported plainly, and the exit code is still `0`:
+
+```bash
+$ agentpack retrieve ./out "kubernetes helm chart" --top-k 3 --mode fts
+Searching for 'kubernetes helm chart' in ./out using fts mode...
+No results found.
+```
+
 ### `agentpack validate`
 Validates the structural integrity of a context pack, ensuring all expected files and tables exist and are properly referenced in the manifest. When a `map.yml` is present, its referential integrity is checked too — every node's `chunk_ids` and `source_id` must resolve against the manifest. When a `graph.yml` is present, its foreign keys are checked as well: every node's `doc` resolves to a manifest source, every section node to a real `map.yml` node, every edge endpoint to a node in the graph, and every `community` to a listed community. An absent map or graph is not an error.
 
 ```bash
 agentpack validate <pack_dir>
+```
+
+#### Example
+
+```bash
+$ agentpack validate ./out
+Validating pack at ./out...
+Pack validation successful.
+```
+
+A failing pack lists each problem and exits `1`:
+
+```text
+Validating pack at ./out...
+Validation failed with errors:
+- Chunk file missing: chunks/src_002_chunk_001.md
 ```
 
 ## Evaluation Commands

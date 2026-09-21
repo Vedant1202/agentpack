@@ -23,6 +23,7 @@ plugins:
 
 nav:
   - Home: index.md
+  - A Worked Example: worked-example.md
   - Architecture & Internals: architecture.md
   - Knowledge Map: knowledge-map.md
   - Concept Graph: concept-graph.md

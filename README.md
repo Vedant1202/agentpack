@@ -15,6 +15,8 @@ Instead of forcing AI agents to parse messy, disparate file formats (PDFs, CSVs,
 
 > **Why AgentPack:** across 9 retrieval strategies on 2 corpora, it delivers the most consistent retrieval quality of any method tested — 0.83 Hit@3 on both homogeneous and heterogeneous document sets — while keeping context ~100× smaller than raw document stuffing. See the [full benchmark results](https://github.com/Vedant1202/agentpack/blob/main/BENCHMARK.md).
 
+> **New here?** [A Worked Example](https://github.com/Vedant1202/agentpack/blob/main/docs/worked-example.md) takes four small files through the whole pipeline and shows exactly what comes out — the pack on disk, a chunk, its citation, and what a retrieval actually prints. Every output on that page is real and reproducible from the repository.
+
 ## The Benchmark
 **Given the same LLM, AgentPack provides better context than raw document stuffing or naive RAG.**
 
@@ -94,8 +96,8 @@ Settings can also be stored in an `agentpack.toml` file in your input directory:
 
 ```toml
 [pack]
-chunk_max_tokens = 800
 exclude = ["drafts/", "*.log"]
+remove_empty_lines = true
 ```
 
 ### 2b. Pre-build Indexes (optional)
@@ -132,11 +134,11 @@ Every pack also writes `reports/graph_report.md`, a plain-language read on the c
 
 ```markdown
 ## Top Concepts
-- **alerting system** (3 mention(s))
+- **alerting system** (2 mention(s))
 - **Deployment Pipeline** (2 mention(s))
 
 ## Isolated Documents
-- No isolated documents.
+- api-gateway.md
 ```
 
 That report answers questions retrieval alone cannot: *is this corpus actually about what I assumed?* and *is any document disconnected from the rest* — either off-topic, or a sign the document that would connect it is missing.
@@ -168,14 +170,48 @@ agentpack retrieve ./agentpack-output "eligibility criteria" --top-k 5
 agentpack retrieve ./agentpack-output "revenue" --source "annual_report" --page 12
 ```
 
-### 3. Deterministic Eval
+Here is a real run, against the four-file example corpus in [`examples/docs_example_corpus/`](https://github.com/Vedant1202/agentpack/tree/main/examples/docs_example_corpus):
+
+```bash
+$ agentpack retrieve ./out "what should I do about a bad release during an incident" --top-k 3
+Searching for 'what should I do about a bad release during an incident' in ./out using hybrid mode...
+
+1. incident-response.md, Closing An Incident
+   chunk: chunks/src_002_chunk_000.md
+   tokens: 797
+   score: 0.03
+
+2. onboarding.md, Where Things Live
+   chunk: chunks/src_003_chunk_001.md
+   tokens: 326
+   score: 0.03
+
+3. incident-response.md, Closing An Incident
+   chunk: chunks/src_002_chunk_001.md
+   tokens: 233
+   score: 0.02
+```
+
+Each line is a citation, the chunk file holding the text, its token cost, and a ranking score — 1,356 tokens of evidence out of a 3,435-token corpus. The CLI prints citations rather than text; `search_pack()` in Python returns the content inline:
+
+```python
+from agentpack.retrieve import search_pack
+
+for r in search_pack("./out", "rolling back a bad release", top_k=3):
+    print(r["citation"]["source_path"], r["token_count"], "tokens")
+    print(r["content"])
+```
+
+**[See the whole pipeline end to end](https://github.com/Vedant1202/agentpack/blob/main/docs/worked-example.md)** — the input files, the pack that comes out, a chunk, its manifest entry, the map, the graph, and every command's real output.
+
+### 4. Deterministic Eval
 Benchmark AgentPack against naive chunking using our offline evaluation harness.
 
 ```bash
 agentpack eval ./benchmarks/my_dataset
 ```
 
-### 4. Visualize with the Corpus Explorer
+### 5. Visualize with the Corpus Explorer
 If you installed AgentPack with the `[ui]` extra, you can launch a local 2D force-graph explorer of your compiled chunks. This allows you to visually debug chunk sizes, semantic similarities, and ranked retrieval results.
 
 ```bash
