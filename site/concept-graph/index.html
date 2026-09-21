@@ -235,6 +235,33 @@
   
   
     <li class="md-nav__item">
+      <a href="../worked-example/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    A Worked Example
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    <li class="md-nav__item">
       <a href="../architecture/" class="md-nav__link">
         
   
@@ -667,10 +694,10 @@
       
         
         
-        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_9" >
+        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_10" >
         
           
-          <label class="md-nav__link" for="__nav_9" id="__nav_9_label" tabindex="0">
+          <label class="md-nav__link" for="__nav_10" id="__nav_10_label" tabindex="0">
             
   
   
@@ -688,8 +715,8 @@
             <span class="md-nav__icon md-icon"></span>
           </label>
         
-        <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_9_label" aria-expanded="false">
-          <label class="md-nav__title" for="__nav_9">
+        <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_10_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_10">
             <span class="md-nav__icon md-icon"></span>
             
   
@@ -1078,31 +1105,34 @@
 </table>
 <p>Nodes reuse the ids that already exist — a <code>document</code> node <strong>is</strong> the manifest's <code>source_id</code>, a <code>section</code> node <strong>is</strong> the map's <code>node_id</code>. Only concepts introduce new ids. That means a graph node can be resolved against the other two files without a lookup table.</p>
 <h2 id="a-worked-example">A worked example</h2>
-<p>Four short Markdown files about an engineering org (<code>onboarding.md</code>, <code>incident-response.md</code>, <code>api-gateway.md</code>, <code>alerting.md</code>). Packing them produces:</p>
+<p>Four short Markdown files about an engineering org — <code>onboarding.md</code>, <code>incident-response.md</code>, <code>api-gateway.md</code>, and <code>alerting.md</code>. They ship with the repository at <a href="https://github.com/Vedant1202/agentpack/tree/main/examples/docs_example_corpus"><code>examples/docs_example_corpus/</code></a>, so everything below is reproducible with <code>agentpack pack ./examples/docs_example_corpus --out ./out</code>.</p>
+<p>Packing them produces:</p>
 <div class="highlight"><pre><span></span><code><span class="nt">graph_version</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">1</span>
 <span class="nt">pack</span><span class="p">:</span><span class="w"> </span><span class="p p-Indicator">{</span><span class="nt"> name</span><span class="p">:</span><span class="w"> </span><span class="nv">docs_example_corpus</span><span class="p p-Indicator">,</span><span class="nt"> generated_at</span><span class="p">:</span><span class="w"> </span><span class="nv">...</span><span class="p p-Indicator">,</span><span class="nt"> manifest</span><span class="p">:</span><span class="w"> </span><span class="nv">manifest.yml</span><span class="w"> </span><span class="p p-Indicator">}</span>
 <span class="nt">params</span><span class="p">:</span>
 <span class="w">  </span><span class="nt">enabled</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">true</span>
-<span class="w">  </span><span class="nt">df_cap</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">0.30</span>
+<span class="w">  </span><span class="nt">df_cap</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">0.3</span>
 <span class="w">  </span><span class="nt">min_docs</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">2</span>
-<span class="w">  </span><span class="nt">similarity_threshold</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">0.80</span>
+<span class="w">  </span><span class="nt">similarity_threshold</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">0.8</span>
 <span class="nt">nodes</span><span class="p">:</span>
-<span class="p p-Indicator">-</span><span class="w"> </span><span class="p p-Indicator">{</span><span class="nt"> id</span><span class="p">:</span><span class="w"> </span><span class="nv">c_alerting_system</span><span class="p p-Indicator">,</span><span class="nt">     kind</span><span class="p">:</span><span class="w"> </span><span class="nv">concept</span><span class="p p-Indicator">,</span><span class="nt">  label</span><span class="p">:</span><span class="w"> </span><span class="nv">alerting system</span><span class="p p-Indicator">,</span><span class="nt">     doc</span><span class="p">:</span><span class="w"> </span><span class="nv">null</span><span class="p p-Indicator">,</span><span class="nt">    community</span><span class="p">:</span><span class="w"> </span><span class="nv">0</span><span class="w"> </span><span class="p p-Indicator">}</span>
+<span class="p p-Indicator">-</span><span class="w"> </span><span class="p p-Indicator">{</span><span class="nt"> id</span><span class="p">:</span><span class="w"> </span><span class="nv">c_alerting_system</span><span class="p p-Indicator">,</span><span class="nt">     kind</span><span class="p">:</span><span class="w"> </span><span class="nv">concept</span><span class="p p-Indicator">,</span><span class="nt">  label</span><span class="p">:</span><span class="w"> </span><span class="nv">alerting system</span><span class="p p-Indicator">,</span><span class="nt">     doc</span><span class="p">:</span><span class="w"> </span><span class="nv">null</span><span class="p p-Indicator">,</span><span class="nt">    community</span><span class="p">:</span><span class="w"> </span><span class="nv">1</span><span class="w"> </span><span class="p p-Indicator">}</span>
 <span class="p p-Indicator">-</span><span class="w"> </span><span class="p p-Indicator">{</span><span class="nt"> id</span><span class="p">:</span><span class="w"> </span><span class="nv">c_deployment_pipeline</span><span class="p p-Indicator">,</span><span class="nt"> kind</span><span class="p">:</span><span class="w"> </span><span class="nv">concept</span><span class="p p-Indicator">,</span><span class="nt">  label</span><span class="p">:</span><span class="w"> </span><span class="nv">Deployment Pipeline</span><span class="p p-Indicator">,</span><span class="nt"> doc</span><span class="p">:</span><span class="w"> </span><span class="nv">null</span><span class="p p-Indicator">,</span><span class="nt">    community</span><span class="p">:</span><span class="w"> </span><span class="nv">2</span><span class="w"> </span><span class="p p-Indicator">}</span>
-<span class="p p-Indicator">-</span><span class="w"> </span><span class="p p-Indicator">{</span><span class="nt"> id</span><span class="p">:</span><span class="w"> </span><span class="nv">src_003</span><span class="p p-Indicator">,</span><span class="nt">               kind</span><span class="p">:</span><span class="w"> </span><span class="nv">document</span><span class="p p-Indicator">,</span><span class="nt"> label</span><span class="p">:</span><span class="w"> </span><span class="nv">onboarding.md</span><span class="p p-Indicator">,</span><span class="nt">       doc</span><span class="p">:</span><span class="w"> </span><span class="nv">null</span><span class="p p-Indicator">,</span><span class="nt">    community</span><span class="p">:</span><span class="w"> </span><span class="nv">1</span><span class="w"> </span><span class="p p-Indicator">}</span>
+<span class="p p-Indicator">-</span><span class="w"> </span><span class="p p-Indicator">{</span><span class="nt"> id</span><span class="p">:</span><span class="w"> </span><span class="nv">src_003</span><span class="p p-Indicator">,</span><span class="nt">               kind</span><span class="p">:</span><span class="w"> </span><span class="nv">document</span><span class="p p-Indicator">,</span><span class="nt"> label</span><span class="p">:</span><span class="w"> </span><span class="nv">onboarding.md</span><span class="p p-Indicator">,</span><span class="nt">       doc</span><span class="p">:</span><span class="w"> </span><span class="nv">null</span><span class="p p-Indicator">,</span><span class="nt">    community</span><span class="p">:</span><span class="w"> </span><span class="nv">0</span><span class="w"> </span><span class="p p-Indicator">}</span>
 <span class="p p-Indicator">-</span><span class="w"> </span><span class="p p-Indicator">{</span><span class="nt"> id</span><span class="p">:</span><span class="w"> </span><span class="nv">src_003_s00-01</span><span class="p p-Indicator">,</span><span class="nt">        kind</span><span class="p">:</span><span class="w"> </span><span class="nv">section</span><span class="p p-Indicator">,</span><span class="nt">  label</span><span class="p">:</span><span class="w"> </span><span class="nv">Deployment Basics</span><span class="p p-Indicator">,</span><span class="nt">   doc</span><span class="p">:</span><span class="w"> </span><span class="nv">src_003</span><span class="p p-Indicator">,</span><span class="nt"> community</span><span class="p">:</span><span class="w"> </span><span class="nv">2</span><span class="w"> </span><span class="p p-Indicator">}</span>
-<span class="w">  </span><span class="c1"># ... 11 more nodes</span>
+<span class="w">  </span><span class="c1"># ... 10 more nodes</span>
 <span class="nt">edges</span><span class="p">:</span>
-<span class="p p-Indicator">-</span><span class="w"> </span><span class="p p-Indicator">{</span><span class="nt"> source</span><span class="p">:</span><span class="w"> </span><span class="nv">src_003</span><span class="p p-Indicator">,</span><span class="nt">        target</span><span class="p">:</span><span class="w"> </span><span class="nv">src_003_s00-01</span><span class="p p-Indicator">,</span><span class="nt">      relation</span><span class="p">:</span><span class="w"> </span><span class="nv">contains</span><span class="p p-Indicator">,</span><span class="nt">   basis</span><span class="p">:</span><span class="w"> </span><span class="nv">structural</span><span class="w"> </span><span class="p p-Indicator">}</span>
-<span class="p p-Indicator">-</span><span class="w"> </span><span class="p p-Indicator">{</span><span class="nt"> source</span><span class="p">:</span><span class="w"> </span><span class="nv">src_003_s00-01</span><span class="p p-Indicator">,</span><span class="nt"> target</span><span class="p">:</span><span class="w"> </span><span class="nv">c_deployment_pipeline</span><span class="p p-Indicator">,</span><span class="nt"> relation</span><span class="p">:</span><span class="w"> </span><span class="nv">mentions</span><span class="p p-Indicator">,</span><span class="nt"> basis</span><span class="p">:</span><span class="w"> </span><span class="nv">keyphrase</span><span class="w"> </span><span class="p p-Indicator">}</span>
-<span class="p p-Indicator">-</span><span class="w"> </span><span class="p p-Indicator">{</span><span class="nt"> source</span><span class="p">:</span><span class="w"> </span><span class="nv">src_003</span><span class="p p-Indicator">,</span><span class="nt">        target</span><span class="p">:</span><span class="w"> </span><span class="nv">src_001</span><span class="p p-Indicator">,</span><span class="nt">             relation</span><span class="p">:</span><span class="w"> </span><span class="nv">references</span><span class="p p-Indicator">,</span><span class="nt"> basis</span><span class="p">:</span><span class="w"> </span><span class="nv">structural</span><span class="w"> </span><span class="p p-Indicator">}</span>
-<span class="w">  </span><span class="c1"># ... 8 more edges</span>
+<span class="p p-Indicator">-</span><span class="w"> </span><span class="p p-Indicator">{</span><span class="nt"> source</span><span class="p">:</span><span class="w"> </span><span class="nv">src_003</span><span class="p p-Indicator">,</span><span class="nt">        target</span><span class="p">:</span><span class="w"> </span><span class="nv">src_003_s00</span><span class="p p-Indicator">,</span><span class="nt">           relation</span><span class="p">:</span><span class="w"> </span><span class="nv">contains</span><span class="p p-Indicator">,</span><span class="nt">   basis</span><span class="p">:</span><span class="w"> </span><span class="nv">structural</span><span class="w"> </span><span class="p p-Indicator">}</span>
+<span class="p p-Indicator">-</span><span class="w"> </span><span class="p p-Indicator">{</span><span class="nt"> source</span><span class="p">:</span><span class="w"> </span><span class="nv">src_003_s00-01</span><span class="p p-Indicator">,</span><span class="nt"> target</span><span class="p">:</span><span class="w"> </span><span class="nv">c_deployment_pipeline</span><span class="p p-Indicator">,</span><span class="nt"> relation</span><span class="p">:</span><span class="w"> </span><span class="nv">mentions</span><span class="p p-Indicator">,</span><span class="nt">   basis</span><span class="p">:</span><span class="w"> </span><span class="nv">keyphrase</span><span class="w"> </span><span class="p p-Indicator">}</span>
+<span class="p p-Indicator">-</span><span class="w"> </span><span class="p p-Indicator">{</span><span class="nt"> source</span><span class="p">:</span><span class="w"> </span><span class="nv">src_003</span><span class="p p-Indicator">,</span><span class="nt">        target</span><span class="p">:</span><span class="w"> </span><span class="nv">src_002</span><span class="p p-Indicator">,</span><span class="nt">               relation</span><span class="p">:</span><span class="w"> </span><span class="nv">references</span><span class="p p-Indicator">,</span><span class="nt"> basis</span><span class="p">:</span><span class="w"> </span><span class="nv">structural</span><span class="w"> </span><span class="p p-Indicator">}</span>
+<span class="w">  </span><span class="c1"># ... 7 more edges</span>
 <span class="nt">communities</span><span class="p">:</span>
-<span class="p p-Indicator">-</span><span class="w"> </span><span class="p p-Indicator">{</span><span class="nt"> id</span><span class="p">:</span><span class="w"> </span><span class="nv">0</span><span class="p p-Indicator">,</span><span class="nt"> label</span><span class="p">:</span><span class="w"> </span><span class="nv">alerting system</span><span class="p p-Indicator">,</span><span class="nt">     size</span><span class="p">:</span><span class="w"> </span><span class="nv">4</span><span class="w"> </span><span class="p p-Indicator">}</span>
-<span class="p p-Indicator">-</span><span class="w"> </span><span class="p p-Indicator">{</span><span class="nt"> id</span><span class="p">:</span><span class="w"> </span><span class="nv">2</span><span class="p p-Indicator">,</span><span class="nt"> label</span><span class="p">:</span><span class="w"> </span><span class="nv">Deployment Pipeline</span><span class="p p-Indicator">,</span><span class="nt"> size</span><span class="p">:</span><span class="w"> </span><span class="nv">3</span><span class="w"> </span><span class="p p-Indicator">}</span>
-<span class="w">  </span><span class="c1"># ... 3 more</span>
+<span class="p p-Indicator">-</span><span class="w"> </span><span class="p p-Indicator">{</span><span class="nt"> id</span><span class="p">:</span><span class="w"> </span><span class="nv">0</span><span class="p p-Indicator">,</span><span class="nt"> label</span><span class="p">:</span><span class="w"> </span><span class="nv">incident-response.md</span><span class="p p-Indicator">,</span><span class="nt"> size</span><span class="p">:</span><span class="w"> </span><span class="nv">4</span><span class="w"> </span><span class="p p-Indicator">}</span>
+<span class="p p-Indicator">-</span><span class="w"> </span><span class="p p-Indicator">{</span><span class="nt"> id</span><span class="p">:</span><span class="w"> </span><span class="nv">1</span><span class="p p-Indicator">,</span><span class="nt"> label</span><span class="p">:</span><span class="w"> </span><span class="nv">alerting system</span><span class="p p-Indicator">,</span><span class="nt">      size</span><span class="p">:</span><span class="w"> </span><span class="nv">3</span><span class="w"> </span><span class="p p-Indicator">}</span>
+<span class="p p-Indicator">-</span><span class="w"> </span><span class="p p-Indicator">{</span><span class="nt"> id</span><span class="p">:</span><span class="w"> </span><span class="nv">2</span><span class="p p-Indicator">,</span><span class="nt"> label</span><span class="p">:</span><span class="w"> </span><span class="nv">Deployment Pipeline</span><span class="p p-Indicator">,</span><span class="nt">  size</span><span class="p">:</span><span class="w"> </span><span class="nv">3</span><span class="w"> </span><span class="p p-Indicator">}</span>
+<span class="w">  </span><span class="c1"># ... 2 more</span>
 </code></pre></div>
-<p>Two concepts were promoted. <code>alerting system</code> is mentioned by three sections spread across three different documents; <code>Deployment Pipeline</code> by two sections in two documents. The mutual Markdown links between <code>onboarding.md</code> and <code>incident-response.md</code> became <code>references</code> edges in both directions.</p>
+<p>Two concepts were promoted: <code>alerting system</code>, mentioned by sections in <code>alerting.md</code> and <code>incident-response.md</code>, and <code>Deployment Pipeline</code>, mentioned by sections in <code>onboarding.md</code> and <code>incident-response.md</code>. The mutual Markdown links between <code>onboarding.md</code> and <code>incident-response.md</code> became <code>references</code> edges in both directions.</p>
+<p>The full file, alongside the <code>manifest.yml</code> and <code>map.yml</code> it was built from, is shown in <a href="../worked-example/#10-the-concept-graph">A Worked Example</a>.</p>
 <h3 id="why-api-gateway-is-not-a-concept">Why "API gateway" is <em>not</em> a concept</h3>
 <p>The corpus talks about the API gateway constantly, and it still did not promote. That is the gates working, and it is worth walking through because it is the most common source of "why isn't my obvious topic here?"</p>
 <table>
@@ -1116,12 +1146,12 @@
 <tbody>
 <tr>
 <td>Document frequency (<code>df_cap</code>)</td>
-<td>Appears in 4 of 16 sections = <strong>0.25</strong>, under the 0.30 cap</td>
+<td>The <code>api_gateway</code> slug appears in 2 of 21 sections = <strong>0.095</strong>, well under the 0.30 cap</td>
 <td>Yes</td>
 </tr>
 <tr>
 <td>Distinct documents (<code>min_docs</code>)</td>
-<td>3 occurrences in <code>api-gateway.md</code>, 1 in <code>onboarding.md</code></td>
+<td>Both occurrences are in <code>api-gateway.md</code></td>
 <td><strong>No</strong> — see below</td>
 </tr>
 <tr>
@@ -1131,7 +1161,8 @@
 </tr>
 </tbody>
 </table>
-<p><code>api-gateway.md</code>'s own title is <em>"API Gateway Architecture"</em>. A document repeating its own name is not evidence that a topic spans the corpus, so those three occurrences are excluded as <strong>self-reference</strong>. That leaves one document, below <code>min_docs = 2</code>, so no concept.</p>
+<p><code>api-gateway.md</code>'s own title is <em>"API Gateway Architecture"</em>. A document repeating its own name is not evidence that a topic spans the corpus, so both occurrences are excluded as <strong>self-reference</strong>. That leaves zero documents, below <code>min_docs = 2</code>, so no concept.</p>
+<p><code>onboarding.md</code> does mention the API gateway in prose — "The API gateway configuration is the one exception" — but YAKE did not rank it among that section's keyphrases, so it never becomes candidate evidence in the first place. Concept promotion operates on <code>map.yml</code> keyphrases, not on raw text; a phrase the extractor did not surface cannot be promoted no matter how many documents contain it.</p>
 <p>This is intentional: without the filter, every document in a corpus of company filings would promote its own company name, and every README its own project name. To promote it anyway, either lower <code>min_docs</code> to <code>1</code> or rename the file so its title stops matching.</p>
 <h2 id="concept-promotion">Concept promotion</h2>
 <p>A keyphrase from <code>map.yml</code> becomes a concept only if it clears <strong>all three</strong> gates:</p>
@@ -1152,21 +1183,25 @@
 <p><strong>Isolated documents</strong> have no <code>references</code> edge in either direction <em>and</em> share no concept with any other document. Practically, an isolated document is one of three things: genuinely off-topic, the only document covering its subject, or evidence that the document connecting it to the rest of the corpus is missing. All three are worth knowing before handing the pack to an agent.</p>
 <h2 id="the-report">The report</h2>
 <p><code>reports/graph_report.md</code> renders the same data for humans — no LLM, deterministic:</p>
-<div class="highlight"><pre><span></span><code><span class="gu">## Statistics</span>
+<div class="highlight"><pre><span></span><code><span class="gh"># Corpus Concept Graph Report for &#39;docs_example_corpus&#39;</span>
+Generated at: 2026-09-21T22:16:11.223796+00:00
+
+<span class="gu">## Statistics</span>
 <span class="k">-</span><span class="w"> </span><span class="gs">**Documents:**</span> 4
 <span class="k">-</span><span class="w"> </span><span class="gs">**Concepts:**</span> 2
 <span class="k">-</span><span class="w"> </span><span class="gs">**Communities:**</span> 5
 
 <span class="gu">## Top Concepts</span>
-<span class="k">-</span><span class="w"> </span><span class="gs">**alerting system**</span> (3 mention(s))
+<span class="k">-</span><span class="w"> </span><span class="gs">**alerting system**</span> (2 mention(s))
 <span class="k">-</span><span class="w"> </span><span class="gs">**Deployment Pipeline**</span> (2 mention(s))
 
 <span class="gu">## Bridge Concepts</span>
 <span class="k">-</span><span class="w"> </span>No bridge concepts found.
 
 <span class="gu">## Isolated Documents</span>
-<span class="k">-</span><span class="w"> </span>No isolated documents.
+<span class="k">-</span><span class="w"> </span>api-gateway.md
 </code></pre></div>
+<p><code>api-gateway.md</code> is isolated because nothing links to it and it shares no promoted concept with any other document — the corpus discusses the API gateway only inside the file named after it. On a four-file handbook that is unremarkable. On a corpus you are about to hand to an agent, it is the signal described under <a href="#use-cases">Use cases</a> below.</p>
 <h2 id="similarity-edges">Similarity edges</h2>
 <p><code>similar_to</code> edges are the one part that needs embeddings, so they are added at <strong>index</strong> time rather than pack time:</p>
 <div class="highlight"><pre><span></span><code>agentpack<span class="w"> </span>index<span class="w"> </span>./out<span class="w">                      </span><span class="c1"># builds vectors, then refreshes similar_to edges</span>
@@ -1174,6 +1209,10 @@ agentpack<span class="w"> </span>graph<span class="w"> </span>./out<span class="
 </code></pre></div>
 <p>A section's centroid is the mean of its chunks' already-normalized vectors, re-normalized. Sections in <em>different</em> documents whose centroids reach <code>similarity_threshold</code> (default <code>0.80</code>) get an edge, and communities are recomputed afterward. The operation is idempotent — running <code>agentpack index</code> repeatedly never accumulates duplicate edges.</p>
 <p>Similarity edges reuse the embedding cache, so they cost no extra model work beyond the index build you were already paying for.</p>
+<blockquote>
+<p><strong>Heads up — Known issue</strong></p>
+<p>The similarity step currently fails on packs where a similar section is not already a node in <code>graph.yml</code>, printing <code>Warning: similarity edge build failed, graph.yml left unchanged (...)</code> and writing no <code>similar_to</code> edges. Both indexes and the rest of the graph build normally, and retrieval is unaffected. The behaviour described in this section is what the feature is meant to do; expect the warning until the fix lands.</p>
+</blockquote>
 <h2 id="configuration">Configuration</h2>
 <p>Every gate is tunable through <code>agentpack.toml</code> in your input directory:</p>
 <div class="highlight"><pre><span></span><code><span class="k">[graph]</span>

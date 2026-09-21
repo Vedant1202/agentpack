@@ -2,6 +2,8 @@
 
 AgentPack acts as a bridge between raw, unstructured knowledge and LLM-powered agents. It performs the heavy lifting of parsing, chunking, and indexing offline, so agents receive clean, high-signal context.
 
+> Prefer to see it before reading about it? [A Worked Example](worked-example.md) runs a four-file corpus through the whole pipeline and shows every artifact this page describes.
+
 ## High-Level Data Flow
 
 ```mermaid
@@ -84,6 +86,41 @@ agentpack-output/
 ### `manifest.yml`
 The registry for the pack. Maps original document sources to their chunks and maintains citation metadata (source path, page number, section, and the full `section_path`) so every piece of text sent to an agent can be traced back to its origin. The `version` field reflects the installed package version.
 
+```yaml
+pack:
+  name: docs_example_corpus
+  version: 0.5.1
+  generated_at: '2026-09-21T22:16:10.891275+00:00'
+sources:
+- id: src_002
+  path: incident-response.md
+  type: markdown
+  checksum: e5402e0890698c500cf2ed573ab7c11bbf9d6a917638f45d966ebf30b66659e3
+  status: success
+  warnings: []
+chunks:
+- id: src_002_chunk_001
+  source_id: src_002
+  path: chunks/src_002_chunk_001.md
+  token_count: 233
+  citation:
+    source_path: incident-response.md
+    section: Closing An Incident
+    section_path:
+    - Incident Response Runbook
+    - Closing An Incident
+tables: []
+agent:
+  instructions:
+  - Use citations when answering.
+  - Prefer raw chunks over summaries.
+  - Say not found when the corpus does not contain the answer.
+```
+
+A chunk's `citation` gains `page` for paged formats (PDF, DOCX, PPTX) and `row_range` for CSVs. Because a chunk is filled to the token budget across section boundaries, `section` names the section the chunk **ended** in — see [A Worked Example](worked-example.md#5-where-a-chunk-came-from-manifestyml) for the same manifest in full, next to the chunk file it describes.
+
+The `checksum` is the SHA-256 that keys the L1 parse cache, which is what makes a re-pack of an unchanged file free.
+
 ### `map.yml`
 A hierarchical **knowledge map** — `corpus → document → section → chunk` — that an agent reads to locate *where* information lives, then pulls only the chunks it needs. The tree structure is reconstructed from the parsed section hierarchy; each section also carries deterministic, offline descriptors (YAKE `keyphrases` + a TextRank `gist`). The map is purely additive and **never enters the retrieval indexes**. Built by default (`--no-map` to skip; `agentpack map` to rebuild). See **[Knowledge Map](knowledge-map.md)** for the full schema and rationale.
 
@@ -132,7 +169,7 @@ Keys carry a version component so a logic change auto-invalidates only the affec
 ### Indexing
 Instead of forcing agents to process thousands of tokens for every query, AgentPack creates dual indexes for lightning-fast retrieval:
 
-- **Lexical Index (SQLite FTS5)**: Full-text search optimized for keyword matching. Queries are OR-of-terms by default.
+- **Lexical Index (SQLite FTS5)**: Full-text search optimized for keyword matching. A query is run as an AND of its non-stop-word terms first; if that matches nothing, it is retried as an OR to preserve recall.
 - **Vector Index (FastEmbed + HNSW)**: `BAAI/bge-small-en-v1.5` ONNX embeddings via FastEmbed; stored as pre-normalized float32 vectors. The default backend is **HNSW** (`hnswlib`, inner-product space = cosine on normalized vectors). Falls back to brute-force `np.dot` when `hnswlib` is absent, for very small corpora, or when a stale/corrupt HNSW file is detected at load time (the bin is deleted and rebuilt on the next index).
 - **Hybrid Search (default)**: Combines lexical and vector rank lists using **Reciprocal Rank Fusion** (`score = 1 / (60 + rank)`) — rank-stable across heterogeneous score scales.
 

@@ -46,34 +46,39 @@ Nodes reuse the ids that already exist — a `document` node **is** the manifest
 
 ## A worked example
 
-Four short Markdown files about an engineering org (`onboarding.md`, `incident-response.md`, `api-gateway.md`, `alerting.md`). Packing them produces:
+Four short Markdown files about an engineering org — `onboarding.md`, `incident-response.md`, `api-gateway.md`, and `alerting.md`. They ship with the repository at [`examples/docs_example_corpus/`](https://github.com/Vedant1202/agentpack/tree/main/examples/docs_example_corpus), so everything below is reproducible with `agentpack pack ./examples/docs_example_corpus --out ./out`.
+
+Packing them produces:
 
 ```yaml
 graph_version: 1
 pack: { name: docs_example_corpus, generated_at: ..., manifest: manifest.yml }
 params:
   enabled: true
-  df_cap: 0.30
+  df_cap: 0.3
   min_docs: 2
-  similarity_threshold: 0.80
+  similarity_threshold: 0.8
 nodes:
-- { id: c_alerting_system,     kind: concept,  label: alerting system,     doc: null,    community: 0 }
+- { id: c_alerting_system,     kind: concept,  label: alerting system,     doc: null,    community: 1 }
 - { id: c_deployment_pipeline, kind: concept,  label: Deployment Pipeline, doc: null,    community: 2 }
-- { id: src_003,               kind: document, label: onboarding.md,       doc: null,    community: 1 }
+- { id: src_003,               kind: document, label: onboarding.md,       doc: null,    community: 0 }
 - { id: src_003_s00-01,        kind: section,  label: Deployment Basics,   doc: src_003, community: 2 }
-  # ... 11 more nodes
+  # ... 10 more nodes
 edges:
-- { source: src_003,        target: src_003_s00-01,      relation: contains,   basis: structural }
-- { source: src_003_s00-01, target: c_deployment_pipeline, relation: mentions, basis: keyphrase }
-- { source: src_003,        target: src_001,             relation: references, basis: structural }
-  # ... 8 more edges
+- { source: src_003,        target: src_003_s00,           relation: contains,   basis: structural }
+- { source: src_003_s00-01, target: c_deployment_pipeline, relation: mentions,   basis: keyphrase }
+- { source: src_003,        target: src_002,               relation: references, basis: structural }
+  # ... 7 more edges
 communities:
-- { id: 0, label: alerting system,     size: 4 }
-- { id: 2, label: Deployment Pipeline, size: 3 }
-  # ... 3 more
+- { id: 0, label: incident-response.md, size: 4 }
+- { id: 1, label: alerting system,      size: 3 }
+- { id: 2, label: Deployment Pipeline,  size: 3 }
+  # ... 2 more
 ```
 
-Two concepts were promoted. `alerting system` is mentioned by three sections spread across three different documents; `Deployment Pipeline` by two sections in two documents. The mutual Markdown links between `onboarding.md` and `incident-response.md` became `references` edges in both directions.
+Two concepts were promoted: `alerting system`, mentioned by sections in `alerting.md` and `incident-response.md`, and `Deployment Pipeline`, mentioned by sections in `onboarding.md` and `incident-response.md`. The mutual Markdown links between `onboarding.md` and `incident-response.md` became `references` edges in both directions.
+
+The full file, alongside the `manifest.yml` and `map.yml` it was built from, is shown in [A Worked Example](worked-example.md#10-the-concept-graph).
 
 ### Why "API gateway" is *not* a concept
 
@@ -81,11 +86,13 @@ The corpus talks about the API gateway constantly, and it still did not promote.
 
 | Gate | Value | Passes? |
 |---|---|---|
-| Document frequency (`df_cap`) | Appears in 4 of 16 sections = **0.25**, under the 0.30 cap | Yes |
-| Distinct documents (`min_docs`) | 3 occurrences in `api-gateway.md`, 1 in `onboarding.md` | **No** — see below |
+| Document frequency (`df_cap`) | The `api_gateway` slug appears in 2 of 21 sections = **0.095**, well under the 0.30 cap | Yes |
+| Distinct documents (`min_docs`) | Both occurrences are in `api-gateway.md` | **No** — see below |
 | Length / not-numeric | `api_gateway`, 11 chars | Yes |
 
-`api-gateway.md`'s own title is *"API Gateway Architecture"*. A document repeating its own name is not evidence that a topic spans the corpus, so those three occurrences are excluded as **self-reference**. That leaves one document, below `min_docs = 2`, so no concept.
+`api-gateway.md`'s own title is *"API Gateway Architecture"*. A document repeating its own name is not evidence that a topic spans the corpus, so both occurrences are excluded as **self-reference**. That leaves zero documents, below `min_docs = 2`, so no concept.
+
+`onboarding.md` does mention the API gateway in prose — "The API gateway configuration is the one exception" — but YAKE did not rank it among that section's keyphrases, so it never becomes candidate evidence in the first place. Concept promotion operates on `map.yml` keyphrases, not on raw text; a phrase the extractor did not surface cannot be promoted no matter how many documents contain it.
 
 This is intentional: without the filter, every document in a corpus of company filings would promote its own company name, and every README its own project name. To promote it anyway, either lower `min_docs` to `1` or rename the file so its title stops matching.
 
@@ -117,21 +124,26 @@ The concept's `label` is the most frequent surface form among its contributors, 
 `reports/graph_report.md` renders the same data for humans — no LLM, deterministic:
 
 ```markdown
+# Corpus Concept Graph Report for 'docs_example_corpus'
+Generated at: 2026-09-21T22:16:11.223796+00:00
+
 ## Statistics
 - **Documents:** 4
 - **Concepts:** 2
 - **Communities:** 5
 
 ## Top Concepts
-- **alerting system** (3 mention(s))
+- **alerting system** (2 mention(s))
 - **Deployment Pipeline** (2 mention(s))
 
 ## Bridge Concepts
 - No bridge concepts found.
 
 ## Isolated Documents
-- No isolated documents.
+- api-gateway.md
 ```
+
+`api-gateway.md` is isolated because nothing links to it and it shares no promoted concept with any other document — the corpus discusses the API gateway only inside the file named after it. On a four-file handbook that is unremarkable. On a corpus you are about to hand to an agent, it is the signal described under [Use cases](#use-cases) below.
 
 ## Similarity edges
 
@@ -145,6 +157,10 @@ agentpack graph ./out --with-similarity    # or refresh them explicitly
 A section's centroid is the mean of its chunks' already-normalized vectors, re-normalized. Sections in *different* documents whose centroids reach `similarity_threshold` (default `0.80`) get an edge, and communities are recomputed afterward. The operation is idempotent — running `agentpack index` repeatedly never accumulates duplicate edges.
 
 Similarity edges reuse the embedding cache, so they cost no extra model work beyond the index build you were already paying for.
+
+> **Heads up — Known issue**
+>
+> The similarity step currently fails on packs where a similar section is not already a node in `graph.yml`, printing `Warning: similarity edge build failed, graph.yml left unchanged (...)` and writing no `similar_to` edges. Both indexes and the rest of the graph build normally, and retrieval is unaffected. The behaviour described in this section is what the feature is meant to do; expect the warning until the fix lands.
 
 ## Configuration
 
