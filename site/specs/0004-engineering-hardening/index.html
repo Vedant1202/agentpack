@@ -1,0 +1,1669 @@
+
+<!doctype html>
+<html lang="en" class="no-js">
+  <head>
+    
+      <meta charset="utf-8">
+      <meta name="viewport" content="width=device-width,initial-scale=1">
+      
+      
+      
+        <link rel="canonical" href="https://vedant1202.github.io/agentpack/specs/0004-engineering-hardening/">
+      
+      
+      
+      
+        
+      
+      
+      <link rel="icon" href="../../assets/images/favicon.png">
+      <meta name="generator" content="mkdocs-1.6.1, mkdocs-material-9.7.6">
+    
+    
+      
+        <title>Spec 0004: Engineering Hardening — fixes for the 2026-08 audit - AgentPack Documentation</title>
+      
+    
+    
+      <link rel="stylesheet" href="../../assets/stylesheets/main.484c7ddc.min.css">
+      
+        
+        <link rel="stylesheet" href="../../assets/stylesheets/palette.ab4e12ef.min.css">
+      
+      
+
+
+    
+    
+      
+    
+    
+      
+        
+        
+        <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+        <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Roboto:300,300i,400,400i,700,700i%7CRoboto+Mono:400,400i,700,700i&display=fallback">
+        <style>:root{--md-text-font:"Roboto";--md-code-font:"Roboto Mono"}</style>
+      
+    
+    
+      <link rel="stylesheet" href="../../assets/_mkdocstrings.css">
+    
+    <script>__md_scope=new URL("../..",location),__md_hash=e=>[...e].reduce(((e,_)=>(e<<5)-e+_.charCodeAt(0)),0),__md_get=(e,_=localStorage,t=__md_scope)=>JSON.parse(_.getItem(t.pathname+"."+e)),__md_set=(e,_,t=localStorage,a=__md_scope)=>{try{t.setItem(a.pathname+"."+e,JSON.stringify(_))}catch(e){}}</script>
+    
+      
+
+    
+    
+  </head>
+  
+  
+    
+    
+    
+    
+    
+    <body dir="ltr" data-md-color-scheme="slate" data-md-color-primary="indigo" data-md-color-accent="indigo">
+  
+    
+    <input class="md-toggle" data-md-toggle="drawer" type="checkbox" id="__drawer" autocomplete="off">
+    <input class="md-toggle" data-md-toggle="search" type="checkbox" id="__search" autocomplete="off">
+    <label class="md-overlay" for="__drawer"></label>
+    <div data-md-component="skip">
+      
+        
+        <a href="#spec-0004-engineering-hardening-fixes-for-the-2026-08-audit" class="md-skip">
+          Skip to content
+        </a>
+      
+    </div>
+    <div data-md-component="announce">
+      
+    </div>
+    
+    
+      
+
+  
+
+<header class="md-header md-header--shadow" data-md-component="header">
+  <nav class="md-header__inner md-grid" aria-label="Header">
+    <a href="../.." title="AgentPack Documentation" class="md-header__button md-logo" aria-label="AgentPack Documentation" data-md-component="logo">
+      
+  
+  <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M12 8a3 3 0 0 0 3-3 3 3 0 0 0-3-3 3 3 0 0 0-3 3 3 3 0 0 0 3 3m0 3.54C9.64 9.35 6.5 8 3 8v11c3.5 0 6.64 1.35 9 3.54 2.36-2.19 5.5-3.54 9-3.54V8c-3.5 0-6.64 1.35-9 3.54"/></svg>
+
+    </a>
+    <label class="md-header__button md-icon" for="__drawer">
+      
+      <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M3 6h18v2H3zm0 5h18v2H3zm0 5h18v2H3z"/></svg>
+    </label>
+    <div class="md-header__title" data-md-component="header-title">
+      <div class="md-header__ellipsis">
+        <div class="md-header__topic">
+          <span class="md-ellipsis">
+            AgentPack Documentation
+          </span>
+        </div>
+        <div class="md-header__topic" data-md-component="header-topic">
+          <span class="md-ellipsis">
+            
+              Spec 0004: Engineering Hardening — fixes for the 2026-08 audit
+            
+          </span>
+        </div>
+      </div>
+    </div>
+    
+      
+    
+    
+    
+    
+      
+      
+        <label class="md-header__button md-icon" for="__search">
+          
+          <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M9.5 3A6.5 6.5 0 0 1 16 9.5c0 1.61-.59 3.09-1.56 4.23l.27.27h.79l5 5-1.5 1.5-5-5v-.79l-.27-.27A6.52 6.52 0 0 1 9.5 16 6.5 6.5 0 0 1 3 9.5 6.5 6.5 0 0 1 9.5 3m0 2C7 5 5 7 5 9.5S7 14 9.5 14 14 12 14 9.5 12 5 9.5 5"/></svg>
+        </label>
+        <div class="md-search" data-md-component="search" role="dialog">
+  <label class="md-search__overlay" for="__search"></label>
+  <div class="md-search__inner" role="search">
+    <form class="md-search__form" name="search">
+      <input type="text" class="md-search__input" name="query" aria-label="Search" placeholder="Search" autocapitalize="off" autocorrect="off" autocomplete="off" spellcheck="false" data-md-component="search-query" required>
+      <label class="md-search__icon md-icon" for="__search">
+        
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M9.5 3A6.5 6.5 0 0 1 16 9.5c0 1.61-.59 3.09-1.56 4.23l.27.27h.79l5 5-1.5 1.5-5-5v-.79l-.27-.27A6.52 6.52 0 0 1 9.5 16 6.5 6.5 0 0 1 3 9.5 6.5 6.5 0 0 1 9.5 3m0 2C7 5 5 7 5 9.5S7 14 9.5 14 14 12 14 9.5 12 5 9.5 5"/></svg>
+        
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M20 11v2H8l5.5 5.5-1.42 1.42L4.16 12l7.92-7.92L13.5 5.5 8 11z"/></svg>
+      </label>
+      <nav class="md-search__options" aria-label="Search">
+        
+        <button type="reset" class="md-search__icon md-icon" title="Clear" aria-label="Clear" tabindex="-1">
+          
+          <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M19 6.41 17.59 5 12 10.59 6.41 5 5 6.41 10.59 12 5 17.59 6.41 19 12 13.41 17.59 19 19 17.59 13.41 12z"/></svg>
+        </button>
+      </nav>
+      
+    </form>
+    <div class="md-search__output">
+      <div class="md-search__scrollwrap" tabindex="0" data-md-scrollfix>
+        <div class="md-search-result" data-md-component="search-result">
+          <div class="md-search-result__meta">
+            Initializing search
+          </div>
+          <ol class="md-search-result__list" role="presentation"></ol>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+      
+    
+    
+  </nav>
+  
+</header>
+    
+    <div class="md-container" data-md-component="container">
+      
+      
+        
+          
+        
+      
+      <main class="md-main" data-md-component="main">
+        <div class="md-main__inner md-grid">
+          
+            
+              
+              <div class="md-sidebar md-sidebar--primary" data-md-component="sidebar" data-md-type="navigation" >
+                <div class="md-sidebar__scrollwrap">
+                  <div class="md-sidebar__inner">
+                    
+
+
+
+<nav class="md-nav md-nav--primary" aria-label="Navigation" data-md-level="0">
+  <label class="md-nav__title" for="__drawer">
+    <a href="../.." title="AgentPack Documentation" class="md-nav__button md-logo" aria-label="AgentPack Documentation" data-md-component="logo">
+      
+  
+  <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M12 8a3 3 0 0 0 3-3 3 3 0 0 0-3-3 3 3 0 0 0-3 3 3 3 0 0 0 3 3m0 3.54C9.64 9.35 6.5 8 3 8v11c3.5 0 6.64 1.35 9 3.54 2.36-2.19 5.5-3.54 9-3.54V8c-3.5 0-6.64 1.35-9 3.54"/></svg>
+
+    </a>
+    AgentPack Documentation
+  </label>
+  
+  <ul class="md-nav__list" data-md-scrollfix>
+    
+      
+      
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../.." class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Home
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../worked-example/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    A Worked Example
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../architecture/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Architecture & Internals
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../knowledge-map/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Knowledge Map
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../concept-graph/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Concept Graph
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../cli-reference/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    CLI Reference
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../corpus-explorer-ui/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Corpus Explorer UI
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../benchmark/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Benchmark
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../changelog/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Changelog
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    
+    
+    
+    
+    
+    <li class="md-nav__item md-nav__item--nested">
+      
+        
+        
+        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_10" >
+        
+          
+          <label class="md-nav__link" for="__nav_10" id="__nav_10_label" tabindex="0">
+            
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    API Reference
+  
+
+    
+  </span>
+  
+  
+
+            <span class="md-nav__icon md-icon"></span>
+          </label>
+        
+        <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_10_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_10">
+            <span class="md-nav__icon md-icon"></span>
+            
+  
+    API Reference
+  
+
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../api/core/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Core
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../api/parsers/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Parsers
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+    
+  </ul>
+</nav>
+                  </div>
+                </div>
+              </div>
+            
+            
+              
+              <div class="md-sidebar md-sidebar--secondary" data-md-component="sidebar" data-md-type="toc" >
+                <div class="md-sidebar__scrollwrap">
+                  <div class="md-sidebar__inner">
+                    
+
+<nav class="md-nav md-nav--secondary" aria-label="Table of contents">
+  
+  
+  
+    
+  
+  
+    <label class="md-nav__title" for="__toc">
+      <span class="md-nav__icon md-icon"></span>
+      Table of contents
+    </label>
+    <ul class="md-nav__list" data-md-component="toc" data-md-scrollfix>
+      
+        <li class="md-nav__item">
+  <a href="#0-read-this-first-handoff-rules-for-the-implementing-agent" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        0. READ THIS FIRST (handoff rules for the implementing agent)
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#1-objective" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        1. Objective
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#2-verified-facts-do-not-re-derive-each-was-reproduced-during-the-audit" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        2. Verified facts (do not re-derive; each was reproduced during the audit)
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#3-design-decisions-already-made-do-not-relitigate" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        3. Design decisions (already made — do not relitigate)
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#4-tasks" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        4. Tasks
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="4. Tasks">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#phase-0-independent-quick-wins-each-is-a-small-self-contained-commit" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Phase 0 — Independent quick wins (each is a small, self-contained commit)
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Phase 0 — Independent quick wins (each is a small, self-contained commit)">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#t01-fix-test_run_eval-the-months-old-red-test" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        T0.1 · Fix test_run_eval (the months-old red test)
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#t02-gen-eval-exit-code" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        T0.2 · gen-eval exit code
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#t03-corrupt-lexical_indexdb-self-heal" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        T0.3 · Corrupt lexical_index.db self-heal
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#t04-cap-section-level-enrichment-the-oom" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        T0.4 · Cap section-level enrichment (the OOM)
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#t05-pin-the-embedding-model-name" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        T0.5 · Pin the embedding model name
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#t06-warn-when-agentpack-graph-runs-on-a-descriptor-less-map" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        T0.6 · Warn when agentpack graph runs on a descriptor-less map
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#t07-remove-the-dead-alpha-parameter" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        T0.7 · Remove the dead alpha parameter
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#phase-a-pack-correctness-citations-error-boundary-cache-identity-determinism" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Phase A — Pack correctness (citations, error boundary, cache identity, determinism)
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Phase A — Pack correctness (citations, error boundary, cache identity, determinism)">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#ta1-chunk-boundary-metadata-the-citation-bug" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        TA.1 · Chunk boundary metadata (THE citation bug)
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#ta2-oversized-split-token-accounting" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        TA.2 · Oversized-split token accounting
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#ta3-per-file-error-boundary" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        TA.3 · Per-file error boundary
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#ta4-l1-cache-hit-remap-of-path-and-block-ids" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        TA.4 · L1 cache-hit remap of path and block ids
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#ta5-deterministic-scan-order" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        TA.5 · Deterministic scan order
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#ta6-stop-self-ingestion-of-the-output-dir" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        TA.6 · Stop self-ingestion of the output dir
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#ta7-encoding-bom-decode-warnings" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        TA.7 · Encoding: BOM + decode warnings
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#ta8-close-the-fitz-document" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        TA.8 · Close the fitz document
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#phase-b-invalidation-retrieval-robustness" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Phase B — Invalidation &amp; retrieval robustness
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Phase B — Invalidation &amp; retrieval robustness">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#tb0-ranking-snapshot-guard-write-first-before-any-b-change" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        TB.0 · Ranking snapshot guard (write FIRST, before any B change)
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#tb1-ghost-results-after-degenerate-rebuild" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        TB.1 · Ghost results after degenerate rebuild
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#tb2-content-aware-manifest-hash" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        TB.2 · Content-aware manifest hash
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#tb3-corrupt-cachedb-self-heal-connection-hygiene" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        TB.3 · Corrupt cache.db self-heal + connection hygiene
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#tb4-hnsw-staleness" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        TB.4 · HNSW staleness
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#tb5-remove_empty_lines-in-the-l1-key" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        TB.5 · remove_empty_lines in the L1 key
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#tb6-retrievepy-connection-hygiene-no-side-effect-mkdir-on-reads" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        TB.6 · retrieve.py connection hygiene + no side-effect mkdir on reads
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#tb7-ui-feedback-atomicity-umap-import-order-chunks-staleness" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        TB.7 · UI: feedback atomicity + umap import order + chunks staleness
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#phase-c-eval-integrity-the-published-numbers" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Phase C — Eval integrity (the published numbers)
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Phase C — Eval integrity (the published numbers)">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#tc1-failed-queries-excluded-from-averages-failures-reported" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        TC.1 · Failed queries excluded from averages; failures reported
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#tc2-per-query-error-isolation-incremental-persistence" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        TC.2 · Per-query error isolation + incremental persistence
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#tc3-baseline-cache-gets-a-corpus-fingerprint" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        TC.3 · Baseline cache gets a corpus fingerprint
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#tc4-llm-baseline-degradation-must-be-loud" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        TC.4 · LLM-baseline degradation must be loud
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#tc5-_get_naive_conn-cache-correctness" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        TC.5 · _get_naive_conn cache correctness
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#tc6-cliedge-hygiene-sweep" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        TC.6 · CLI/edge hygiene sweep
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#5-commands" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        5. Commands
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#6-project-structure-files-this-spec-touches" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        6. Project structure (files this spec touches)
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#7-code-style" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        7. Code style
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#8-descoped-deliberately-not-in-this-spec" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        8. Descoped (deliberately NOT in this spec)
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#9-open-questions-resolved-2026-08-12-all-recommendations-accepted" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        9. Open Questions — RESOLVED 2026-08-12 (all recommendations accepted)
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#10-success-criteria-rollup" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        10. Success criteria (rollup)
+      
+    </span>
+  </a>
+  
+</li>
+      
+    </ul>
+  
+</nav>
+                  </div>
+                </div>
+              </div>
+            
+          
+          
+            <div class="md-content" data-md-component="content">
+              
+              <article class="md-content__inner md-typeset">
+                
+                  
+
+
+
+<h1 id="spec-0004-engineering-hardening-fixes-for-the-2026-08-audit">Spec 0004: Engineering Hardening — fixes for the 2026-08 audit</h1>
+<blockquote>
+<p>Status: <strong>APPROVED — ready for implementation</strong> (all §9 open questions resolved 2026-08-12; recommendations accepted verbatim)
+Owner: Vedant
+Created: 2026-08-12
+Source: engineering audit of 2026-08-12 (three parallel subsystem audits + release/packaging pass; full record in <code>.plans/engineering-audit-2026-08.md</code> — background only, THIS SPEC IS SELF-CONTAINED)
+Baseline commit: <code>489dbe4</code> on <code>dev</code> (v0.5.0). Line numbers cited below are as of this commit.</p>
+</blockquote>
+<hr />
+<h2 id="0-read-this-first-handoff-rules-for-the-implementing-agent">0. READ THIS FIRST (handoff rules for the implementing agent)</h2>
+<p>This spec is written for an implementer with <strong>no prior context</strong>. Everything needed is inlined.</p>
+<p><strong>Hard process rules (non-negotiable):</strong></p>
+<ol>
+<li><strong>Test invocation, this exact form, always:</strong>
+   <div class="highlight"><pre><span></span><code><span class="nv">PYTHONPATH</span><span class="o">=</span><span class="s2">&quot;</span><span class="nv">$PWD</span><span class="s2">/src&quot;</span><span class="w"> </span>./venv/bin/python<span class="w"> </span>-m<span class="w"> </span>pytest<span class="w"> </span>tests/<span class="w"> </span>-q
+</code></pre></div>
+   Bare <code>python -m pytest</code> hits the wrong environment (anaconda base) and fails spuriously.</li>
+<li><strong>Green baseline:</strong> <code>296 passed, 1 failed</code> today. The 1 failure is <code>tests/test_eval.py::test_run_eval</code> — <strong>T0.1 below fixes it</strong>. After T0.1 the baseline is <strong>fully green</strong> and stays fully green after every task. Any new failure = you broke something; stop and fix before proceeding.</li>
+<li><strong>TDD every task:</strong> write the failing test first, run it, confirm it fails FOR THE RIGHT REASON (read the failure output), then implement, then confirm green, then run the FULL suite.</li>
+<li><strong>Line numbers drift.</strong> Before editing any cited location, <code>grep</code> for the quoted code to find its current line. If the code at a cited location does not match what this spec describes, <strong>STOP and report the mismatch</strong> — do not improvise a fix for code that has changed.</li>
+<li><strong>Branch <code>fix/engineering-hardening</code> off <code>dev</code>. PR into <code>dev</code>, never <code>main</code>.</strong> Commit per task or per coherent pair (conventional commits: <code>fix(chunker): …</code>, <code>test(eval): …</code>).</li>
+<li><strong>One task at a time, in order.</strong> Each phase ends with a checkpoint. <strong>Stop at each ▣ CHECKPOINT and wait for human review before the next phase.</strong></li>
+<li>Keep a running todo file <code>tasks/hardening-todo.md</code> (same style as <code>tasks/concept-graph-todo.md</code>: check off with evidence — test counts, commands run, findings).</li>
+<li><strong>Verify library behavior live before relying on it.</strong> Where a task says "verify:", run the snippet in <code>./venv/bin/python</code> first and record the output in the todo.</li>
+</ol>
+<p><strong>Do-not-touch list (out of scope for every task):</strong>
+- <code>src/agentpack/grapher.py</code>, <code>src/agentpack/trust.py</code>, <code>src/agentpack/enrich.py</code> internals (except the single call-site cap in T0.4), <code>src/agentpack/mapper.py</code> tree-building logic (only the enrichment call sites in T0.4), parser <em>extraction logic</em> (only error boundaries/encoding wrappers change), <code>manifest.yml</code>/<code>map.yml</code>/<code>graph.yml</code> schemas (no new/renamed fields anywhere), retrieval <em>ranking</em> behavior (RRF, FTS query construction — verified correct, leave alone), <code>.github/workflows/publish.yml</code> and <code>agentpack.spec</code> (release plumbing is descoped, §8).</p>
+<p><strong>Success criteria for the whole spec:</strong> every listed task's new test fails before its fix and passes after; full suite fully green after every task; no schema changes; no retrieval-ranking changes (proven by T-B0's snapshot test).</p>
+<hr />
+<h2 id="1-objective">1. Objective</h2>
+<p>Fix the verified engineering bugs from the 2026-08 audit — wrong citations, run-killing error paths, stale-cache/stale-index serving, eval-integrity holes, and CLI hygiene — <strong>without adding features and without changing any output schema or retrieval ranking</strong>. Users: everyone running <code>agentpack pack/retrieve/eval</code> today; the benchmark numbers in the README depend on Phase C.</p>
+<hr />
+<h2 id="2-verified-facts-do-not-re-derive-each-was-reproduced-during-the-audit">2. Verified facts (do not re-derive; each was reproduced during the audit)</h2>
+<table>
+<thead>
+<tr>
+<th>#</th>
+<th>Fact</th>
+<th>Where</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>F1</td>
+<td>A chunk flushed at a block boundary is stamped with the NEXT block's page/section (chunk of pure page-1 text cited <code>page=2</code>)</td>
+<td><code>chunker.py</code> (metadata updated before flush decision)</td>
+</tr>
+<tr>
+<td>F2</td>
+<td>A dangling symlink in the corpus aborts the entire pack with <code>FileNotFoundError</code>; nothing is written</td>
+<td><code>pack.py</code> (<code>future.result()</code> unguarded; <code>open()</code>s outside parser try blocks)</td>
+</tr>
+<tr>
+<td>F3</td>
+<td>L1 cache hit remaps only <code>doc.source_id</code>; <code>doc.path</code> and block ids stay stale → citations name the old file; table files collide across sources</td>
+<td><code>pack.py:72-73</code></td>
+</tr>
+<tr>
+<td>F4</td>
+<td>Corrupt/truncated <code>lexical_index.db</code> raises <code>sqlite3.DatabaseError</code>, which the <code>except sqlite3.OperationalError</code> does NOT catch (it's the parent class) → permanent crash loop, self-heal never runs</td>
+<td><code>retrieve.py:76-81</code></td>
+</tr>
+<tr>
+<td>F5</td>
+<td>Section-level enrichment text is uncapped; <code>gist()</code> builds a dense O(N²) sentence graph; a <code>--fast</code> PDF = one root section = whole document → OOM on large filings (observed: 42-doc corpus, 8GB machine). Doc/corpus level already cap at <code>_ENRICH_TEXT_CAP = 8000</code></td>
+<td><code>mapper.py:22,116,122-123,176,194</code>; <code>enrich.py:84-90</code></td>
+</tr>
+<tr>
+<td>F6</td>
+<td><code>gen-eval</code> prints its error branch in red and exits <strong>0</strong> (<code>eval</code> correctly raises <code>typer.Exit(1)</code> at <code>cli.py:304-306</code>)</td>
+<td><code>cli.py:342-344</code></td>
+</tr>
+<tr>
+<td>F7</td>
+<td><code>build_vector_index</code> early-returns on a zero-chunk manifest without writing the new hash or clearing old <code>vector_index.npy</code>/<code>vector_meta.json</code> → stale vectors served forever ("ghost results"); <code>tests/test_retrieve.py:125-159</code> (<code>test_search_hybrid</code>) <strong>passes because of this bug</strong> (mismatched hash + empty-chunk manifest → stale artifacts served)</td>
+<td><code>retrieve.py:141-142,175-176,309-322</code></td>
+</tr>
+<tr>
+<td>F8</td>
+<td><code>_manifest_hash</code> fingerprints only sorted chunk ids + source checksums; chunk ids are positional (<code>{source_id}_chunk_{i:03d}</code>) → re-chunking that redistributes text across the SAME number of chunks keeps the hash identical → stale FTS/vector indexes AND stale L5 cached answers</td>
+<td><code>retrieve.py:62-73</code>; <code>chunker.py:30</code></td>
+</tr>
+<tr>
+<td>F9</td>
+<td><code>cache_get</code>/<code>cache_set</code> swallow ALL exceptions; corrupt <code>cache.db</code> silently disables L1/L3/L5 forever and leaks the connection</td>
+<td><code>cache.py:39-51,54-66</code></td>
+</tr>
+<tr>
+<td>F10</td>
+<td><code>hnsw_index.bin</code> is outside the staleness check and never deleted when hnswlib is absent at rebuild → a later hnswlib-capable env loads stale labels against new metadata</td>
+<td><code>retrieve.py:210-217,310-315,335-344</code></td>
+</tr>
+<tr>
+<td>F11</td>
+<td>L1 cache key = (file_hash, parser_version, fast_flag); <code>remove_empty_lines</code> missing → toggling the flag no-ops on cached corpora</td>
+<td><code>pack.py:65</code></td>
+</tr>
+<tr>
+<td>F12</td>
+<td><code>TextEmbedding()</code> is instantiated with NO model argument while L3 keys hardcode <code>BAAI/bge-small-en-v1.5</code> (fastembed unpinned <code>&gt;=0.2.7</code>)</td>
+<td><code>retrieve.py:21,58</code></td>
+</tr>
+<tr>
+<td>F13</td>
+<td><code>scanner.py</code> uses <code>os.walk</code> with no <code>sorted()</code> → source_ids/chunk ids/manifest order are filesystem/platform-dependent</td>
+<td><code>scanner.py:64</code></td>
+</tr>
+<tr>
+<td>F14</td>
+<td>Oversized-block splitting: first sub-chunk is appended onto the retained overlap but <code>current_tokens = len(sub_tokens)</code> OVERWRITES the count → content 901 tokens, recorded <code>token_count=800</code>. Existing test passes only because it tests a LONE oversized block</td>
+<td><code>chunker.py:89-90</code></td>
+</tr>
+<tr>
+<td>F15</td>
+<td>Output dir inside input dir is scanned on re-run → the pack ingests its own chunks/report and grows every run (<code>write_pack('corpus','corpus/pack')</code> twice reproduced it)</td>
+<td><code>pack.py:132-137</code></td>
+</tr>
+<tr>
+<td>F16</td>
+<td>Non-UTF8 text/markdown files decode with <code>errors="replace"</code> → NUL-riddled mojibake chunks, status success, zero warnings. UTF-8 BOM (<code>utf-8</code> not <code>utf-8-sig</code>) turns <code># Title</code> into a paragraph — structure silently lost</td>
+<td><code>text_parser.py:8</code>; <code>markdown_parser.py:82</code></td>
+</tr>
+<tr>
+<td>F17</td>
+<td>Judge failures in gen-eval record scores of 0 and increment <code>count</code> → averaged into headline numbers; generation failures produce answer text <code>"Error generating answer: …"</code> which is then judged as a real answer</td>
+<td><code>generation.py:112,128-130,143-147</code></td>
+</tr>
+<tr>
+<td>F18</td>
+<td>Dense-baseline disk cache is keyed <code>{strategy}_v{_CACHE_VERSION}</code> only — no corpus fingerprint → corpus edits silently reuse stale baseline embeddings while AgentPack's own modes rebuild</td>
+<td><code>baselines.py:287-302</code></td>
+</tr>
+<tr>
+<td>F19</td>
+<td><code>_llm_generate</code> returns <code>""</code> on ANY failure → "HyDE"/"Contextual Retrieval" rows silently become plain vector search, still labeled as LLM baselines</td>
+<td><code>baselines.py:485-493,510,534</code></td>
+</tr>
+<tr>
+<td>F20</td>
+<td><code>run_eval</code> has no per-query/per-mode error isolation and writes the report only at the end; same for <code>generation_results.json</code> → one flaky query loses an entire (paid) run</td>
+<td><code>runner.py:89,139</code>; <code>generation.py:163</code></td>
+</tr>
+<tr>
+<td>F21</td>
+<td><code>_get_naive_conn</code> never sets <code>_last_corpus_dir</code> → with <code>--skip-raw-file</code> the naive FTS index is rebuilt from scratch on EVERY query; conversely can serve corpus A's index for corpus B</td>
+<td><code>baselines.py:75-102</code></td>
+</tr>
+<tr>
+<td>F22</td>
+<td><code>test_run_eval</code> fails because commit <code>6a1e682</code> added a reranker baseline doing a <strong>function-local</strong> <code>from agentpack.retrieve import search_pack</code> (<code>baselines.py:445-447</code>) that the test's mock on <code>agentpack.eval.runner.search_pack</code> cannot intercept. Validated fix: additionally patch <code>agentpack.eval.runner._baselines.get_baselines</code> to return <code>[]</code> → passes in 1.9s</td>
+<td><code>tests/test_eval.py:65-67</code></td>
+</tr>
+<tr>
+<td>F23</td>
+<td><code>/api/feedback</code>: bare <code>except: pass</code> turns a corrupt <code>eval_feedback.json</code> into <code>[]</code> and the next POST overwrites the whole file; write is non-atomic truncate-then-write</td>
+<td><code>ui/server.py:377-398</code></td>
+</tr>
+<tr>
+<td>F24</td>
+<td><code>/api/umap</code> imports <code>umap</code> before the manifest check → missing manifest + no umap-learn = misleading 500; <code>tests/test_ui.py:158-162</code> documents this and <code>pytest.skip</code>s around it</td>
+<td><code>ui/server.py:214-220</code></td>
+</tr>
+<tr>
+<td>F25</td>
+<td><code>cache_get</code> on a read path does <code>cache_dir.mkdir(parents=True)</code> → <code>agentpack retrieve &lt;typo-dir&gt; q</code> side-effect-creates <code>.cache/</code> and <code>indexes/</code> at the typo path, then tracebacks</td>
+<td><code>cache.py:19</code></td>
+</tr>
+<tr>
+<td>F26</td>
+<td><code>agentpack index &lt;missing-dir&gt;</code> tracebacks (<code>mkdir</code> without <code>parents</code>, no manifest pre-check — <code>map</code>/<code>graph</code> at <code>cli.py:190-192,221-223</code> do it right); <code>audit</code> on an empty manifest tracebacks (<code>safe_load</code> → <code>None</code>, <code>audit.py:34</code>); <code>retrieve --top-k -1</code> reaches SQLite as <code>LIMIT -1</code> and dumps the ENTIRE corpus; <code>--top-k 0</code> returns nothing; <code>--mode</code> typos silently run hybrid (<code>retrieve.py:449-454</code>); <code>prep-benchmark --dataset tatqa\|qasper</code> are <code>pass</code> stubs that print "Preparation complete." and exit 0 (<code>benchmarks.py:226-236</code>)</td>
+<td><code>cli.py</code>, <code>audit.py</code>, <code>retrieve.py</code>, <code>benchmarks.py</code></td>
+</tr>
+<tr>
+<td>F27</td>
+<td><code>search_fts</code> leaks its sqlite connection on the all-stopword early return and on any exception (no try/finally); <code>ensure_lexical_index</code> (<code>ui/server.py:44</code>) discards the LIVE connection <code>build_fts_index</code> returns. UI endpoints themselves are clean (try/finally verified)</td>
+<td><code>retrieve.py:237-281</code></td>
+</tr>
+<tr>
+<td>F28</td>
+<td><code>agentpack map</code> rebuild hardcodes <code>enrich=False</code> (<code>mapper.py:261</code>) → rebuilt map has no keyphrases → a subsequent <code>agentpack graph</code> produces a zero-concept graph with no warning anywhere</td>
+<td><code>mapper.py:261</code>; <code>cli.py</code> graph_cmd</td>
+</tr>
+<tr>
+<td>F29</td>
+<td><code>fitz.open()</code> in the fast PDF path is never closed (success or exception)</td>
+<td><code>pdf_parser.py:41</code></td>
+</tr>
+<tr>
+<td>F30</td>
+<td><code>search_hybrid(alpha=…)</code> is accepted and documented by signature but never read (dead parameter)</td>
+<td><code>retrieve.py:364</code></td>
+</tr>
+</tbody>
+</table>
+<hr />
+<h2 id="3-design-decisions-already-made-do-not-relitigate">3. Design decisions (already made — do not relitigate)</h2>
+<table>
+<thead>
+<tr>
+<th>Decision</th>
+<th>Choice</th>
+<th>Why</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Failure posture for per-file errors</td>
+<td>Degrade to <code>parse_error</code> warning + <code>status: failed</code> source, never abort the pack</td>
+<td>Matches the existing contract for errors inside parser try blocks; F2 just extends it to the escape paths</td>
+</tr>
+<tr>
+<td>Eval failure accounting</td>
+<td><strong>Exclude failed queries from averages; report <code>failures: N</code> per mode; never feed error strings to the judge</strong></td>
+<td>Averaging zeros corrupts published numbers (F17); abort-on-first-error loses paid runs (F20)</td>
+</tr>
+<tr>
+<td>Cache/index invalidation changes</td>
+<td>Strengthen keys/fingerprints even though it one-time invalidates existing caches</td>
+<td>Correctness over a one-time rebuild cost; see OQ2</td>
+</tr>
+<tr>
+<td>Scanner ordering</td>
+<td><code>sorted()</code> on both dirs and files in <code>os.walk</code></td>
+<td>Determinism; see OQ1 for the migration consequence</td>
+</tr>
+<tr>
+<td>Corrupt-state self-heal</td>
+<td>Corrupt <code>lexical_index.db</code> and corrupt <code>cache.db</code>: delete the file, warn on stderr once, rebuild/recreate</td>
+<td>Matches trust.py/grapher.py "never crash, never silent" posture</td>
+</tr>
+<tr>
+<td>Mode/typo handling</td>
+<td><code>--mode</code> becomes a validated choice; invalid <code>top_k</code> (&lt; 1) is a clean CLI error</td>
+<td>Silent fallback lies to users (F26)</td>
+</tr>
+<tr>
+<td>Dead <code>alpha</code> param</td>
+<td>Remove it from <code>search_hybrid</code>'s signature</td>
+<td>Grep confirms no caller passes it (<code>cli.py</code>, <code>ui/server.py</code>, <code>eval/*</code> all call without it); removing is safe and honest</td>
+</tr>
+<tr>
+<td>BOM/encoding</td>
+<td><code>utf-8-sig</code> for text/markdown; on decode errors emit an <code>ExtractionWarning(type="decode_error")</code> and continue with replacement chars</td>
+<td>Same warning mechanism as everything else; no schema change (<code>type</code> is a free string)</td>
+</tr>
+<tr>
+<td>What "atomic write" means here</td>
+<td>Write to <code>&lt;file&gt;.tmp</code> in the same directory, then <code>os.replace()</code></td>
+<td>POSIX-atomic on same filesystem; pattern for F23 and the incremental eval writes</td>
+</tr>
+</tbody>
+</table>
+<hr />
+<h2 id="4-tasks">4. Tasks</h2>
+<p>Uniform template per task: <strong>Bug</strong> (what's wrong) → <strong>Fix</strong> (exactly what to change) → <strong>Test</strong> (the RED test to write first) → <strong>Verify</strong> (commands). Acceptance for every task additionally includes: full suite green.</p>
+<h3 id="phase-0-independent-quick-wins-each-is-a-small-self-contained-commit">Phase 0 — Independent quick wins (each is a small, self-contained commit)</h3>
+<h4 id="t01-fix-test_run_eval-the-months-old-red-test">T0.1 · Fix <code>test_run_eval</code> (the months-old red test)</h4>
+<ul>
+<li><strong>Bug:</strong> F22. The test mocks <code>agentpack.eval.runner.search_pack</code>/<code>write_pack</code>, but the reranker baseline added later imports <code>search_pack</code> function-locally from <code>agentpack.retrieve</code>, bypassing the mock; with <code>write_pack</code> mocked no pack exists → <code>FileNotFoundError</code>.</li>
+<li><strong>Fix:</strong> in <code>tests/test_eval.py</code>, add a third patch so the test unit-tests the runner loop, not six real baselines:
+  <div class="highlight"><pre><span></span><code><span class="nd">@patch</span><span class="p">(</span><span class="s2">&quot;agentpack.eval.runner._baselines.get_baselines&quot;</span><span class="p">,</span> <span class="n">return_value</span><span class="o">=</span><span class="p">[])</span>
+<span class="nd">@patch</span><span class="p">(</span><span class="s2">&quot;agentpack.eval.runner.search_pack&quot;</span><span class="p">)</span>
+<span class="nd">@patch</span><span class="p">(</span><span class="s2">&quot;agentpack.eval.runner.write_pack&quot;</span><span class="p">)</span>
+<span class="k">def</span><span class="w"> </span><span class="nf">test_run_eval</span><span class="p">(</span><span class="n">mock_write_pack</span><span class="p">,</span> <span class="n">mock_search</span><span class="p">,</span> <span class="n">mock_baselines</span><span class="p">,</span> <span class="n">tmp_path</span><span class="p">):</span>
+</code></pre></div>
+  First <strong>verify</strong> the import shape: <code>grep -n "import baselines\|_baselines\|get_baselines" src/agentpack/eval/runner.py</code> — patch whatever name <code>run_eval</code> actually resolves <code>get_baselines</code> through (the audit found it reachable as <code>agentpack.eval.runner._baselines.get_baselines</code>; confirm before writing).</li>
+<li><strong>Test:</strong> this IS a test change. RED = current failure (<code>FileNotFoundError</code>); GREEN = passes in ~2s.</li>
+<li><strong>Verify:</strong> <code>PYTHONPATH="$PWD/src" ./venv/bin/python -m pytest tests/test_eval.py -v</code> then full suite → <strong>fully green from here on</strong>. Update rule 2's baseline in <code>tasks/hardening-todo.md</code>.</li>
+</ul>
+<h4 id="t02-gen-eval-exit-code">T0.2 · <code>gen-eval</code> exit code</h4>
+<ul>
+<li><strong>Bug:</strong> F6.</li>
+<li><strong>Fix:</strong> in <code>cli.py</code>'s <code>gen_eval</code> error branch (currently <code>typer.secho(report, fg=typer.colors.RED)</code> with nothing after), add <code>raise typer.Exit(code=1)</code> — mirror the <code>eval</code> command's branch a few lines above.</li>
+<li><strong>Test (RED first):</strong> in <code>tests/test_cli.py</code>, copy the existing <code>test_cli_eval_error</code> pattern: mock <code>run_generation_eval</code> to return a string starting with <code>"Error"</code>, invoke <code>["gen-eval", "fake_dir"]</code>, assert <code>result.exit_code == 1</code>.</li>
+<li><strong>Verify:</strong> targeted test + full suite.</li>
+</ul>
+<h4 id="t03-corrupt-lexical_indexdb-self-heal">T0.3 · Corrupt <code>lexical_index.db</code> self-heal</h4>
+<ul>
+<li><strong>Bug:</strong> F4.</li>
+<li><strong>Fix:</strong> in <code>retrieve.py</code> <code>_fts_stored_hash</code>, catch <code>sqlite3.DatabaseError</code> (parent of <code>OperationalError</code>) instead. In the caller (<code>search_fts</code>, around the hash-check at <code>:235-241</code>), when the stored hash is unreadable because the file is corrupt: <code>db_path.unlink(missing_ok=True)</code>, print one stderr warning (<code>[agentpack] Warning: corrupt lexical index, rebuilding.</code>), rebuild. Ensure the probe connection is closed on the error path (context-manage it).</li>
+<li><strong>Test (RED first):</strong> build a real tiny FTS index (reuse <code>test_build_fts_index_and_search</code>'s setup), then truncate the db file (<code>db_path.write_bytes(b"garbage")</code>), then call <code>search_fts</code> → RED: raises <code>sqlite3.DatabaseError</code>. GREEN: returns results after transparent rebuild, and <code>capsys</code> captured a warning.</li>
+<li><strong>Verify:</strong> live-verify first that <code>sqlite3.connect</code> + query on a garbage file raises <code>DatabaseError</code> and NOT <code>OperationalError</code>: the audit confirmed it, re-confirm in <code>./venv/bin/python</code>.</li>
+</ul>
+<h4 id="t04-cap-section-level-enrichment-the-oom">T0.4 · Cap section-level enrichment (the OOM)</h4>
+<ul>
+<li><strong>Bug:</strong> F5.</li>
+<li><strong>Fix:</strong> two lines in <code>mapper.py::_to_section_node</code>: after <code>node_text = " ".join(tnode.own_text).strip()</code>, apply <code>node_text = node_text[:_ENRICH_TEXT_CAP]</code> before the <code>_keyphrases</code>/<code>_gist</code> calls — identical to the doc-level pattern at <code>:176</code>. Defense in depth (optional, same commit): in <code>enrich.py::gist</code>, cap <code>sentences = sentences[:400]</code> after <code>_sentences()</code> with a short comment; 400 sentences ≈ well past any 8000-char input, so it only guards future uncapped callers.</li>
+<li><strong>Test (RED first):</strong> in <code>tests/test_mapper.py</code> (or wherever mapper tests live — find with <code>grep -rl "_to_section_node\|build_map" tests/</code>), build a doc whose single section has <code>own_text</code> &gt; 8000 chars and assert the text reaching enrichment is capped — simplest observable: monkeypatch <code>agentpack.mapper._gist</code> to capture its argument, assert <code>len(arg) &lt;= 8000</code>. RED first (captures full length today).</li>
+<li><strong>Verify:</strong> targeted + full suite. Then the real-world check: <code>PYTHONPATH="$PWD/src" ./venv/bin/python -m agentpack.cli pack demo_corpus --out /tmp/hardening_t04 --fast --quiet</code> still succeeds and <code>map.yml</code> still has keyphrases/gists (cap must not blank them on normal docs).</li>
+</ul>
+<h4 id="t05-pin-the-embedding-model-name">T0.5 · Pin the embedding model name</h4>
+<ul>
+<li><strong>Bug:</strong> F12.</li>
+<li><strong>Fix:</strong> <code>retrieve.py</code> — <code>TextEmbedding(model_name=_EMBED_MODEL_ID)</code> at the singleton construction site.</li>
+<li><strong>Test (RED first):</strong> in <code>tests/test_retrieve.py</code>, patch <code>fastembed.TextEmbedding</code> with a <code>MagicMock</code>, call <code>_get_embedding_model()</code> (reset the module singleton first — check how it's cached, e.g. set the module global to <code>None</code>), assert it was called with <code>model_name="BAAI/bge-small-en-v1.5"</code>.</li>
+<li><strong>Verify:</strong> targeted + full suite (mocked-embedding tests must be unaffected — they patch <code>_get_embedding_model</code> itself).</li>
+</ul>
+<h4 id="t06-warn-when-agentpack-graph-runs-on-a-descriptor-less-map">T0.6 · Warn when <code>agentpack graph</code> runs on a descriptor-less map</h4>
+<ul>
+<li><strong>Bug:</strong> F28.</li>
+<li><strong>Fix:</strong> in <code>cli.py::graph_cmd</code>, after loading/confirming <code>map.yml</code> exists (or inside the flow before <code>write_graph</code>), read <code>map.yml</code> and if NO section anywhere in any document carries a non-empty <code>keyphrases</code> list, <code>typer.secho</code> a yellow warning: <code>"map.yml has no keyphrases (built by 'agentpack map'?) — the graph will contain no concepts; run 'agentpack pack' for a full-fidelity map."</code> Do not change behavior — warn only. Walk sections recursively (nested <code>nodes</code>).</li>
+<li><strong>Test (RED first):</strong> in <code>tests/test_graph_cli.py</code>, pack a corpus, overwrite <code>map.yml</code> stripping all <code>keyphrases</code> (or run the real <code>agentpack map</code> rebuild to produce one honestly), run <code>["graph", str(out)]</code>, assert the warning text appears in output and exit code is 0. Second test: normal pack-time map → no warning.</li>
+<li><strong>Verify:</strong> targeted + full suite.</li>
+</ul>
+<h4 id="t07-remove-the-dead-alpha-parameter">T0.7 · Remove the dead <code>alpha</code> parameter</h4>
+<ul>
+<li><strong>Bug:</strong> F30.</li>
+<li><strong>Fix:</strong> delete <code>alpha</code> from <code>search_hybrid</code>'s signature. First <strong>verify</strong> no callers: <code>grep -rn "search_hybrid(" src/ tests/</code> — if ANY call site passes <code>alpha</code>, STOP and report instead.</li>
+<li><strong>Test:</strong> no new test; full suite is the test.</li>
+</ul>
+<p>▣ <strong>CHECKPOINT 0</strong> — post the todo with evidence; wait for human go before Phase A.</p>
+<h3 id="phase-a-pack-correctness-citations-error-boundary-cache-identity-determinism">Phase A — Pack correctness (citations, error boundary, cache identity, determinism)</h3>
+<h4 id="ta1-chunk-boundary-metadata-the-citation-bug">TA.1 · Chunk boundary metadata (THE citation bug)</h4>
+<ul>
+<li><strong>Bug:</strong> F1. In <code>chunker.py</code>, the loop updates <code>current_metadata</code> from the incoming block BEFORE deciding whether the accumulated chunk must flush; <code>create_chunk</code> then stamps the flushed chunk with the incoming block's page/section.</li>
+<li><strong>Fix:</strong> reorder so the flush uses the metadata of the content actually IN the chunk: capture the would-be-flushed chunk's metadata before overwriting <code>current_metadata</code> (i.e., flush first with the OLD metadata, then update <code>current_metadata</code> for the new block). Read the whole loop before editing; also confirm the overlap-retention path (<code>:44-51</code>) stamps retained-overlap chunks with the metadata of where the overlap CAME FROM (acceptable) vs the new block (fix likewise if reachable).</li>
+<li><strong>Test (RED first):</strong> two blocks, page 1 and page 2, sized so block 1 alone overflows into a flush exactly at the boundary (e.g., block1 ~700 tokens, block2 ~700 with <code>max_tokens=800</code>). Assert the FIRST chunk's citation page == 1. RED today: it reports 2. Add a section-path variant (block 2 in a different section; first chunk must carry block 1's section).</li>
+<li><strong>Verify:</strong> targeted + full suite + re-pack <code>demo_corpus</code> and spot-check <code>manifest.yml</code> citations against a known page boundary.</li>
+</ul>
+<h4 id="ta2-oversized-split-token-accounting">TA.2 · Oversized-split token accounting</h4>
+<ul>
+<li><strong>Bug:</strong> F14. First sub-chunk = retained overlap + sub-block, but <code>current_tokens</code> is OVERWRITTEN with <code>len(sub_tokens)</code>.</li>
+<li><strong>Fix:</strong> in <code>chunker.py:89-90</code> area: either add (<code>current_tokens += len(sub_tokens)</code>) so the flush threshold sees the true size, or flush the retained overlap before starting sub-block accumulation — choose whichever keeps every emitted chunk's real token count ≤ <code>max_tokens</code> AND <code>token_count</code> equal to the actual tokenized length of the chunk's text. The second property is the acceptance criterion; assert it directly.</li>
+<li><strong>Test (RED first):</strong> normal block (~200 tokens) followed by an oversized block (~2000 tokens), <code>max_tokens=800</code>, overlap default. For EVERY emitted chunk: <code>len(enc.encode(chunk_text)) &lt;= 800</code> and <code>manifest token_count == len(enc.encode(chunk_text))</code> (use the same <code>cl100k_base</code> encoder the chunker uses). RED today: one chunk is 901 tokens recorded as 800.</li>
+<li><strong>Verify:</strong> targeted + full suite.</li>
+</ul>
+<h4 id="ta3-per-file-error-boundary">TA.3 · Per-file error boundary</h4>
+<ul>
+<li><strong>Bug:</strong> F2.</li>
+<li><strong>Fix:</strong> in <code>pack.py</code>, wrap the per-file work so ANY exception from parsing one file (including the checksum/<code>open()</code> calls currently outside parser try blocks, and the <code>future.result()</code> at the gather point) degrades to: a <code>SourceDocument</code> with <code>status</code>-driving <code>ExtractionWarning(type="parse_error", detail=str(e))</code>, empty blocks, and the pack continuing. Implement at the submission-function level (the callable submitted to the executor catches everything and returns a failed-doc object) so <code>future.result()</code> can only raise on true executor faults. Preserve existing behavior for errors already handled inside parsers.</li>
+<li><strong>Test (RED first):</strong> corpus of one good <code>.md</code> + one dangling symlink (<code>(dir / "ghost.md").symlink_to(dir / "nope.md")</code>). RED today: <code>write_pack</code> raises <code>FileNotFoundError</code>. GREEN: pack succeeds, manifest lists both sources, ghost has <code>status: failed</code> + a <code>parse_error</code> warning, good file's chunks exist. Second test: unreadable file via <code>chmod 0</code> (skip on platforms where root ignores permissions — guard with an effective-uid check like other tests do, or use monkeypatched <code>open</code> to raise <code>PermissionError</code> for that one path for determinism).</li>
+<li><strong>Verify:</strong> targeted + full suite + <code>agentpack audit</code> on the produced pack shows the warning.</li>
+</ul>
+<h4 id="ta4-l1-cache-hit-remap-of-path-and-block-ids">TA.4 · L1 cache-hit remap of path and block ids</h4>
+<ul>
+<li><strong>Bug:</strong> F3. Cache hit remaps <code>doc.source_id</code> only.</li>
+<li><strong>Fix:</strong> at <code>pack.py:72-73</code>, after a hit also set <code>doc.path = file_path.name</code> (or the current path value used at parse time — match whatever a fresh parse would set) and rewrite block-level ids: for each block, re-derive its id under the CURRENT <code>source_id</code> (blocks carry ids like <code>src_000_table_0</code> — regenerate with the same formatting logic the parser uses; find it with <code>grep -rn "block_id\|_table_" src/agentpack/parsers/</code>). Follow the precedent of the trust-warning remap test (<code>tests/test_pack.py:192</code>) — this is the same bug class one field over.</li>
+<li><strong>Test (RED first):</strong> pack corpus with <code>report_a.csv</code>; then rename the file to <code>report_b.csv</code> (same bytes) into a fresh input dir, pack again with the same cache dir. Assert manifest citations for the second pack say <code>report_b.csv</code> (RED: says <code>report_a.csv</code>) and any table block ids carry the second pack's source_id namespace.</li>
+<li><strong>Verify:</strong> targeted + full suite. Also confirm cache HIT still happens (assert via the existing cache-hit counting pattern in <code>test_pack.py</code>) — the fix must remap, not bypass, the cache.</li>
+</ul>
+<h4 id="ta5-deterministic-scan-order">TA.5 · Deterministic scan order</h4>
+<ul>
+<li><strong>Bug:</strong> F13.</li>
+<li><strong>Fix:</strong> in <code>scanner.py</code>'s <code>os.walk</code> loop: <code>dirs.sort()</code> (in-place, so traversal itself is ordered) and iterate <code>sorted(files)</code>.</li>
+<li><strong>Test (RED-ish):</strong> monkeypatch <code>os.walk</code> to yield files in reversed order and assert <code>scan_directory</code> output is nonetheless sorted (this makes the test meaningful on any filesystem). Plus a straight determinism test: two scans → identical list.</li>
+<li><strong>Verify:</strong> targeted + full suite. <strong>Migration note for the PR description (OQ1):</strong> existing packs re-packed after this may assign different <code>src_NNN</code> ids once.</li>
+</ul>
+<h4 id="ta6-stop-self-ingestion-of-the-output-dir">TA.6 · Stop self-ingestion of the output dir</h4>
+<ul>
+<li><strong>Bug:</strong> F15.</li>
+<li><strong>Fix:</strong> in <code>pack.py::write_pack</code>, resolve <code>out_path</code> and pass it to the scanner as an exclusion (add an <code>exclude_dirs</code> parameter to <code>scan_directory</code> or filter the scan result: any file whose resolved path is inside the resolved output dir is skipped). Do it by real path (<code>Path.resolve()</code>), not string prefix.</li>
+<li><strong>Test (RED first):</strong> <code>write_pack(corpus, corpus/"pack")</code> twice; assert the second manifest's sources are exactly the original corpus files (RED today: includes <code>src_000_chunk_000.md</code>, <code>pack_report.md</code>).</li>
+<li><strong>Verify:</strong> targeted + full suite.</li>
+</ul>
+<h4 id="ta7-encoding-bom-decode-warnings">TA.7 · Encoding: BOM + decode warnings</h4>
+<ul>
+<li><strong>Bug:</strong> F16.</li>
+<li><strong>Fix:</strong> <code>text_parser.py</code> and <code>markdown_parser.py</code>: read with <code>encoding="utf-8-sig"</code>, <code>errors="replace"</code> retained, but AFTER decode, if <code>"�"</code> in the text, append <code>ExtractionWarning(type="decode_error", message=...)</code> to the doc (mirror how parsers attach warnings today — find the pattern with <code>grep -n "ExtractionWarning" src/agentpack/parsers/*.py</code>). Status stays success (content may still be partially useful) — the warning surfaces it in <code>audit</code>.</li>
+<li><strong>Test (RED first):</strong> (a) UTF-8-BOM markdown <code>﻿# Title\n\nbody</code> → RED: first block is a paragraph titled literally <code>﻿# Title</code>; GREEN: parsed as heading, section structure present, no decode warning. (b) UTF-16-encoded <code>.txt</code> → GREEN: pack succeeds AND the source carries a <code>decode_error</code> warning (RED: no warning).</li>
+<li><strong>Verify:</strong> targeted + full suite.</li>
+</ul>
+<h4 id="ta8-close-the-fitz-document">TA.8 · Close the fitz document</h4>
+<ul>
+<li><strong>Bug:</strong> F29.</li>
+<li><strong>Fix:</strong> <code>pdf_parser.py:41</code> — <code>with fitz.open(...) as pdf_doc:</code> (pymupdf supports context manager; <strong>verify live</strong>: <code>import fitz; help(fitz.Document.__enter__)</code> or just try it on a demo PDF in <code>./venv/bin/python</code>).</li>
+<li><strong>Test:</strong> no direct test (resource release); full suite + the e2e PDF test must stay green.</li>
+</ul>
+<p>▣ <strong>CHECKPOINT A</strong> — evidence + human go.</p>
+<h3 id="phase-b-invalidation-retrieval-robustness">Phase B — Invalidation &amp; retrieval robustness</h3>
+<h4 id="tb0-ranking-snapshot-guard-write-first-before-any-b-change">TB.0 · Ranking snapshot guard (write FIRST, before any B change)</h4>
+<ul>
+<li><strong>Purpose:</strong> prove Phase B changes storage/invalidation only, never ranking.</li>
+<li><strong>Test:</strong> build a small real pack (markdown corpus, mocked embeddings like <code>test_rrf_ordering</code> does), run <code>search_pack</code> hybrid for 2 fixed queries, snapshot the ordered chunk-id lists as literals in the test. This is the regression tripwire for the rest of Phase B.</li>
+</ul>
+<h4 id="tb1-ghost-results-after-degenerate-rebuild">TB.1 · Ghost results after degenerate rebuild</h4>
+<ul>
+<li><strong>Bug:</strong> F7.</li>
+<li><strong>Fix:</strong> in <code>build_vector_index</code>, on the zero-chunks/zero-texts early paths: delete <code>vector_index.npy</code>, <code>vector_meta.json</code>, <code>hnsw_index.bin</code> if present, and WRITE the new manifest hash — so searches see "empty index" (return <code>[]</code>) rather than loading stale files. Adjust <code>search_vector</code> to return <code>[]</code> cleanly when index files are absent AND the hash says current-and-empty.</li>
+<li><strong>Test (RED first):</strong> build a pack + vector index (mocked embeddings); then rewrite the manifest to zero chunks (keep sources) and call <code>search_vector</code> → RED: returns results for deleted chunks; GREEN: <code>[]</code>. <strong>Also fix the entrenched test:</strong> <code>test_search_hybrid</code> (<code>tests/test_retrieve.py:125-159</code>) currently passes BECAUSE of the bug — rewrite its fixture to a consistent manifest+index pair (it will fail against the fix as-is; that failure is expected and is the proof).</li>
+<li><strong>Verify:</strong> targeted + TB.0 snapshot + full suite.</li>
+</ul>
+<h4 id="tb2-content-aware-manifest-hash">TB.2 · Content-aware manifest hash</h4>
+<ul>
+<li><strong>Bug:</strong> F8.</li>
+<li><strong>Fix:</strong> in <code>_manifest_hash</code>, fold each chunk's <code>token_count</code> (present in the manifest today — verify with <code>grep -n "token_count" src/agentpack/pack.py</code>) into the fingerprint alongside its id, e.g. hash over sorted <code>f"{id}:{token_count}"</code> lines + source checksums. No schema change; redistribution of text across same-count chunks almost always shifts token counts.</li>
+<li><strong>Test (RED first):</strong> two manifests, same chunk ids/sources, different token_counts → hashes must differ (RED: equal). Existing invalidation tests must stay green.</li>
+<li><strong>Verify:</strong> targeted + TB.0 + full suite. Migration note (OQ2): one-time index rebuild + L5 cache invalidation for existing packs.</li>
+</ul>
+<h4 id="tb3-corrupt-cachedb-self-heal-connection-hygiene">TB.3 · Corrupt <code>cache.db</code> self-heal + connection hygiene</h4>
+<ul>
+<li><strong>Bug:</strong> F9.</li>
+<li><strong>Fix:</strong> in <code>cache.py</code>: wrap connections in try/finally (or context managers) so no path leaks; on <code>sqlite3.DatabaseError</code> in <code>_connect</code>/get/set, delete <code>cache.db</code>, emit ONE stderr warning per process (module-level flag), recreate, and continue (get returns miss). Keep the general never-crash posture.</li>
+<li><strong>Test (RED first):</strong> write garbage to <code>cache.db</code>, call <code>cache_get</code> → RED: silent None forever with no heal (assert file unchanged); GREEN: warning emitted once (capsys), file recreated, subsequent <code>cache_set</code>/<code>cache_get</code> round-trips.</li>
+<li><strong>Verify:</strong> targeted + full suite.</li>
+</ul>
+<h4 id="tb4-hnsw-staleness">TB.4 · HNSW staleness</h4>
+<ul>
+<li><strong>Bug:</strong> F10.</li>
+<li><strong>Fix:</strong> in <code>build_vector_index</code>: when hnswlib is unavailable (or embeddings empty), delete any existing <code>hnsw_index.bin</code>. In <code>search_vector</code>'s load path, wrap HNSW load+query in try/except → on failure (corrupt/mismatched bin) delete the bin, warn once, fall through to brute-force <code>np.dot</code>. Cheap consistency check before trusting it: <code>index.get_current_count() == len(embeddings)</code> (<strong>verify live</strong> that hnswlib exposes <code>get_current_count</code>; if not, rely on the try/except fallback alone).</li>
+<li><strong>Test (RED first):</strong> build index with a REAL tiny hnsw bin (hnswlib is installed), then rewrite npy/meta to fewer rows while keeping the old bin and a matching hash → call <code>search_vector</code>: RED: wrong/erroring results from stale labels; GREEN: brute-force results, warning emitted, bin deleted.</li>
+<li><strong>Verify:</strong> targeted + TB.0 + full suite.</li>
+</ul>
+<h4 id="tb5-remove_empty_lines-in-the-l1-key">TB.5 · <code>remove_empty_lines</code> in the L1 key</h4>
+<ul>
+<li><strong>Bug:</strong> F11.</li>
+<li><strong>Fix:</strong> <code>pack.py:65</code> — add the flag to the key tuple/string (find exact key construction; extend consistently with how <code>fast_pdf</code> is included).</li>
+<li><strong>Test (RED first):</strong> pack same corpus twice into fresh out dirs, same cache, second time with <code>remove_empty_lines=True</code> → assert the second pack's chunk text has no blank lines (RED: cached untransformed text served).</li>
+<li><strong>Verify:</strong> targeted + full suite. (Old-key entries simply miss once — no migration needed.)</li>
+</ul>
+<h4 id="tb6-retrievepy-connection-hygiene-no-side-effect-mkdir-on-reads">TB.6 · retrieve.py connection hygiene + no side-effect mkdir on reads</h4>
+<ul>
+<li><strong>Bug:</strong> F25, F27.</li>
+<li><strong>Fix:</strong> (a) <code>search_fts</code> and <code>search_pack</code>'s content-attach block: try/finally around connections (mirror <code>ui/server.py:184-211</code>). (b) <code>ensure_lexical_index</code> in <code>ui/server.py</code>: <code>build_fts_index(...)</code> returns a live conn — close it. (c) <code>cache.py:19</code>: split read/write paths — <code>cache_get</code> must NOT <code>mkdir</code>; only <code>cache_set</code> creates the directory (verify <code>_db_path</code>/<code>_connect</code> structure first; simplest: pass a <code>create=False</code> flag from the get path and return a miss if the db file doesn't exist). (d) <code>search_pack</code>/CLI <code>retrieve</code>: check <code>manifest.yml</code> exists up front and produce the clean red-error/exit-1 pattern <code>map_cmd</code> uses.</li>
+<li><strong>Test (RED first):</strong> <code>runner.invoke(app, ["retrieve", str(tmp/"nope"), "q"])</code> → RED: traceback + <code>.cache/</code> created at the typo path; GREEN: exit 1, red message, NO directories created (assert <code>not (tmp/"nope").exists()</code>).</li>
+<li><strong>Verify:</strong> targeted + full suite.</li>
+</ul>
+<h4 id="tb7-ui-feedback-atomicity-umap-import-order-chunks-staleness">TB.7 · UI: feedback atomicity + umap import order + chunks staleness</h4>
+<ul>
+<li><strong>Bug:</strong> F23, F24, and <code>/api/chunks</code> trusting existence over hash.</li>
+<li><strong>Fix:</strong> (a) <code>/api/feedback</code>: replace bare <code>except: pass</code> with: on JSON parse failure, rename the corrupt file to <code>eval_feedback.json.corrupt-&lt;epoch&gt;</code> (preserve, don't wipe) and start fresh; write via tmp-file + <code>os.replace</code>; guard the read-modify-write with a module-level <code>threading.Lock</code>. (b) <code>/api/umap</code>: move <code>import umap</code> to AFTER <code>load_vector_artifacts</code> succeeds; then remove the now-unneeded <code>pytest.skip</code> guards in <code>tests/test_ui.py:158-176</code> region so the 404 path is actually tested everywhere (keep skips only where umap itself must run). (c) <code>ensure_lexical_index</code>: validate the stored hash like <code>search_fts</code> does (reuse/extract that check) and rebuild when stale.</li>
+<li><strong>Test (RED first):</strong> (a) write corrupt <code>eval_feedback.json</code>, POST feedback twice → GREEN: both entries present in the new file AND the corrupt original preserved under <code>.corrupt-*</code> (RED: file wiped to 1 entry, original lost). (b) missing manifest + umap absent: currently skipped tests → after fix, <code>/api/umap</code> with no manifest returns 404 with umap not even installed (drop the skip). (c) build pack, load <code>/api/chunks</code>, re-pack different corpus into same dir, <code>/api/chunks</code> again → GREEN: new corpus's chunks (RED: old).</li>
+<li><strong>Verify:</strong> targeted + full suite.</li>
+</ul>
+<p>▣ <strong>CHECKPOINT B</strong> — evidence + human go.</p>
+<h3 id="phase-c-eval-integrity-the-published-numbers">Phase C — Eval integrity (the published numbers)</h3>
+<h4 id="tc1-failed-queries-excluded-from-averages-failures-reported">TC.1 · Failed queries excluded from averages; failures reported</h4>
+<ul>
+<li><strong>Bug:</strong> F17 (+ policy from §3).</li>
+<li><strong>Fix:</strong> <code>generation.py</code>: when generation raises → record the query as FAILED for that mode (do NOT call the judge, do NOT increment the scored count, do NOT synthesize an "Error generating answer" string as an answer); when the judge raises → same. Track <code>failures</code> per mode; the report table gains a <code>failures</code> column (report text only — no schema files involved) and averages divide by <code>count_scored</code>. If <code>count_scored == 0</code>, print <code>n/a</code> not 0.0. Mirror the same policy in <code>runner.py</code>'s retrieval metrics if a search_fn raises (see TC.2).</li>
+<li><strong>Test (RED first):</strong> mock generation to raise on query 2 of 3 → GREEN: averages computed over 2, <code>failures: 1</code> visible in report (RED: averaged over 3 with zeros / error-string judged).</li>
+<li><strong>Verify:</strong> targeted + full suite.</li>
+</ul>
+<h4 id="tc2-per-query-error-isolation-incremental-persistence">TC.2 · Per-query error isolation + incremental persistence</h4>
+<ul>
+<li><strong>Bug:</strong> F20.</li>
+<li><strong>Fix:</strong> <code>runner.py</code>: wrap the per-query <code>search_fn</code> call in try/except → count as failure for that mode, continue. <code>generation.py</code>: after each query, write <code>generation_results.json</code> atomically (tmp + <code>os.replace</code>) so a crash at q99 preserves 98; same for the final report writes.</li>
+<li><strong>Test (RED first):</strong> search_fn that raises on one query → run completes, other queries scored (RED: whole eval aborts). Persistence: mock generation to raise <code>KeyboardInterrupt</code> at q3 of 5 inside a <code>pytest.raises</code> guard → <code>generation_results.json</code> on disk contains q1-q2.</li>
+<li><strong>Verify:</strong> targeted + full suite.</li>
+</ul>
+<h4 id="tc3-baseline-cache-gets-a-corpus-fingerprint">TC.3 · Baseline cache gets a corpus fingerprint</h4>
+<ul>
+<li><strong>Bug:</strong> F18.</li>
+<li><strong>Fix:</strong> <code>baselines.py</code> cache filenames/keys: incorporate a corpus fingerprint = sha256 over sorted <code>(relative_path, size, mtime_ns)</code> of corpus files (cheap, no hashing of content; compute once per run). Bump <code>_CACHE_VERSION</code>.</li>
+<li><strong>Test (RED first):</strong> populate cache, touch/modify a corpus file, rerun → GREEN: cache miss + rebuild (assert via a marker: the cache file name changes / a build-counter mock is called again). RED: stale reuse.</li>
+<li><strong>Verify:</strong> targeted + full suite.</li>
+</ul>
+<h4 id="tc4-llm-baseline-degradation-must-be-loud">TC.4 · LLM-baseline degradation must be loud</h4>
+<ul>
+<li><strong>Bug:</strong> F19.</li>
+<li><strong>Fix:</strong> <code>_llm_generate</code> failures: count them; if a mode's LLM call failed for &gt;0 queries, its report row label gains an explicit marker, e.g. <code>HyDE [LLM UNAVAILABLE for N/M queries]</code>, and a stderr warning is printed once. Do NOT change the fallback behavior itself (still degrade gracefully) — just stop it being silent.</li>
+<li><strong>Test (RED first):</strong> mock <code>_llm_generate</code> to return <code>""</code> (as on failure) → report contains the marker (RED: clean "HyDE" row).</li>
+<li><strong>Verify:</strong> targeted + full suite.</li>
+</ul>
+<h4 id="tc5-_get_naive_conn-cache-correctness">TC.5 · <code>_get_naive_conn</code> cache correctness</h4>
+<ul>
+<li><strong>Bug:</strong> F21.</li>
+<li><strong>Fix:</strong> set <code>_last_corpus_dir</code> (and include <code>chunk_size</code> in the identity check) in <code>_get_naive_conn</code> exactly as <code>_get_raw_conn</code> does — read both functions side by side first.</li>
+<li><strong>Test (RED first):</strong> call <code>_get_naive_conn(corpusA)</code> twice → second call must NOT rebuild (mock/count the index-build function; RED: builds twice). Call with corpusB after A → MUST rebuild (guard the cross-corpus serving direction).</li>
+<li><strong>Verify:</strong> targeted + full suite.</li>
+</ul>
+<h4 id="tc6-cliedge-hygiene-sweep">TC.6 · CLI/edge hygiene sweep</h4>
+<ul>
+<li><strong>Bug:</strong> F26 (+ audit/None guards).</li>
+<li><strong>Fix:</strong> (a) <code>retrieve</code>: <code>top_k &lt; 1</code> → clean typer error; <code>mode</code> validated against <code>{"hybrid","vector","fts"}</code> → clean error on anything else (keep free-text arg, validate in code — or use an Enum if typer version supports it cleanly; check how other choices are done in this cli.py). (b) <code>index</code>: add the manifest pre-check + red-exit-1 (copy <code>map_cmd</code>'s block). (c) <code>audit.py:34</code> + <code>runner.py:83</code> + <code>generation.py:86</code>: guard <code>safe_load(...) or {}</code> / empty-list access with clean error messages. (d) <code>benchmarks.py</code> tatqa/qasper stubs: <code>raise NotImplementedError("dataset slicing for X not implemented")</code> and <code>cli.py prep-benchmark</code> catches it → red message + exit 1 (RED test: currently prints "Preparation complete." and exits 0).</li>
+<li><strong>Test (RED first):</strong> one test per branch above, all via <code>CliRunner</code> asserting exit codes and messages.</li>
+<li><strong>Verify:</strong> targeted + full suite.</li>
+</ul>
+<p>▣ <strong>CHECKPOINT C (final)</strong> — full-suite evidence, re-pack <code>demo_corpus</code> end-to-end (<code>pack</code>, <code>retrieve</code>, <code>audit</code>, <code>validate</code>, <code>ui</code> smoke), then PR into <code>dev</code>.</p>
+<hr />
+<h2 id="5-commands">5. Commands</h2>
+<div class="highlight"><pre><span></span><code><span class="nv">PYTHONPATH</span><span class="o">=</span><span class="s2">&quot;</span><span class="nv">$PWD</span><span class="s2">/src&quot;</span><span class="w"> </span>./venv/bin/python<span class="w"> </span>-m<span class="w"> </span>pytest<span class="w"> </span>tests/<span class="w"> </span>-q<span class="w">            </span><span class="c1"># full suite (always)</span>
+<span class="nv">PYTHONPATH</span><span class="o">=</span><span class="s2">&quot;</span><span class="nv">$PWD</span><span class="s2">/src&quot;</span><span class="w"> </span>./venv/bin/python<span class="w"> </span>-m<span class="w"> </span>pytest<span class="w"> </span>tests/test_X.py<span class="w"> </span>-v<span class="w">   </span><span class="c1"># targeted</span>
+<span class="nv">PYTHONPATH</span><span class="o">=</span><span class="s2">&quot;</span><span class="nv">$PWD</span><span class="s2">/src&quot;</span><span class="w"> </span>./venv/bin/python<span class="w"> </span>-m<span class="w"> </span>agentpack.cli<span class="w"> </span>pack<span class="w"> </span>demo_corpus<span class="w"> </span>--out<span class="w"> </span>/tmp/hardening_smoke<span class="w"> </span>--fast<span class="w"> </span>--quiet<span class="w">   </span><span class="c1"># real-corpus smoke</span>
+</code></pre></div>
+<h2 id="6-project-structure-files-this-spec-touches">6. Project structure (files this spec touches)</h2>
+<p><code>src/agentpack/</code>: <code>chunker.py</code>, <code>pack.py</code>, <code>scanner.py</code>, <code>retrieve.py</code>, <code>cache.py</code>, <code>mapper.py</code> (call-site caps only), <code>cli.py</code>, <code>audit.py</code>, <code>ui/server.py</code>, <code>parsers/text_parser.py</code>, <code>parsers/markdown_parser.py</code>, <code>parsers/pdf_parser.py</code> (close only), <code>eval/runner.py</code>, <code>eval/generation.py</code>, <code>eval/baselines.py</code>, <code>eval/benchmarks.py</code> (stub errors only).
+<code>tests/</code>: the matching <code>test_*.py</code> files; <code>tasks/hardening-todo.md</code> (new).
+<strong>Nothing else.</strong> If a fix seems to require touching a file outside this list, stop and report.</p>
+<h2 id="7-code-style">7. Code style</h2>
+<p>Match each file's existing conventions (this codebase is consistent): stderr warnings as <code>[agentpack] Warning: …</code> / <code>[agentpack] Note: …</code>; CLI errors as <code>typer.secho(..., fg=typer.colors.RED)</code> + <code>raise typer.Exit(code=1)</code>; never-crash wrappers follow <code>trust.py</code>/<code>grapher.py</code> (one outer try/except, degrade + one warning line); comments state constraints, not narration.</p>
+<h2 id="8-descoped-deliberately-not-in-this-spec">8. Descoped (deliberately NOT in this spec)</h2>
+<ul>
+<li><strong>Release/packaging (audit #24/#25):</strong> the never-succeeding <code>publish.yml</code>, the double-publish design, and the UI-less npm binary need a product decision (CI-canonical vs local-canonical publishing) — separate discussion, do not touch the workflow or <code>agentpack.spec</code>.</li>
+<li><strong>Manifest basename collisions (audit #16):</strong> the fix changes <code>path</code> field semantics (relative paths) — a schema-adjacent behavior change; needs its own mini-spec.</li>
+<li><strong>Docling converter thread-safety (audit #34):</strong> needs investigation of docling's actual guarantees; risky to "fix" blind.</li>
+<li><strong><code>docs/docs/assets</code> Windows symlink (#36), nested-gitignore support, streaming file hashing, UMAP response caching:</strong> noted in the audit, not worth the risk/effort ratio here.</li>
+</ul>
+<h2 id="9-open-questions-resolved-2026-08-12-all-recommendations-accepted">9. Open Questions — RESOLVED 2026-08-12 (all recommendations accepted)</h2>
+<p>Resolutions: <strong>OQ1</strong> accepted (one-time src_NNN shift on re-pack is fine). <strong>OQ2</strong> accepted (one-time index rebuild + L5 invalidation is fine). <strong>OQ3</strong> confirmed (exclude-and-report). <strong>OQ4</strong> in scope, as its own PR after Checkpoint B. Original questions kept below for the record.</p>
+<ol>
+<li><strong>OQ1 — scan-order migration.</strong> TA.5 makes scanning sorted; re-packing an existing corpus may reassign <code>src_NNN</code> ids once (citations in NEW packs shift accordingly; old packs are untouched). Accept this one-time shift? <strong>Recommendation: yes</strong> — determinism across machines is worth it, and ids were never stable across platforms anyway (that's the bug).</li>
+<li><strong>OQ2 — hash-strengthening migration.</strong> TB.2 changes <code>_manifest_hash</code> → every existing pack's indexes rebuild once on next query and L5 query caches invalidate once. Accept? <strong>Recommendation: yes</strong> — the alternative is serving stale results.</li>
+<li><strong>OQ3 — eval failure policy.</strong> §3 chose exclude-and-report over abort-on-error and over average-as-zero. Confirm? <strong>Recommendation: confirm</strong> — it's the only option that neither corrupts numbers nor loses paid runs. (Failed-query counts remain visible so a mostly-failed run can't masquerade as a good one.)</li>
+<li><strong>OQ4 — Phase C scope.</strong> Eval integrity is the largest phase and touches the code producing README benchmark numbers. In scope now, or ship Phases 0/A/B first and do C as its own PR? <strong>Recommendation: in scope, but as its own PR after Checkpoint B</strong> (one branch per phase is fine; the spec's checkpoints already gate this).</li>
+</ol>
+<h2 id="10-success-criteria-rollup">10. Success criteria (rollup)</h2>
+<ul>
+<li>Full suite <strong>fully green</strong> after T0.1 and after every subsequent task (no "1 pre-existing failure" allowance anymore).</li>
+<li>Every fix has a test that failed before it (recorded in <code>tasks/hardening-todo.md</code> with the RED output).</li>
+<li>TB.0's ranking snapshot is byte-identical before and after Phases B and C.</li>
+<li><code>demo_corpus</code> end-to-end smoke (<code>pack</code> → <code>retrieve</code> → <code>audit</code> → <code>validate</code>) clean at the final checkpoint.</li>
+<li>No changes to <code>manifest.yml</code>/<code>map.yml</code>/<code>graph.yml</code> schemas, no changes to retrieval ranking, no new dependencies.</li>
+</ul>
+
+
+
+
+
+
+
+
+
+
+
+
+                
+              </article>
+            </div>
+          
+          
+<script>var target=document.getElementById(location.hash.slice(1));target&&target.name&&(target.checked=target.name.startsWith("__tabbed_"))</script>
+        </div>
+        
+      </main>
+      
+        <footer class="md-footer">
+  
+  <div class="md-footer-meta md-typeset">
+    <div class="md-footer-meta__inner md-grid">
+      <div class="md-copyright">
+  
+  
+    Made with
+    <a href="https://squidfunk.github.io/mkdocs-material/" target="_blank" rel="noopener">
+      Material for MkDocs
+    </a>
+  
+</div>
+      
+    </div>
+  </div>
+</footer>
+      
+    </div>
+    <div class="md-dialog" data-md-component="dialog">
+      <div class="md-dialog__inner md-typeset"></div>
+    </div>
+    
+    
+    
+      
+      
+      <script id="__config" type="application/json">{"annotate": null, "base": "../..", "features": [], "search": "../../assets/javascripts/workers/search.2c215733.min.js", "tags": null, "translations": {"clipboard.copied": "Copied to clipboard", "clipboard.copy": "Copy to clipboard", "search.result.more.one": "1 more on this page", "search.result.more.other": "# more on this page", "search.result.none": "No matching documents", "search.result.one": "1 matching document", "search.result.other": "# matching documents", "search.result.placeholder": "Type to start searching", "search.result.term.missing": "Missing", "select.version": "Select version"}, "version": null}</script>
+    
+    
+      <script src="../../assets/javascripts/bundle.79ae519e.min.js"></script>
+      
+    
+  </body>
+</html>

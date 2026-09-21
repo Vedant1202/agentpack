@@ -1,0 +1,1707 @@
+
+<!doctype html>
+<html lang="en" class="no-js">
+  <head>
+    
+      <meta charset="utf-8">
+      <meta name="viewport" content="width=device-width,initial-scale=1">
+      
+      
+      
+        <link rel="canonical" href="https://vedant1202.github.io/agentpack/worked-example/">
+      
+      
+        <link rel="prev" href="..">
+      
+      
+        <link rel="next" href="../architecture/">
+      
+      
+        
+      
+      
+      <link rel="icon" href="../assets/images/favicon.png">
+      <meta name="generator" content="mkdocs-1.6.1, mkdocs-material-9.7.6">
+    
+    
+      
+        <title>A Worked Example - AgentPack Documentation</title>
+      
+    
+    
+      <link rel="stylesheet" href="../assets/stylesheets/main.484c7ddc.min.css">
+      
+        
+        <link rel="stylesheet" href="../assets/stylesheets/palette.ab4e12ef.min.css">
+      
+      
+
+
+    
+    
+      
+    
+    
+      
+        
+        
+        <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+        <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Roboto:300,300i,400,400i,700,700i%7CRoboto+Mono:400,400i,700,700i&display=fallback">
+        <style>:root{--md-text-font:"Roboto";--md-code-font:"Roboto Mono"}</style>
+      
+    
+    
+      <link rel="stylesheet" href="../assets/_mkdocstrings.css">
+    
+    <script>__md_scope=new URL("..",location),__md_hash=e=>[...e].reduce(((e,_)=>(e<<5)-e+_.charCodeAt(0)),0),__md_get=(e,_=localStorage,t=__md_scope)=>JSON.parse(_.getItem(t.pathname+"."+e)),__md_set=(e,_,t=localStorage,a=__md_scope)=>{try{t.setItem(a.pathname+"."+e,JSON.stringify(_))}catch(e){}}</script>
+    
+      
+
+    
+    
+  </head>
+  
+  
+    
+    
+    
+    
+    
+    <body dir="ltr" data-md-color-scheme="slate" data-md-color-primary="indigo" data-md-color-accent="indigo">
+  
+    
+    <input class="md-toggle" data-md-toggle="drawer" type="checkbox" id="__drawer" autocomplete="off">
+    <input class="md-toggle" data-md-toggle="search" type="checkbox" id="__search" autocomplete="off">
+    <label class="md-overlay" for="__drawer"></label>
+    <div data-md-component="skip">
+      
+        
+        <a href="#a-worked-example" class="md-skip">
+          Skip to content
+        </a>
+      
+    </div>
+    <div data-md-component="announce">
+      
+    </div>
+    
+    
+      
+
+  
+
+<header class="md-header md-header--shadow" data-md-component="header">
+  <nav class="md-header__inner md-grid" aria-label="Header">
+    <a href=".." title="AgentPack Documentation" class="md-header__button md-logo" aria-label="AgentPack Documentation" data-md-component="logo">
+      
+  
+  <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M12 8a3 3 0 0 0 3-3 3 3 0 0 0-3-3 3 3 0 0 0-3 3 3 3 0 0 0 3 3m0 3.54C9.64 9.35 6.5 8 3 8v11c3.5 0 6.64 1.35 9 3.54 2.36-2.19 5.5-3.54 9-3.54V8c-3.5 0-6.64 1.35-9 3.54"/></svg>
+
+    </a>
+    <label class="md-header__button md-icon" for="__drawer">
+      
+      <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M3 6h18v2H3zm0 5h18v2H3zm0 5h18v2H3z"/></svg>
+    </label>
+    <div class="md-header__title" data-md-component="header-title">
+      <div class="md-header__ellipsis">
+        <div class="md-header__topic">
+          <span class="md-ellipsis">
+            AgentPack Documentation
+          </span>
+        </div>
+        <div class="md-header__topic" data-md-component="header-topic">
+          <span class="md-ellipsis">
+            
+              A Worked Example
+            
+          </span>
+        </div>
+      </div>
+    </div>
+    
+      
+    
+    
+    
+    
+      
+      
+        <label class="md-header__button md-icon" for="__search">
+          
+          <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M9.5 3A6.5 6.5 0 0 1 16 9.5c0 1.61-.59 3.09-1.56 4.23l.27.27h.79l5 5-1.5 1.5-5-5v-.79l-.27-.27A6.52 6.52 0 0 1 9.5 16 6.5 6.5 0 0 1 3 9.5 6.5 6.5 0 0 1 9.5 3m0 2C7 5 5 7 5 9.5S7 14 9.5 14 14 12 14 9.5 12 5 9.5 5"/></svg>
+        </label>
+        <div class="md-search" data-md-component="search" role="dialog">
+  <label class="md-search__overlay" for="__search"></label>
+  <div class="md-search__inner" role="search">
+    <form class="md-search__form" name="search">
+      <input type="text" class="md-search__input" name="query" aria-label="Search" placeholder="Search" autocapitalize="off" autocorrect="off" autocomplete="off" spellcheck="false" data-md-component="search-query" required>
+      <label class="md-search__icon md-icon" for="__search">
+        
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M9.5 3A6.5 6.5 0 0 1 16 9.5c0 1.61-.59 3.09-1.56 4.23l.27.27h.79l5 5-1.5 1.5-5-5v-.79l-.27-.27A6.52 6.52 0 0 1 9.5 16 6.5 6.5 0 0 1 3 9.5 6.5 6.5 0 0 1 9.5 3m0 2C7 5 5 7 5 9.5S7 14 9.5 14 14 12 14 9.5 12 5 9.5 5"/></svg>
+        
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M20 11v2H8l5.5 5.5-1.42 1.42L4.16 12l7.92-7.92L13.5 5.5 8 11z"/></svg>
+      </label>
+      <nav class="md-search__options" aria-label="Search">
+        
+        <button type="reset" class="md-search__icon md-icon" title="Clear" aria-label="Clear" tabindex="-1">
+          
+          <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M19 6.41 17.59 5 12 10.59 6.41 5 5 6.41 10.59 12 5 17.59 6.41 19 12 13.41 17.59 19 19 17.59 13.41 12z"/></svg>
+        </button>
+      </nav>
+      
+    </form>
+    <div class="md-search__output">
+      <div class="md-search__scrollwrap" tabindex="0" data-md-scrollfix>
+        <div class="md-search-result" data-md-component="search-result">
+          <div class="md-search-result__meta">
+            Initializing search
+          </div>
+          <ol class="md-search-result__list" role="presentation"></ol>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+      
+    
+    
+  </nav>
+  
+</header>
+    
+    <div class="md-container" data-md-component="container">
+      
+      
+        
+          
+        
+      
+      <main class="md-main" data-md-component="main">
+        <div class="md-main__inner md-grid">
+          
+            
+              
+              <div class="md-sidebar md-sidebar--primary" data-md-component="sidebar" data-md-type="navigation" >
+                <div class="md-sidebar__scrollwrap">
+                  <div class="md-sidebar__inner">
+                    
+
+
+
+<nav class="md-nav md-nav--primary" aria-label="Navigation" data-md-level="0">
+  <label class="md-nav__title" for="__drawer">
+    <a href=".." title="AgentPack Documentation" class="md-nav__button md-logo" aria-label="AgentPack Documentation" data-md-component="logo">
+      
+  
+  <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M12 8a3 3 0 0 0 3-3 3 3 0 0 0-3-3 3 3 0 0 0-3 3 3 3 0 0 0 3 3m0 3.54C9.64 9.35 6.5 8 3 8v11c3.5 0 6.64 1.35 9 3.54 2.36-2.19 5.5-3.54 9-3.54V8c-3.5 0-6.64 1.35-9 3.54"/></svg>
+
+    </a>
+    AgentPack Documentation
+  </label>
+  
+  <ul class="md-nav__list" data-md-scrollfix>
+    
+      
+      
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href=".." class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Home
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+    
+      
+      
+  
+  
+    
+  
+  
+  
+    <li class="md-nav__item md-nav__item--active">
+      
+      <input class="md-nav__toggle md-toggle" type="checkbox" id="__toc">
+      
+      
+        
+      
+      
+        <label class="md-nav__link md-nav__link--active" for="__toc">
+          
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    A Worked Example
+  
+
+    
+  </span>
+  
+  
+
+          <span class="md-nav__icon md-icon"></span>
+        </label>
+      
+      <a href="./" class="md-nav__link md-nav__link--active">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    A Worked Example
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+      
+        
+
+<nav class="md-nav md-nav--secondary" aria-label="Table of contents">
+  
+  
+  
+    
+  
+  
+    <label class="md-nav__title" for="__toc">
+      <span class="md-nav__icon md-icon"></span>
+      Table of contents
+    </label>
+    <ul class="md-nav__list" data-md-component="toc" data-md-scrollfix>
+      
+        <li class="md-nav__item">
+  <a href="#1-what-goes-in" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        1. What goes in
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#2-compiling-the-pack" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        2. Compiling the pack
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#3-what-lands-on-disk" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        3. What lands on disk
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#4-what-a-chunk-looks-like" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        4. What a chunk looks like
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#5-where-a-chunk-came-from-manifestyml" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        5. Where a chunk came from: manifest.yml
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#6-building-the-indexes" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        6. Building the indexes
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#7-what-a-retrieval-looks-like" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        7. What a retrieval looks like
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="7. What a retrieval looks like">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#the-same-query-in-each-mode" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        The same query in each mode
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#filtering" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Filtering
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#when-nothing-matches" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        When nothing matches
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#8-calling-it-from-python" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        8. Calling it from Python
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#9-the-knowledge-map" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        9. The knowledge map
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#10-the-concept-graph" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        10. The concept graph
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#11-audit-and-validate" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        11. Audit and validate
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#citations-from-pdfs-and-csvs" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Citations from PDFs and CSVs
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#where-to-go-next" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Where to go next
+      
+    </span>
+  </a>
+  
+</li>
+      
+    </ul>
+  
+</nav>
+      
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../architecture/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Architecture & Internals
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../knowledge-map/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Knowledge Map
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../concept-graph/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Concept Graph
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../cli-reference/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    CLI Reference
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../corpus-explorer-ui/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Corpus Explorer UI
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../benchmark/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Benchmark
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../changelog/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Changelog
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    
+    
+    
+    
+    
+    <li class="md-nav__item md-nav__item--nested">
+      
+        
+        
+        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_10" >
+        
+          
+          <label class="md-nav__link" for="__nav_10" id="__nav_10_label" tabindex="0">
+            
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    API Reference
+  
+
+    
+  </span>
+  
+  
+
+            <span class="md-nav__icon md-icon"></span>
+          </label>
+        
+        <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_10_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_10">
+            <span class="md-nav__icon md-icon"></span>
+            
+  
+    API Reference
+  
+
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../api/core/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Core
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../api/parsers/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Parsers
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+    
+  </ul>
+</nav>
+                  </div>
+                </div>
+              </div>
+            
+            
+              
+              <div class="md-sidebar md-sidebar--secondary" data-md-component="sidebar" data-md-type="toc" >
+                <div class="md-sidebar__scrollwrap">
+                  <div class="md-sidebar__inner">
+                    
+
+<nav class="md-nav md-nav--secondary" aria-label="Table of contents">
+  
+  
+  
+    
+  
+  
+    <label class="md-nav__title" for="__toc">
+      <span class="md-nav__icon md-icon"></span>
+      Table of contents
+    </label>
+    <ul class="md-nav__list" data-md-component="toc" data-md-scrollfix>
+      
+        <li class="md-nav__item">
+  <a href="#1-what-goes-in" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        1. What goes in
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#2-compiling-the-pack" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        2. Compiling the pack
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#3-what-lands-on-disk" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        3. What lands on disk
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#4-what-a-chunk-looks-like" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        4. What a chunk looks like
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#5-where-a-chunk-came-from-manifestyml" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        5. Where a chunk came from: manifest.yml
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#6-building-the-indexes" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        6. Building the indexes
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#7-what-a-retrieval-looks-like" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        7. What a retrieval looks like
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="7. What a retrieval looks like">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#the-same-query-in-each-mode" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        The same query in each mode
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#filtering" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Filtering
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#when-nothing-matches" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        When nothing matches
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#8-calling-it-from-python" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        8. Calling it from Python
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#9-the-knowledge-map" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        9. The knowledge map
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#10-the-concept-graph" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        10. The concept graph
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#11-audit-and-validate" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        11. Audit and validate
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#citations-from-pdfs-and-csvs" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Citations from PDFs and CSVs
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#where-to-go-next" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Where to go next
+      
+    </span>
+  </a>
+  
+</li>
+      
+    </ul>
+  
+</nav>
+                  </div>
+                </div>
+              </div>
+            
+          
+          
+            <div class="md-content" data-md-component="content">
+              
+              <article class="md-content__inner md-typeset">
+                
+                  
+
+
+
+<h1 id="a-worked-example">A Worked Example</h1>
+<p>Every output on this page is real. It comes from packing the four Markdown files in
+<a href="https://github.com/Vedant1202/agentpack/tree/main/examples/docs_example_corpus"><code>examples/docs_example_corpus/</code></a>,
+which ship with the repository so you can reproduce all of it:</p>
+<div class="highlight"><pre><span></span><code>git<span class="w"> </span>clone<span class="w"> </span>https://github.com/Vedant1202/agentpack.git
+<span class="nb">cd</span><span class="w"> </span>agentpack<span class="w"> </span><span class="o">&amp;&amp;</span><span class="w"> </span>pip<span class="w"> </span>install<span class="w"> </span>-e<span class="w"> </span>.
+agentpack<span class="w"> </span>pack<span class="w"> </span>./examples/docs_example_corpus<span class="w"> </span>--out<span class="w"> </span>./out
+agentpack<span class="w"> </span>index<span class="w"> </span>./out
+agentpack<span class="w"> </span>retrieve<span class="w"> </span>./out<span class="w"> </span><span class="s2">&quot;what should I do about a bad release during an incident&quot;</span><span class="w"> </span>--top-k<span class="w"> </span><span class="m">3</span>
+</code></pre></div>
+<p>The corpus is a small engineering handbook: <code>onboarding.md</code>, <code>incident-response.md</code>,
+<code>api-gateway.md</code>, and <code>alerting.md</code>. It is deliberately tiny — small enough that you can
+hold the whole thing in your head while reading what AgentPack did to it.</p>
+<blockquote>
+<p><strong>Note — This corpus is all Markdown</strong></p>
+<p>Markdown has no page numbers and no embedded tables, so this walkthrough cannot show those. <a href="#citations-from-pdfs-and-csvs">Citations from other formats</a> at the end of this page shows what a PDF- or CSV-sourced citation looks like instead.</p>
+</blockquote>
+<hr />
+<h2 id="1-what-goes-in">1. What goes in</h2>
+<p>Four files, about 2,600 words total:</p>
+<div class="highlight"><pre><span></span><code>examples/docs_example_corpus/
+├── agentpack.toml         # optional; the defaults written out explicitly
+├── alerting.md            # how alerts are defined, routed, tuned
+├── api-gateway.md         # routing, rate limiting, auth, timeouts
+├── incident-response.md   # severity levels, what to do when an alert fires
+└── onboarding.md          # access, deployment basics, first week
+</code></pre></div>
+<p>Two of them link to each other. <code>onboarding.md</code> contains:</p>
+<div class="highlight"><pre><span></span><code>Read [<span class="nt">the incident response runbook</span>](<span class="na">incident-response.md</span>) before your first
+on-call shift.
+</code></pre></div>
+<p>and <code>incident-response.md</code> links back. That detail matters later — it becomes a
+<code>references</code> edge in the concept graph.</p>
+<h2 id="2-compiling-the-pack">2. Compiling the pack</h2>
+<div class="highlight"><pre><span></span><code>$<span class="w"> </span>agentpack<span class="w"> </span>pack<span class="w"> </span>./examples/docs_example_corpus<span class="w"> </span>--out<span class="w"> </span>./out
+Packing<span class="w"> </span>./examples/docs_example_corpus<span class="w"> </span>into<span class="w"> </span>./out...
+Pack<span class="w"> </span>generated<span class="w"> </span>at<span class="w"> </span>./out
+Done.
+</code></pre></div>
+<p>That is the entire output on success. Warnings (unreadable PDFs, empty files) would appear
+here; this corpus produces none.</p>
+<h2 id="3-what-lands-on-disk">3. What lands on disk</h2>
+<div class="highlight"><pre><span></span><code>out/
+├── manifest.yml                    # every chunk, with its citation
+├── map.yml                         # corpus → document → section → chunk tree
+├── graph.yml                       # how the four documents relate to each other
+├── chunks/
+│   ├── src_000_chunk_000.md        # alerting.md
+│   ├── src_001_chunk_000.md        # api-gateway.md
+│   ├── src_002_chunk_000.md        # incident-response.md
+│   ├── src_002_chunk_001.md
+│   ├── src_003_chunk_000.md        # onboarding.md
+│   └── src_003_chunk_001.md
+├── .cache/
+│   └── cache.db                    # so a re-pack only pays for what changed
+└── reports/
+    ├── pack_report.md
+    └── graph_report.md
+</code></pre></div>
+<p>Four documents became <strong>six chunks</strong>. <code>tables/</code> and <code>indexes/</code> are absent here — this
+corpus has no tables, and indexes are built by <code>agentpack index</code> in step 6.</p>
+<h2 id="4-what-a-chunk-looks-like">4. What a chunk looks like</h2>
+<p>A chunk is a plain Markdown file. No front matter, no wrapper, no JSON envelope — just the
+text, ready to drop into a prompt. Here is <code>chunks/src_003_chunk_001.md</code> in full
+(326 tokens, from <code>onboarding.md</code>):</p>
+<div class="highlight"><pre><span></span><code>Your First Week
+
+Pick a starter issue labelled <span class="sb">`good-first-issue`</span>. Ship it through the full
+deployment pipeline end to end, even though it is small. The point is to see
+every stage run once while someone is sitting next to you, so that the first
+time you watch the pipeline is not during an incident.
+
+Pair with your onboarding buddy for the first review. Code review here is
+blocking and is expected to take a day, not an hour. A review that comes back
+in ten minutes usually means the reviewer skimmed it.
+
+Do not spend your first week reading the entire codebase. Read the service you
+are shipping to, read its tests, and read the runbook for the alert it owns.
+Breadth comes later and comes faster once you have shipped something.
+
+Where Things Live
+
+Service code lives in the <span class="sb">`platform`</span> org, one repository per service. There is
+no monorepo, and attempts to create one have been abandoned twice.
+
+Infrastructure is defined in the <span class="sb">`infra`</span> repository as Terraform modules.
+Changes there go through the same deployment pipeline as service code, with an
+additional manual approval gate before the apply step.
+
+The API gateway configuration is the one exception: it lives in its own
+repository because its release cadence is different from everything else and
+because a bad gateway config affects every service at once rather than one.
+
+Documentation lives next to the code it describes. A runbook that lives in a
+wiki drifts from reality within two quarters; a runbook in the repository at
+least shows up in the diff when the behaviour it documents changes.
+</code></pre></div>
+<p>Note that this one chunk spans <strong>two</strong> sections — "Your First Week" and "Where Things
+Live". Chunks are filled up to the token budget across section boundaries; they are not
+one-per-section. This is worth remembering when you read the citation in the next step.</p>
+<h2 id="5-where-a-chunk-came-from-manifestyml">5. Where a chunk came from: <code>manifest.yml</code></h2>
+<p>The manifest is the registry that makes every chunk traceable. Here it is in full — six
+chunks is small enough to show the whole file:</p>
+<div class="highlight"><pre><span></span><code><span class="nt">pack</span><span class="p">:</span>
+<span class="w">  </span><span class="nt">name</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">docs_example_corpus</span>
+<span class="w">  </span><span class="nt">version</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">0.5.1</span>
+<span class="w">  </span><span class="nt">generated_at</span><span class="p">:</span><span class="w"> </span><span class="s">&#39;2026-09-21T22:16:10.891275+00:00&#39;</span>
+<span class="nt">sources</span><span class="p">:</span>
+<span class="p p-Indicator">-</span><span class="w"> </span><span class="nt">id</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">src_000</span>
+<span class="w">  </span><span class="nt">path</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">alerting.md</span>
+<span class="w">  </span><span class="nt">type</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">markdown</span>
+<span class="w">  </span><span class="nt">checksum</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">8dc7a90e2687822222f8d5c62f90d85e7aa3ef8f4fb676be37780e4242ff6f10</span>
+<span class="w">  </span><span class="nt">status</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">success</span>
+<span class="w">  </span><span class="nt">warnings</span><span class="p">:</span><span class="w"> </span><span class="p p-Indicator">[]</span>
+<span class="p p-Indicator">-</span><span class="w"> </span><span class="nt">id</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">src_001</span>
+<span class="w">  </span><span class="nt">path</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">api-gateway.md</span>
+<span class="w">  </span><span class="nt">type</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">markdown</span>
+<span class="w">  </span><span class="nt">checksum</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">f0694c703e6747ed82b3e8d7019f3528271590e640499124ac65dbeb5e812fe3</span>
+<span class="w">  </span><span class="nt">status</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">success</span>
+<span class="w">  </span><span class="nt">warnings</span><span class="p">:</span><span class="w"> </span><span class="p p-Indicator">[]</span>
+<span class="p p-Indicator">-</span><span class="w"> </span><span class="nt">id</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">src_002</span>
+<span class="w">  </span><span class="nt">path</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">incident-response.md</span>
+<span class="w">  </span><span class="nt">type</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">markdown</span>
+<span class="w">  </span><span class="nt">checksum</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">e5402e0890698c500cf2ed573ab7c11bbf9d6a917638f45d966ebf30b66659e3</span>
+<span class="w">  </span><span class="nt">status</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">success</span>
+<span class="w">  </span><span class="nt">warnings</span><span class="p">:</span><span class="w"> </span><span class="p p-Indicator">[]</span>
+<span class="p p-Indicator">-</span><span class="w"> </span><span class="nt">id</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">src_003</span>
+<span class="w">  </span><span class="nt">path</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">onboarding.md</span>
+<span class="w">  </span><span class="nt">type</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">markdown</span>
+<span class="w">  </span><span class="nt">checksum</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">de64e0494b83384408a225d8c115768c12548970e05ec19479a7d63523589b3e</span>
+<span class="w">  </span><span class="nt">status</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">success</span>
+<span class="w">  </span><span class="nt">warnings</span><span class="p">:</span><span class="w"> </span><span class="p p-Indicator">[]</span>
+<span class="nt">chunks</span><span class="p">:</span>
+<span class="p p-Indicator">-</span><span class="w"> </span><span class="nt">id</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">src_000_chunk_000</span>
+<span class="w">  </span><span class="nt">source_id</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">src_000</span>
+<span class="w">  </span><span class="nt">path</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">chunks/src_000_chunk_000.md</span>
+<span class="w">  </span><span class="nt">token_count</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">601</span>
+<span class="w">  </span><span class="nt">citation</span><span class="p">:</span>
+<span class="w">    </span><span class="nt">source_path</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">alerting.md</span>
+<span class="w">    </span><span class="nt">section</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">Tuning</span>
+<span class="w">    </span><span class="nt">section_path</span><span class="p">:</span>
+<span class="w">    </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">Alerting</span>
+<span class="w">    </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">Tuning</span>
+<span class="p p-Indicator">-</span><span class="w"> </span><span class="nt">id</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">src_001_chunk_000</span>
+<span class="w">  </span><span class="nt">source_id</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">src_001</span>
+<span class="w">  </span><span class="nt">path</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">chunks/src_001_chunk_000.md</span>
+<span class="w">  </span><span class="nt">token_count</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">706</span>
+<span class="w">  </span><span class="nt">citation</span><span class="p">:</span>
+<span class="w">    </span><span class="nt">source_path</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">api-gateway.md</span>
+<span class="w">    </span><span class="nt">section</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">Observability</span>
+<span class="w">    </span><span class="nt">section_path</span><span class="p">:</span>
+<span class="w">    </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">API Gateway Architecture</span>
+<span class="w">    </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">Observability</span>
+<span class="p p-Indicator">-</span><span class="w"> </span><span class="nt">id</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">src_002_chunk_000</span>
+<span class="w">  </span><span class="nt">source_id</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">src_002</span>
+<span class="w">  </span><span class="nt">path</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">chunks/src_002_chunk_000.md</span>
+<span class="w">  </span><span class="nt">token_count</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">797</span>
+<span class="w">  </span><span class="nt">citation</span><span class="p">:</span>
+<span class="w">    </span><span class="nt">source_path</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">incident-response.md</span>
+<span class="w">    </span><span class="nt">section</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">Closing An Incident</span>
+<span class="w">    </span><span class="nt">section_path</span><span class="p">:</span>
+<span class="w">    </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">Incident Response Runbook</span>
+<span class="w">    </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">Closing An Incident</span>
+<span class="p p-Indicator">-</span><span class="w"> </span><span class="nt">id</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">src_002_chunk_001</span>
+<span class="w">  </span><span class="nt">source_id</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">src_002</span>
+<span class="w">  </span><span class="nt">path</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">chunks/src_002_chunk_001.md</span>
+<span class="w">  </span><span class="nt">token_count</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">233</span>
+<span class="w">  </span><span class="nt">citation</span><span class="p">:</span>
+<span class="w">    </span><span class="nt">source_path</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">incident-response.md</span>
+<span class="w">    </span><span class="nt">section</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">Closing An Incident</span>
+<span class="w">    </span><span class="nt">section_path</span><span class="p">:</span>
+<span class="w">    </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">Incident Response Runbook</span>
+<span class="w">    </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">Closing An Incident</span>
+<span class="p p-Indicator">-</span><span class="w"> </span><span class="nt">id</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">src_003_chunk_000</span>
+<span class="w">  </span><span class="nt">source_id</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">src_003</span>
+<span class="w">  </span><span class="nt">path</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">chunks/src_003_chunk_000.md</span>
+<span class="w">  </span><span class="nt">token_count</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">772</span>
+<span class="w">  </span><span class="nt">citation</span><span class="p">:</span>
+<span class="w">    </span><span class="nt">source_path</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">onboarding.md</span>
+<span class="w">    </span><span class="nt">section</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">Your First Week</span>
+<span class="w">    </span><span class="nt">section_path</span><span class="p">:</span>
+<span class="w">    </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">Engineering Onboarding</span>
+<span class="w">    </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">Your First Week</span>
+<span class="p p-Indicator">-</span><span class="w"> </span><span class="nt">id</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">src_003_chunk_001</span>
+<span class="w">  </span><span class="nt">source_id</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">src_003</span>
+<span class="w">  </span><span class="nt">path</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">chunks/src_003_chunk_001.md</span>
+<span class="w">  </span><span class="nt">token_count</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">326</span>
+<span class="w">  </span><span class="nt">citation</span><span class="p">:</span>
+<span class="w">    </span><span class="nt">source_path</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">onboarding.md</span>
+<span class="w">    </span><span class="nt">section</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">Where Things Live</span>
+<span class="w">    </span><span class="nt">section_path</span><span class="p">:</span>
+<span class="w">    </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">Engineering Onboarding</span>
+<span class="w">    </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">Where Things Live</span>
+<span class="nt">tables</span><span class="p">:</span><span class="w"> </span><span class="p p-Indicator">[]</span>
+<span class="nt">agent</span><span class="p">:</span>
+<span class="w">  </span><span class="nt">instructions</span><span class="p">:</span>
+<span class="w">  </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">Use citations when answering.</span>
+<span class="w">  </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">Prefer raw chunks over summaries.</span>
+<span class="w">  </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">Say not found when the corpus does not contain the answer.</span>
+</code></pre></div>
+<p>Three things are worth pointing out.</p>
+<p><strong><code>section</code> is where the chunk ends, not where it starts.</strong> The chunk shown in step 4
+opens under "Your First Week" and its citation reads <code>Where Things Live</code>. A chunk carries
+the metadata of the last block it absorbed. On a corpus like this one — short sections,
+800-token chunks — a chunk routinely spans several sections, and the citation names the
+last of them. Expect this when you read retrieval output.</p>
+<p><strong><code>checksum</code> is what makes re-packing cheap.</strong> It is a SHA-256 of the file's bytes and it
+keys the L1 parse cache, so an unchanged file is never re-parsed on a second run.</p>
+<p><strong><code>agent.instructions</code> ships inside the pack.</strong> These are the ground rules intended for
+whatever model consumes the pack, carried alongside the content rather than pasted into
+each prompt by hand.</p>
+<h2 id="6-building-the-indexes">6. Building the indexes</h2>
+<div class="highlight"><pre><span></span><code>$<span class="w"> </span>agentpack<span class="w"> </span>index<span class="w"> </span>./out
+Building<span class="w"> </span>FTS<span class="w"> </span>index…
+Building<span class="w"> </span>vector<span class="w"> </span>index…
+<span class="o">[</span>agentpack<span class="o">]</span><span class="w"> </span>Warning:<span class="w"> </span>similarity<span class="w"> </span>edge<span class="w"> </span>build<span class="w"> </span>failed,<span class="w"> </span>graph.yml<span class="w"> </span>left<span class="w"> </span>unchanged<span class="w"> </span><span class="o">(</span><span class="s1">&#39;src_000_s00-02&#39;</span><span class="o">)</span>.
+Index<span class="w"> </span>build<span class="w"> </span>complete.
+</code></pre></div>
+<blockquote>
+<p><strong>Heads up — That warning is a known bug, not something you did</strong></p>
+<p><code>agentpack index</code> also refreshes the <code>similar_to</code> edges in <code>graph.yml</code>. That step currently fails on packs where a similar section is not already a graph node, so no <code>similar_to</code> edges are written. Everything else — both indexes, and the rest of <code>graph.yml</code> — is built normally, and retrieval is unaffected. It is tracked as a bug; the <a href="../concept-graph/#similarity-edges">Concept Graph</a> page describes how similarity edges are meant to behave.</p>
+</blockquote>
+<p>Which produces:</p>
+<div class="highlight"><pre><span></span><code>out/indexes/
+├── lexical_index.db       # SQLite FTS5
+├── vector_index.npy       # pre-normalized float32 vectors
+├── vector_meta.json       # per-vector chunk metadata
+├── hnsw_index.bin         # approximate nearest-neighbour index
+└── vector_index.hash      # content hash, for invalidation
+</code></pre></div>
+<p>This step is optional. Skipping it just means the first <code>retrieve</code> pays the build cost
+instead.</p>
+<h2 id="7-what-a-retrieval-looks-like">7. What a retrieval looks like</h2>
+<p>This is the output most people want to see before installing anything.</p>
+<div class="highlight"><pre><span></span><code>$<span class="w"> </span>agentpack<span class="w"> </span>retrieve<span class="w"> </span>./out<span class="w"> </span><span class="s2">&quot;what should I do about a bad release during an incident&quot;</span><span class="w"> </span>--top-k<span class="w"> </span><span class="m">3</span>
+Searching<span class="w"> </span><span class="k">for</span><span class="w"> </span><span class="s1">&#39;what should I do about a bad release during an incident&#39;</span><span class="w"> </span><span class="k">in</span><span class="w"> </span>./out<span class="w"> </span>using<span class="w"> </span>hybrid<span class="w"> </span>mode...
+
+<span class="m">1</span>.<span class="w"> </span>incident-response.md,<span class="w"> </span>Closing<span class="w"> </span>An<span class="w"> </span>Incident
+<span class="w">   </span>chunk:<span class="w"> </span>chunks/src_002_chunk_000.md
+<span class="w">   </span>tokens:<span class="w"> </span><span class="m">797</span>
+<span class="w">   </span>score:<span class="w"> </span><span class="m">0</span>.03
+
+<span class="m">2</span>.<span class="w"> </span>onboarding.md,<span class="w"> </span>Where<span class="w"> </span>Things<span class="w"> </span>Live
+<span class="w">   </span>chunk:<span class="w"> </span>chunks/src_003_chunk_001.md
+<span class="w">   </span>tokens:<span class="w"> </span><span class="m">326</span>
+<span class="w">   </span>score:<span class="w"> </span><span class="m">0</span>.03
+
+<span class="m">3</span>.<span class="w"> </span>incident-response.md,<span class="w"> </span>Closing<span class="w"> </span>An<span class="w"> </span>Incident
+<span class="w">   </span>chunk:<span class="w"> </span>chunks/src_002_chunk_001.md
+<span class="w">   </span>tokens:<span class="w"> </span><span class="m">233</span>
+<span class="w">   </span>score:<span class="w"> </span><span class="m">0</span>.02
+</code></pre></div>
+<p>Read a result line by line:</p>
+<table>
+<thead>
+<tr>
+<th>Line</th>
+<th>Meaning</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>incident-response.md, Closing An Incident</code></td>
+<td>The citation: source file, then the chunk's section. Add <code>, page 12</code> for paged formats and <code>, rows 1-50</code> for CSVs.</td>
+</tr>
+<tr>
+<td><code>chunk: chunks/src_002_chunk_000.md</code></td>
+<td>Where the text is. Open this file, or pull it from <code>manifest.yml</code>.</td>
+</tr>
+<tr>
+<td><code>tokens: 797</code></td>
+<td>What it costs to put in a prompt. Sum these to get the context budget for the whole answer — 1,356 tokens here, against roughly 3,400 for the entire corpus.</td>
+</tr>
+<tr>
+<td><code>score: 0.03</code></td>
+<td>Ranking only. See the note below.</td>
+</tr>
+</tbody>
+</table>
+<p><strong>The CLI prints citations, not text.</strong> It is a debugging tool for checking <em>which</em>
+chunks come back, not a way to read them. To get the text, open the <code>chunk:</code> path or use
+<a href="#8-calling-it-from-python">the Python API</a>.</p>
+<p><strong>Hybrid scores are small and clustered, and that is normal.</strong> Hybrid mode fuses the
+lexical and vector rankings with Reciprocal Rank Fusion, where a result's contribution is
+<code>1 / (60 + rank)</code>. A first-place result scores about <code>0.016</code> from one ranker. These numbers
+are ordinal — they say which result ranked higher, not how good it is. Do not threshold on
+them, and do not compare them against scores from another mode.</p>
+<h3 id="the-same-query-in-each-mode">The same query in each mode</h3>
+<p><code>--mode fts</code> is keyword matching over SQLite FTS5, with BM25-derived scores. It first tries
+all terms as an <code>AND</code>; if that matches nothing it retries as an <code>OR</code> to preserve recall:</p>
+<div class="highlight"><pre><span></span><code>$<span class="w"> </span>agentpack<span class="w"> </span>retrieve<span class="w"> </span>./out<span class="w"> </span><span class="s2">&quot;escalation unacknowledged page&quot;</span><span class="w"> </span>--top-k<span class="w"> </span><span class="m">2</span><span class="w"> </span>--mode<span class="w"> </span>fts
+Searching<span class="w"> </span><span class="k">for</span><span class="w"> </span><span class="s1">&#39;escalation unacknowledged page&#39;</span><span class="w"> </span><span class="k">in</span><span class="w"> </span>./out<span class="w"> </span>using<span class="w"> </span>fts<span class="w"> </span>mode...
+
+<span class="m">1</span>.<span class="w"> </span>alerting.md,<span class="w"> </span>Tuning
+<span class="w">   </span>chunk:<span class="w"> </span>chunks/src_000_chunk_000.md
+<span class="w">   </span>tokens:<span class="w"> </span><span class="m">601</span>
+<span class="w">   </span>score:<span class="w"> </span><span class="m">3</span>.15
+</code></pre></div>
+<p>One result, not the two requested — nothing else in the corpus contains these terms. Asking
+for <code>--top-k 5</code> would not manufacture five results.</p>
+<p><code>--mode vector</code> is embedding similarity, scored as cosine in <code>[0, 1]</code>:</p>
+<div class="highlight"><pre><span></span><code>$<span class="w"> </span>agentpack<span class="w"> </span>retrieve<span class="w"> </span>./out<span class="w"> </span><span class="s2">&quot;how do I get VPN access&quot;</span><span class="w"> </span>--top-k<span class="w"> </span><span class="m">2</span><span class="w"> </span>--mode<span class="w"> </span>vector
+Searching<span class="w"> </span><span class="k">for</span><span class="w"> </span><span class="s1">&#39;how do I get VPN access&#39;</span><span class="w"> </span><span class="k">in</span><span class="w"> </span>./out<span class="w"> </span>using<span class="w"> </span>vector<span class="w"> </span>mode...
+
+<span class="m">1</span>.<span class="w"> </span>onboarding.md,<span class="w"> </span>Your<span class="w"> </span>First<span class="w"> </span>Week
+<span class="w">   </span>chunk:<span class="w"> </span>chunks/src_003_chunk_000.md
+<span class="w">   </span>tokens:<span class="w"> </span><span class="m">772</span>
+<span class="w">   </span>score:<span class="w"> </span><span class="m">0</span>.62
+
+<span class="m">2</span>.<span class="w"> </span>onboarding.md,<span class="w"> </span>Where<span class="w"> </span>Things<span class="w"> </span>Live
+<span class="w">   </span>chunk:<span class="w"> </span>chunks/src_003_chunk_001.md
+<span class="w">   </span>tokens:<span class="w"> </span><span class="m">326</span>
+<span class="w">   </span>score:<span class="w"> </span><span class="m">0</span>.56
+</code></pre></div>
+<p>The phrase "VPN access" never appears as a unit in the corpus — the text says "a VPN
+certificate". Vector search finds the right chunk anyway, because it matches on meaning
+rather than on the literal terms.</p>
+<p>FTS can answer this query too, but for a different reason and less reliably. Its query is
+OR-of-terms, so it matches on the common words in the question:</p>
+<div class="highlight"><pre><span></span><code>$<span class="w"> </span>agentpack<span class="w"> </span>retrieve<span class="w"> </span>./out<span class="w"> </span><span class="s2">&quot;how do I get VPN access&quot;</span><span class="w"> </span>--top-k<span class="w"> </span><span class="m">2</span><span class="w"> </span>--mode<span class="w"> </span>fts
+Searching<span class="w"> </span><span class="k">for</span><span class="w"> </span><span class="s1">&#39;how do I get VPN access&#39;</span><span class="w"> </span><span class="k">in</span><span class="w"> </span>./out<span class="w"> </span>using<span class="w"> </span>fts<span class="w"> </span>mode...
+
+<span class="m">1</span>.<span class="w"> </span>onboarding.md,<span class="w"> </span>Your<span class="w"> </span>First<span class="w"> </span>Week
+<span class="w">   </span>chunk:<span class="w"> </span>chunks/src_003_chunk_000.md
+<span class="w">   </span>tokens:<span class="w"> </span><span class="m">772</span>
+<span class="w">   </span>score:<span class="w"> </span><span class="m">3</span>.69
+
+<span class="m">2</span>.<span class="w"> </span>incident-response.md,<span class="w"> </span>Closing<span class="w"> </span>An<span class="w"> </span>Incident
+<span class="w">   </span>chunk:<span class="w"> </span>chunks/src_002_chunk_000.md
+<span class="w">   </span>tokens:<span class="w"> </span><span class="m">797</span>
+<span class="w">   </span>score:<span class="w"> </span><span class="m">0</span>.00
+</code></pre></div>
+<p>The right chunk ranks first, and a <code>0.00</code>-scoring chunk that merely shares a word like
+"get" comes along with it. Hybrid mode is the default because fusing the two lists keeps
+the lexical precision where terms match exactly and the semantic recall where they do not.</p>
+<h3 id="filtering">Filtering</h3>
+<p><code>--source</code>, <code>--section</code>, and <code>--page</code> narrow results by substring match on the citation:</p>
+<div class="highlight"><pre><span></span><code>$<span class="w"> </span>agentpack<span class="w"> </span>retrieve<span class="w"> </span>./out<span class="w"> </span><span class="s2">&quot;routing&quot;</span><span class="w"> </span>--top-k<span class="w"> </span><span class="m">2</span><span class="w"> </span>--source<span class="w"> </span>alerting
+Searching<span class="w"> </span><span class="k">for</span><span class="w"> </span><span class="s1">&#39;routing&#39;</span><span class="w"> </span><span class="k">in</span><span class="w"> </span>./out<span class="w"> </span>using<span class="w"> </span>hybrid<span class="w"> </span>mode...
+
+<span class="m">1</span>.<span class="w"> </span>alerting.md,<span class="w"> </span>Tuning
+<span class="w">   </span>chunk:<span class="w"> </span>chunks/src_000_chunk_000.md
+<span class="w">   </span>tokens:<span class="w"> </span><span class="m">601</span>
+<span class="w">   </span>score:<span class="w"> </span><span class="m">0</span>.03
+</code></pre></div>
+<p>Without the filter, <code>api-gateway.md</code> ranks first — it has its own "Routing" section, and
+on this query it beats the one in <code>alerting.md</code>.</p>
+<h3 id="when-nothing-matches">When nothing matches</h3>
+<div class="highlight"><pre><span></span><code>$<span class="w"> </span>agentpack<span class="w"> </span>retrieve<span class="w"> </span>./out<span class="w"> </span><span class="s2">&quot;kubernetes helm chart&quot;</span><span class="w"> </span>--top-k<span class="w"> </span><span class="m">3</span><span class="w"> </span>--mode<span class="w"> </span>fts
+Searching<span class="w"> </span><span class="k">for</span><span class="w"> </span><span class="s1">&#39;kubernetes helm chart&#39;</span><span class="w"> </span><span class="k">in</span><span class="w"> </span>./out<span class="w"> </span>using<span class="w"> </span>fts<span class="w"> </span>mode...
+No<span class="w"> </span>results<span class="w"> </span>found.
+</code></pre></div>
+<p>Empty is a real answer, and the exit code is still <code>0</code>.</p>
+<h2 id="8-calling-it-from-python">8. Calling it from Python</h2>
+<p><code>search_pack</code> returns a list of dicts, and unlike the CLI it includes the chunk text in
+<code>content</code>:</p>
+<div class="highlight"><pre><span></span><code><span class="kn">from</span><span class="w"> </span><span class="nn">agentpack.retrieve</span><span class="w"> </span><span class="kn">import</span> <span class="n">search_pack</span>
+
+<span class="n">results</span> <span class="o">=</span> <span class="n">search_pack</span><span class="p">(</span>
+    <span class="s2">&quot;./out&quot;</span><span class="p">,</span>
+    <span class="s2">&quot;what should I do about a bad release during an incident&quot;</span><span class="p">,</span>
+    <span class="n">top_k</span><span class="o">=</span><span class="mi">2</span><span class="p">,</span>
+    <span class="n">mode</span><span class="o">=</span><span class="s2">&quot;hybrid&quot;</span><span class="p">,</span>          <span class="c1"># &quot;hybrid&quot; | &quot;vector&quot; | &quot;fts&quot;</span>
+    <span class="n">source_filter</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>     <span class="c1"># substring match on the source file name</span>
+    <span class="n">section_filter</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>    <span class="c1"># substring match on citation.section</span>
+    <span class="n">page_filter</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>       <span class="c1"># exact page number</span>
+<span class="p">)</span>
+
+<span class="k">for</span> <span class="n">r</span> <span class="ow">in</span> <span class="n">results</span><span class="p">:</span>
+    <span class="nb">print</span><span class="p">(</span><span class="n">r</span><span class="p">[</span><span class="s2">&quot;citation&quot;</span><span class="p">][</span><span class="s2">&quot;source_path&quot;</span><span class="p">],</span> <span class="s2">&quot;→&quot;</span><span class="p">,</span> <span class="n">r</span><span class="p">[</span><span class="s2">&quot;token_count&quot;</span><span class="p">],</span> <span class="s2">&quot;tokens&quot;</span><span class="p">)</span>
+    <span class="nb">print</span><span class="p">(</span><span class="n">r</span><span class="p">[</span><span class="s2">&quot;content&quot;</span><span class="p">][:</span><span class="mi">200</span><span class="p">])</span>
+</code></pre></div>
+<p>One result, verbatim:</p>
+<div class="highlight"><pre><span></span><code><span class="p">{</span>
+<span class="w">  </span><span class="nt">&quot;chunk_id&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;src_002_chunk_000&quot;</span><span class="p">,</span>
+<span class="w">  </span><span class="nt">&quot;source_id&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;src_002&quot;</span><span class="p">,</span>
+<span class="w">  </span><span class="nt">&quot;path&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;chunks/src_002_chunk_000.md&quot;</span><span class="p">,</span>
+<span class="w">  </span><span class="nt">&quot;token_count&quot;</span><span class="p">:</span><span class="w"> </span><span class="mi">797</span><span class="p">,</span>
+<span class="w">  </span><span class="nt">&quot;citation&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">{</span>
+<span class="w">    </span><span class="nt">&quot;source_path&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;incident-response.md&quot;</span><span class="p">,</span>
+<span class="w">    </span><span class="nt">&quot;section&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;Closing An Incident&quot;</span><span class="p">,</span>
+<span class="w">    </span><span class="nt">&quot;section_path&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">[</span>
+<span class="w">      </span><span class="s2">&quot;Incident Response Runbook&quot;</span><span class="p">,</span>
+<span class="w">      </span><span class="s2">&quot;Closing An Incident&quot;</span>
+<span class="w">    </span><span class="p">]</span>
+<span class="w">  </span><span class="p">},</span>
+<span class="w">  </span><span class="nt">&quot;score&quot;</span><span class="p">:</span><span class="w"> </span><span class="mf">0.03225806451612903</span><span class="p">,</span>
+<span class="w">  </span><span class="nt">&quot;norm_score&quot;</span><span class="p">:</span><span class="w"> </span><span class="mf">0.0</span><span class="p">,</span>
+<span class="w">  </span><span class="nt">&quot;content&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;Incident Response Runbook\n\nThis runbook covers what to do between the moment an alert fires and the moment\nthe incident is closed. It assumes you are the primary on-call engineer and\nthat you have never run an incident before.\n\nSeverity Levels\n\n...&quot;</span>
+<span class="p">}</span>
+</code></pre></div>
+<p><code>score</code> is the raw fusion score that the CLI rounds to two places.</p>
+<p><code>norm_score</code> means something different in each mode, so read it carefully:</p>
+<table>
+<thead>
+<tr>
+<th>Mode</th>
+<th>What <code>norm_score</code> is</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>fts</code></td>
+<td>The BM25 score min-max rescaled across the FTS results, so the best is <code>1.0</code>.</td>
+</tr>
+<tr>
+<td><code>vector</code></td>
+<td>The cosine score itself — identical to <code>score</code>.</td>
+</tr>
+<tr>
+<td><code>hybrid</code></td>
+<td>Carried over from whichever ranker produced the row, and <strong>not</strong> recomputed after fusion. It does not track the fused ranking.</td>
+</tr>
+</tbody>
+</table>
+<p>In the result above, the rank-1 chunk has <code>norm_score</code> <code>0.0</code> while the rank-2 chunk has
+<code>1.0</code>. That is not a display quirk — in hybrid mode the field mixes two incomparable
+scales and should be ignored. Rank by position in the list, or by <code>score</code> within a single
+mode.</p>
+<h2 id="9-the-knowledge-map">9. The knowledge map</h2>
+<p><code>map.yml</code> is the navigation tree: <code>corpus → document → section → chunk</code>. An agent reads it
+to decide <em>where</em> to look before pulling any chunk. Here is the <code>alerting.md</code> portion,
+verbatim:</p>
+<div class="highlight"><pre><span></span><code><span class="nt">map_version</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">1</span>
+<span class="nt">pack</span><span class="p">:</span>
+<span class="w">  </span><span class="nt">name</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">docs_example_corpus</span>
+<span class="w">  </span><span class="nt">generated_at</span><span class="p">:</span><span class="w"> </span><span class="s">&#39;2026-09-21T22:16:10.891275+00:00&#39;</span>
+<span class="w">  </span><span class="nt">manifest</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">manifest.yml</span>
+<span class="nt">corpus</span><span class="p">:</span>
+<span class="w">  </span><span class="nt">summary</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">An unowned alert is a bug in the service definition, and Routing The API</span>
+<span class="w">    </span><span class="l l-Scalar l-Scalar-Plain">gateway matches an incoming request against a route table and forwards If a bad</span>
+<span class="w">    </span><span class="l l-Scalar l-Scalar-Plain">release is the cause, roll it back through the deployment pipeline.</span>
+<span class="w">  </span><span class="nt">stats</span><span class="p">:</span>
+<span class="w">    </span><span class="nt">documents</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">4</span>
+<span class="w">    </span><span class="nt">sections</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">21</span>
+<span class="w">    </span><span class="nt">tables</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">0</span>
+<span class="w">    </span><span class="nt">chunks</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">6</span>
+<span class="nt">documents</span><span class="p">:</span>
+<span class="p p-Indicator">-</span><span class="w"> </span><span class="nt">source_id</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">src_000</span>
+<span class="w">  </span><span class="nt">path</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">alerting.md</span>
+<span class="w">  </span><span class="nt">title</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">Alerting</span>
+<span class="w">  </span><span class="nt">status</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">success</span>
+<span class="w">  </span><span class="nt">pages</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">null</span>
+<span class="w">  </span><span class="nt">summary</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">An unowned alert is a bug in the service definition, and</span>
+<span class="w">  </span><span class="nt">stats</span><span class="p">:</span>
+<span class="w">    </span><span class="nt">sections</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">4</span>
+<span class="w">    </span><span class="nt">tables</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">0</span>
+<span class="w">    </span><span class="nt">chunks</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">1</span>
+<span class="w">  </span><span class="nt">sections</span><span class="p">:</span>
+<span class="w">  </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="nt">node_id</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">src_000_s00</span>
+<span class="w">    </span><span class="nt">title</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">Alerting</span>
+<span class="w">    </span><span class="nt">pages</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">null</span>
+<span class="w">    </span><span class="nt">has_tables</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">false</span>
+<span class="w">    </span><span class="nt">keyphrases</span><span class="p">:</span>
+<span class="w">    </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">Alerting This document</span>
+<span class="w">    </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">document describes</span>
+<span class="w">    </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">routed</span>
+<span class="w">    </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">alerts are defined</span>
+<span class="w">    </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">Alerting</span>
+<span class="w">    </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">defined</span>
+<span class="w">    </span><span class="nt">gist</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">Alerting This document describes how alerts are defined, routed, and tuned.</span>
+<span class="w">    </span><span class="nt">chunk_ids</span><span class="p">:</span><span class="w"> </span><span class="p p-Indicator">[]</span>
+<span class="w">    </span><span class="nt">nodes</span><span class="p">:</span>
+<span class="w">    </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="nt">node_id</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">src_000_s00-01</span>
+<span class="w">      </span><span class="nt">title</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">Routing</span>
+<span class="w">      </span><span class="nt">pages</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">null</span>
+<span class="w">      </span><span class="nt">has_tables</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">false</span>
+<span class="w">      </span><span class="nt">keyphrases</span><span class="p">:</span>
+<span class="w">      </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">alerting system</span>
+<span class="w">      </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">alerting system routes</span>
+<span class="w">      </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">alerting system notifies</span>
+<span class="w">      </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">Routing The alerting</span>
+<span class="w">      </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">alerting system stops</span>
+<span class="w">      </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">service ownership</span>
+<span class="w">      </span><span class="nt">gist</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">An unowned alert is a bug in the service definition, and</span>
+<span class="w">      </span><span class="nt">chunk_ids</span><span class="p">:</span><span class="w"> </span><span class="p p-Indicator">[]</span>
+<span class="w">      </span><span class="nt">nodes</span><span class="p">:</span><span class="w"> </span><span class="p p-Indicator">[]</span>
+<span class="w">    </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="nt">node_id</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">src_000_s00-02</span>
+<span class="w">      </span><span class="nt">title</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">Tuning</span>
+<span class="w">      </span><span class="c1"># ...</span>
+<span class="w">      </span><span class="nt">chunk_ids</span><span class="p">:</span>
+<span class="w">      </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">src_000_chunk_000</span>
+<span class="w">      </span><span class="nt">nodes</span><span class="p">:</span><span class="w"> </span><span class="p p-Indicator">[]</span>
+</code></pre></div>
+<p><code>pages: null</code> throughout because Markdown has no pages. <code>chunk_ids</code> is empty on most
+sections and populated on the one where the chunk ended — the same "chunk ends here"
+rule from step 5, seen from the other side.</p>
+<p>The <code>summary</code> and <code>gist</code> fields are extractive: TextRank picks the most central existing
+sentence rather than writing a new one, which is why they sometimes break mid-clause
+(<code>"...service definition, and"</code>). No LLM is involved, and the same corpus always produces
+the same map. See <a href="../knowledge-map/">Knowledge Map</a>.</p>
+<h2 id="10-the-concept-graph">10. The concept graph</h2>
+<p><code>graph.yml</code> describes how the four documents relate to each other. The full file for this
+corpus:</p>
+<div class="highlight"><pre><span></span><code><span class="nt">graph_version</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">1</span>
+<span class="nt">pack</span><span class="p">:</span>
+<span class="w">  </span><span class="nt">name</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">docs_example_corpus</span>
+<span class="w">  </span><span class="nt">generated_at</span><span class="p">:</span><span class="w"> </span><span class="s">&#39;2026-09-21T22:16:11.223796+00:00&#39;</span>
+<span class="w">  </span><span class="nt">manifest</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">manifest.yml</span>
+<span class="nt">params</span><span class="p">:</span>
+<span class="w">  </span><span class="nt">enabled</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">true</span>
+<span class="w">  </span><span class="nt">df_cap</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">0.3</span>
+<span class="w">  </span><span class="nt">min_docs</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">2</span>
+<span class="w">  </span><span class="nt">similarity_threshold</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">0.8</span>
+<span class="nt">nodes</span><span class="p">:</span>
+<span class="p p-Indicator">-</span><span class="w"> </span><span class="p p-Indicator">{</span><span class="nt"> id</span><span class="p">:</span><span class="w"> </span><span class="nv">c_alerting_system</span><span class="p p-Indicator">,</span><span class="nt">     kind</span><span class="p">:</span><span class="w"> </span><span class="nv">concept</span><span class="p p-Indicator">,</span><span class="nt">  label</span><span class="p">:</span><span class="w"> </span><span class="nv">alerting system</span><span class="p p-Indicator">,</span><span class="nt">          doc</span><span class="p">:</span><span class="w"> </span><span class="nv">null</span><span class="p p-Indicator">,</span><span class="nt">    community</span><span class="p">:</span><span class="w"> </span><span class="nv">1</span><span class="w"> </span><span class="p p-Indicator">}</span>
+<span class="p p-Indicator">-</span><span class="w"> </span><span class="p p-Indicator">{</span><span class="nt"> id</span><span class="p">:</span><span class="w"> </span><span class="nv">c_deployment_pipeline</span><span class="p p-Indicator">,</span><span class="nt"> kind</span><span class="p">:</span><span class="w"> </span><span class="nv">concept</span><span class="p p-Indicator">,</span><span class="nt">  label</span><span class="p">:</span><span class="w"> </span><span class="nv">Deployment Pipeline</span><span class="p p-Indicator">,</span><span class="nt">      doc</span><span class="p">:</span><span class="w"> </span><span class="nv">null</span><span class="p p-Indicator">,</span><span class="nt">    community</span><span class="p">:</span><span class="w"> </span><span class="nv">2</span><span class="w"> </span><span class="p p-Indicator">}</span>
+<span class="p p-Indicator">-</span><span class="w"> </span><span class="p p-Indicator">{</span><span class="nt"> id</span><span class="p">:</span><span class="w"> </span><span class="nv">src_000</span><span class="p p-Indicator">,</span><span class="nt">               kind</span><span class="p">:</span><span class="w"> </span><span class="nv">document</span><span class="p p-Indicator">,</span><span class="nt"> label</span><span class="p">:</span><span class="w"> </span><span class="nv">alerting.md</span><span class="p p-Indicator">,</span><span class="nt">              doc</span><span class="p">:</span><span class="w"> </span><span class="nv">null</span><span class="p p-Indicator">,</span><span class="nt">    community</span><span class="p">:</span><span class="w"> </span><span class="nv">3</span><span class="w"> </span><span class="p p-Indicator">}</span>
+<span class="p p-Indicator">-</span><span class="w"> </span><span class="p p-Indicator">{</span><span class="nt"> id</span><span class="p">:</span><span class="w"> </span><span class="nv">src_001</span><span class="p p-Indicator">,</span><span class="nt">               kind</span><span class="p">:</span><span class="w"> </span><span class="nv">document</span><span class="p p-Indicator">,</span><span class="nt"> label</span><span class="p">:</span><span class="w"> </span><span class="nv">api-gateway.md</span><span class="p p-Indicator">,</span><span class="nt">           doc</span><span class="p">:</span><span class="w"> </span><span class="nv">null</span><span class="p p-Indicator">,</span><span class="nt">    community</span><span class="p">:</span><span class="w"> </span><span class="nv">4</span><span class="w"> </span><span class="p p-Indicator">}</span>
+<span class="p p-Indicator">-</span><span class="w"> </span><span class="p p-Indicator">{</span><span class="nt"> id</span><span class="p">:</span><span class="w"> </span><span class="nv">src_002</span><span class="p p-Indicator">,</span><span class="nt">               kind</span><span class="p">:</span><span class="w"> </span><span class="nv">document</span><span class="p p-Indicator">,</span><span class="nt"> label</span><span class="p">:</span><span class="w"> </span><span class="nv">incident-response.md</span><span class="p p-Indicator">,</span><span class="nt">     doc</span><span class="p">:</span><span class="w"> </span><span class="nv">null</span><span class="p p-Indicator">,</span><span class="nt">    community</span><span class="p">:</span><span class="w"> </span><span class="nv">0</span><span class="w"> </span><span class="p p-Indicator">}</span>
+<span class="p p-Indicator">-</span><span class="w"> </span><span class="p p-Indicator">{</span><span class="nt"> id</span><span class="p">:</span><span class="w"> </span><span class="nv">src_003</span><span class="p p-Indicator">,</span><span class="nt">               kind</span><span class="p">:</span><span class="w"> </span><span class="nv">document</span><span class="p p-Indicator">,</span><span class="nt"> label</span><span class="p">:</span><span class="w"> </span><span class="nv">onboarding.md</span><span class="p p-Indicator">,</span><span class="nt">            doc</span><span class="p">:</span><span class="w"> </span><span class="nv">null</span><span class="p p-Indicator">,</span><span class="nt">    community</span><span class="p">:</span><span class="w"> </span><span class="nv">0</span><span class="w"> </span><span class="p p-Indicator">}</span>
+<span class="p p-Indicator">-</span><span class="w"> </span><span class="p p-Indicator">{</span><span class="nt"> id</span><span class="p">:</span><span class="w"> </span><span class="nv">src_000_s00</span><span class="p p-Indicator">,</span><span class="nt">           kind</span><span class="p">:</span><span class="w"> </span><span class="nv">section</span><span class="p p-Indicator">,</span><span class="nt">  label</span><span class="p">:</span><span class="w"> </span><span class="nv">Alerting</span><span class="p p-Indicator">,</span><span class="nt">                 doc</span><span class="p">:</span><span class="w"> </span><span class="nv">src_000</span><span class="p p-Indicator">,</span><span class="nt"> community</span><span class="p">:</span><span class="w"> </span><span class="nv">3</span><span class="w"> </span><span class="p p-Indicator">}</span>
+<span class="p p-Indicator">-</span><span class="w"> </span><span class="p p-Indicator">{</span><span class="nt"> id</span><span class="p">:</span><span class="w"> </span><span class="nv">src_000_s00-01</span><span class="p p-Indicator">,</span><span class="nt">        kind</span><span class="p">:</span><span class="w"> </span><span class="nv">section</span><span class="p p-Indicator">,</span><span class="nt">  label</span><span class="p">:</span><span class="w"> </span><span class="nv">Routing</span><span class="p p-Indicator">,</span><span class="nt">                  doc</span><span class="p">:</span><span class="w"> </span><span class="nv">src_000</span><span class="p p-Indicator">,</span><span class="nt"> community</span><span class="p">:</span><span class="w"> </span><span class="nv">1</span><span class="w"> </span><span class="p p-Indicator">}</span>
+<span class="p p-Indicator">-</span><span class="w"> </span><span class="p p-Indicator">{</span><span class="nt"> id</span><span class="p">:</span><span class="w"> </span><span class="nv">src_001_s00</span><span class="p p-Indicator">,</span><span class="nt">           kind</span><span class="p">:</span><span class="w"> </span><span class="nv">section</span><span class="p p-Indicator">,</span><span class="nt">  label</span><span class="p">:</span><span class="w"> </span><span class="nv">API Gateway Architecture</span><span class="p p-Indicator">,</span><span class="nt"> doc</span><span class="p">:</span><span class="w"> </span><span class="nv">src_001</span><span class="p p-Indicator">,</span><span class="nt"> community</span><span class="p">:</span><span class="w"> </span><span class="nv">4</span><span class="w"> </span><span class="p p-Indicator">}</span>
+<span class="p p-Indicator">-</span><span class="w"> </span><span class="p p-Indicator">{</span><span class="nt"> id</span><span class="p">:</span><span class="w"> </span><span class="nv">src_002_s00</span><span class="p p-Indicator">,</span><span class="nt">           kind</span><span class="p">:</span><span class="w"> </span><span class="nv">section</span><span class="p p-Indicator">,</span><span class="nt">  label</span><span class="p">:</span><span class="w"> </span><span class="nv">Incident Response Runbook</span><span class="p p-Indicator">,</span><span class="nt"> doc</span><span class="p">:</span><span class="w"> </span><span class="nv">src_002</span><span class="p p-Indicator">,</span><span class="nt"> community</span><span class="p">:</span><span class="w"> </span><span class="nv">0</span><span class="w"> </span><span class="p p-Indicator">}</span>
+<span class="p p-Indicator">-</span><span class="w"> </span><span class="p p-Indicator">{</span><span class="nt"> id</span><span class="p">:</span><span class="w"> </span><span class="nv">src_002_s00-01</span><span class="p p-Indicator">,</span><span class="nt">        kind</span><span class="p">:</span><span class="w"> </span><span class="nv">section</span><span class="p p-Indicator">,</span><span class="nt">  label</span><span class="p">:</span><span class="w"> </span><span class="nv">When An Alert Fires</span><span class="p p-Indicator">,</span><span class="nt">      doc</span><span class="p">:</span><span class="w"> </span><span class="nv">src_002</span><span class="p p-Indicator">,</span><span class="nt"> community</span><span class="p">:</span><span class="w"> </span><span class="nv">1</span><span class="w"> </span><span class="p p-Indicator">}</span>
+<span class="p p-Indicator">-</span><span class="w"> </span><span class="p p-Indicator">{</span><span class="nt"> id</span><span class="p">:</span><span class="w"> </span><span class="nv">src_002_s00-02</span><span class="p p-Indicator">,</span><span class="nt">        kind</span><span class="p">:</span><span class="w"> </span><span class="nv">section</span><span class="p p-Indicator">,</span><span class="nt">  label</span><span class="p">:</span><span class="w"> </span><span class="nv">The Deployment Pipeline</span><span class="p p-Indicator">,</span><span class="nt">  doc</span><span class="p">:</span><span class="w"> </span><span class="nv">src_002</span><span class="p p-Indicator">,</span><span class="nt"> community</span><span class="p">:</span><span class="w"> </span><span class="nv">2</span><span class="w"> </span><span class="p p-Indicator">}</span>
+<span class="p p-Indicator">-</span><span class="w"> </span><span class="p p-Indicator">{</span><span class="nt"> id</span><span class="p">:</span><span class="w"> </span><span class="nv">src_003_s00</span><span class="p p-Indicator">,</span><span class="nt">           kind</span><span class="p">:</span><span class="w"> </span><span class="nv">section</span><span class="p p-Indicator">,</span><span class="nt">  label</span><span class="p">:</span><span class="w"> </span><span class="nv">Engineering Onboarding</span><span class="p p-Indicator">,</span><span class="nt">   doc</span><span class="p">:</span><span class="w"> </span><span class="nv">src_003</span><span class="p p-Indicator">,</span><span class="nt"> community</span><span class="p">:</span><span class="w"> </span><span class="nv">0</span><span class="w"> </span><span class="p p-Indicator">}</span>
+<span class="p p-Indicator">-</span><span class="w"> </span><span class="p p-Indicator">{</span><span class="nt"> id</span><span class="p">:</span><span class="w"> </span><span class="nv">src_003_s00-01</span><span class="p p-Indicator">,</span><span class="nt">        kind</span><span class="p">:</span><span class="w"> </span><span class="nv">section</span><span class="p p-Indicator">,</span><span class="nt">  label</span><span class="p">:</span><span class="w"> </span><span class="nv">Deployment Basics</span><span class="p p-Indicator">,</span><span class="nt">        doc</span><span class="p">:</span><span class="w"> </span><span class="nv">src_003</span><span class="p p-Indicator">,</span><span class="nt"> community</span><span class="p">:</span><span class="w"> </span><span class="nv">2</span><span class="w"> </span><span class="p p-Indicator">}</span>
+<span class="nt">edges</span><span class="p">:</span>
+<span class="p p-Indicator">-</span><span class="w"> </span><span class="p p-Indicator">{</span><span class="nt"> source</span><span class="p">:</span><span class="w"> </span><span class="nv">src_000</span><span class="p p-Indicator">,</span><span class="nt">        target</span><span class="p">:</span><span class="w"> </span><span class="nv">src_000_s00</span><span class="p p-Indicator">,</span><span class="nt">           relation</span><span class="p">:</span><span class="w"> </span><span class="nv">contains</span><span class="p p-Indicator">,</span><span class="nt">   basis</span><span class="p">:</span><span class="w"> </span><span class="nv">structural</span><span class="w"> </span><span class="p p-Indicator">}</span>
+<span class="p p-Indicator">-</span><span class="w"> </span><span class="p p-Indicator">{</span><span class="nt"> source</span><span class="p">:</span><span class="w"> </span><span class="nv">src_000_s00-01</span><span class="p p-Indicator">,</span><span class="nt"> target</span><span class="p">:</span><span class="w"> </span><span class="nv">c_alerting_system</span><span class="p p-Indicator">,</span><span class="nt">     relation</span><span class="p">:</span><span class="w"> </span><span class="nv">mentions</span><span class="p p-Indicator">,</span><span class="nt">   basis</span><span class="p">:</span><span class="w"> </span><span class="nv">keyphrase</span><span class="w"> </span><span class="p p-Indicator">}</span>
+<span class="p p-Indicator">-</span><span class="w"> </span><span class="p p-Indicator">{</span><span class="nt"> source</span><span class="p">:</span><span class="w"> </span><span class="nv">src_001</span><span class="p p-Indicator">,</span><span class="nt">        target</span><span class="p">:</span><span class="w"> </span><span class="nv">src_001_s00</span><span class="p p-Indicator">,</span><span class="nt">           relation</span><span class="p">:</span><span class="w"> </span><span class="nv">contains</span><span class="p p-Indicator">,</span><span class="nt">   basis</span><span class="p">:</span><span class="w"> </span><span class="nv">structural</span><span class="w"> </span><span class="p p-Indicator">}</span>
+<span class="p p-Indicator">-</span><span class="w"> </span><span class="p p-Indicator">{</span><span class="nt"> source</span><span class="p">:</span><span class="w"> </span><span class="nv">src_002</span><span class="p p-Indicator">,</span><span class="nt">        target</span><span class="p">:</span><span class="w"> </span><span class="nv">src_002_s00</span><span class="p p-Indicator">,</span><span class="nt">           relation</span><span class="p">:</span><span class="w"> </span><span class="nv">contains</span><span class="p p-Indicator">,</span><span class="nt">   basis</span><span class="p">:</span><span class="w"> </span><span class="nv">structural</span><span class="w"> </span><span class="p p-Indicator">}</span>
+<span class="p p-Indicator">-</span><span class="w"> </span><span class="p p-Indicator">{</span><span class="nt"> source</span><span class="p">:</span><span class="w"> </span><span class="nv">src_002</span><span class="p p-Indicator">,</span><span class="nt">        target</span><span class="p">:</span><span class="w"> </span><span class="nv">src_003</span><span class="p p-Indicator">,</span><span class="nt">               relation</span><span class="p">:</span><span class="w"> </span><span class="nv">references</span><span class="p p-Indicator">,</span><span class="nt"> basis</span><span class="p">:</span><span class="w"> </span><span class="nv">structural</span><span class="w"> </span><span class="p p-Indicator">}</span>
+<span class="p p-Indicator">-</span><span class="w"> </span><span class="p p-Indicator">{</span><span class="nt"> source</span><span class="p">:</span><span class="w"> </span><span class="nv">src_002_s00-01</span><span class="p p-Indicator">,</span><span class="nt"> target</span><span class="p">:</span><span class="w"> </span><span class="nv">c_alerting_system</span><span class="p p-Indicator">,</span><span class="nt">     relation</span><span class="p">:</span><span class="w"> </span><span class="nv">mentions</span><span class="p p-Indicator">,</span><span class="nt">   basis</span><span class="p">:</span><span class="w"> </span><span class="nv">keyphrase</span><span class="w"> </span><span class="p p-Indicator">}</span>
+<span class="p p-Indicator">-</span><span class="w"> </span><span class="p p-Indicator">{</span><span class="nt"> source</span><span class="p">:</span><span class="w"> </span><span class="nv">src_002_s00-02</span><span class="p p-Indicator">,</span><span class="nt"> target</span><span class="p">:</span><span class="w"> </span><span class="nv">c_deployment_pipeline</span><span class="p p-Indicator">,</span><span class="nt"> relation</span><span class="p">:</span><span class="w"> </span><span class="nv">mentions</span><span class="p p-Indicator">,</span><span class="nt">   basis</span><span class="p">:</span><span class="w"> </span><span class="nv">keyphrase</span><span class="w"> </span><span class="p p-Indicator">}</span>
+<span class="p p-Indicator">-</span><span class="w"> </span><span class="p p-Indicator">{</span><span class="nt"> source</span><span class="p">:</span><span class="w"> </span><span class="nv">src_003</span><span class="p p-Indicator">,</span><span class="nt">        target</span><span class="p">:</span><span class="w"> </span><span class="nv">src_002</span><span class="p p-Indicator">,</span><span class="nt">               relation</span><span class="p">:</span><span class="w"> </span><span class="nv">references</span><span class="p p-Indicator">,</span><span class="nt"> basis</span><span class="p">:</span><span class="w"> </span><span class="nv">structural</span><span class="w"> </span><span class="p p-Indicator">}</span>
+<span class="p p-Indicator">-</span><span class="w"> </span><span class="p p-Indicator">{</span><span class="nt"> source</span><span class="p">:</span><span class="w"> </span><span class="nv">src_003</span><span class="p p-Indicator">,</span><span class="nt">        target</span><span class="p">:</span><span class="w"> </span><span class="nv">src_003_s00</span><span class="p p-Indicator">,</span><span class="nt">           relation</span><span class="p">:</span><span class="w"> </span><span class="nv">contains</span><span class="p p-Indicator">,</span><span class="nt">   basis</span><span class="p">:</span><span class="w"> </span><span class="nv">structural</span><span class="w"> </span><span class="p p-Indicator">}</span>
+<span class="p p-Indicator">-</span><span class="w"> </span><span class="p p-Indicator">{</span><span class="nt"> source</span><span class="p">:</span><span class="w"> </span><span class="nv">src_003_s00-01</span><span class="p p-Indicator">,</span><span class="nt"> target</span><span class="p">:</span><span class="w"> </span><span class="nv">c_deployment_pipeline</span><span class="p p-Indicator">,</span><span class="nt"> relation</span><span class="p">:</span><span class="w"> </span><span class="nv">mentions</span><span class="p p-Indicator">,</span><span class="nt">   basis</span><span class="p">:</span><span class="w"> </span><span class="nv">keyphrase</span><span class="w"> </span><span class="p p-Indicator">}</span>
+<span class="nt">communities</span><span class="p">:</span>
+<span class="p p-Indicator">-</span><span class="w"> </span><span class="p p-Indicator">{</span><span class="nt"> id</span><span class="p">:</span><span class="w"> </span><span class="nv">0</span><span class="p p-Indicator">,</span><span class="nt"> label</span><span class="p">:</span><span class="w"> </span><span class="nv">incident-response.md</span><span class="p p-Indicator">,</span><span class="nt"> size</span><span class="p">:</span><span class="w"> </span><span class="nv">4</span><span class="w"> </span><span class="p p-Indicator">}</span>
+<span class="p p-Indicator">-</span><span class="w"> </span><span class="p p-Indicator">{</span><span class="nt"> id</span><span class="p">:</span><span class="w"> </span><span class="nv">1</span><span class="p p-Indicator">,</span><span class="nt"> label</span><span class="p">:</span><span class="w"> </span><span class="nv">alerting system</span><span class="p p-Indicator">,</span><span class="nt">      size</span><span class="p">:</span><span class="w"> </span><span class="nv">3</span><span class="w"> </span><span class="p p-Indicator">}</span>
+<span class="p p-Indicator">-</span><span class="w"> </span><span class="p p-Indicator">{</span><span class="nt"> id</span><span class="p">:</span><span class="w"> </span><span class="nv">2</span><span class="p p-Indicator">,</span><span class="nt"> label</span><span class="p">:</span><span class="w"> </span><span class="nv">Deployment Pipeline</span><span class="p p-Indicator">,</span><span class="nt">  size</span><span class="p">:</span><span class="w"> </span><span class="nv">3</span><span class="w"> </span><span class="p p-Indicator">}</span>
+<span class="p p-Indicator">-</span><span class="w"> </span><span class="p p-Indicator">{</span><span class="nt"> id</span><span class="p">:</span><span class="w"> </span><span class="nv">3</span><span class="p p-Indicator">,</span><span class="nt"> label</span><span class="p">:</span><span class="w"> </span><span class="nv">alerting.md</span><span class="p p-Indicator">,</span><span class="nt">          size</span><span class="p">:</span><span class="w"> </span><span class="nv">2</span><span class="w"> </span><span class="p p-Indicator">}</span>
+<span class="p p-Indicator">-</span><span class="w"> </span><span class="p p-Indicator">{</span><span class="nt"> id</span><span class="p">:</span><span class="w"> </span><span class="nv">4</span><span class="p p-Indicator">,</span><span class="nt"> label</span><span class="p">:</span><span class="w"> </span><span class="nv">api-gateway.md</span><span class="p p-Indicator">,</span><span class="nt">       size</span><span class="p">:</span><span class="w"> </span><span class="nv">2</span><span class="w"> </span><span class="p p-Indicator">}</span>
+</code></pre></div>
+<p>(The node, edge, and community entries are shown in YAML flow style for width; the file on
+disk writes them as block lists.)</p>
+<p>Two concepts were promoted out of every keyphrase in <code>map.yml</code>. The two <code>references</code> edges
+are the Markdown links from step 1, one in each direction. <code>api-gateway.md</code> has a
+<code>contains</code> edge and nothing else — no concept it shares, no document linking to it.</p>
+<p>And the report, rendered from the same data:</p>
+<div class="highlight"><pre><span></span><code>$<span class="w"> </span>cat<span class="w"> </span>out/reports/graph_report.md
+</code></pre></div>
+<div class="highlight"><pre><span></span><code><span class="gh"># Corpus Concept Graph Report for &#39;docs_example_corpus&#39;</span>
+Generated at: 2026-09-21T22:16:11.223796+00:00
+
+<span class="gu">## Statistics</span>
+<span class="k">-</span><span class="w"> </span><span class="gs">**Documents:**</span> 4
+<span class="k">-</span><span class="w"> </span><span class="gs">**Concepts:**</span> 2
+<span class="k">-</span><span class="w"> </span><span class="gs">**Communities:**</span> 5
+
+<span class="gu">## Top Concepts</span>
+<span class="k">-</span><span class="w"> </span><span class="gs">**alerting system**</span> (2 mention(s))
+<span class="k">-</span><span class="w"> </span><span class="gs">**Deployment Pipeline**</span> (2 mention(s))
+
+<span class="gu">## Bridge Concepts</span>
+<span class="k">-</span><span class="w"> </span>No bridge concepts found.
+
+<span class="gu">## Isolated Documents</span>
+<span class="k">-</span><span class="w"> </span>api-gateway.md
+</code></pre></div>
+<p><strong><code>api-gateway.md</code> is isolated, and that is the interesting result.</strong> The corpus discusses
+the API gateway constantly, but every discussion is inside <code>api-gateway.md</code> itself. No
+other document links to it and no promoted concept reaches it. For a four-file handbook
+that is fine. For a corpus you are about to hand an agent, an isolated document is the
+cheapest available signal that something is off-topic or that the document connecting it
+to everything else is missing.</p>
+<p>Why "API gateway" itself did not become a concept — a document repeating its own title is
+not evidence of a corpus-wide topic — is worked through in
+<a href="../concept-graph/#why-api-gateway-is-not-a-concept">Concept Graph</a>.</p>
+<h2 id="11-audit-and-validate">11. Audit and validate</h2>
+<p><code>audit</code> reports extraction problems and size statistics:</p>
+<div class="highlight"><pre><span></span><code>$<span class="w"> </span>agentpack<span class="w"> </span>audit<span class="w"> </span>./out
+Auditing<span class="w"> </span>pack<span class="w"> </span>at<span class="w"> </span>./out...
+<span class="c1"># AgentPack Audit Report for &#39;docs_example_corpus&#39;</span>
+Generated<span class="w"> </span>at:<span class="w"> </span><span class="m">2026</span>-09-21T22:16:10.891275+00:00
+
+<span class="c1">## Statistics</span>
+-<span class="w"> </span>**Files<span class="w"> </span>Processed:**<span class="w"> </span><span class="m">4</span>
+-<span class="w"> </span>**Total<span class="w"> </span>Chunks:**<span class="w"> </span><span class="m">6</span>
+-<span class="w"> </span>**Total<span class="w"> </span>Tables:**<span class="w"> </span><span class="m">0</span>
+-<span class="w"> </span>**Total<span class="w"> </span>Tokens:**<span class="w"> </span><span class="m">3435</span>
+-<span class="w"> </span>**Largest<span class="w"> </span>Chunk:**<span class="w"> </span><span class="m">797</span><span class="w"> </span>tokens<span class="w"> </span><span class="o">(</span>ID:<span class="w"> </span>src_002_chunk_000<span class="o">)</span>
+
+<span class="c1">## Extraction Warnings</span>
+-<span class="w"> </span>No<span class="w"> </span>extraction<span class="w"> </span>warnings.
+
+Audit<span class="w"> </span>report<span class="w"> </span>generated.
+</code></pre></div>
+<p>On a corpus with scanned PDFs or empty files, "Extraction Warnings" is where they surface.</p>
+<p><code>validate</code> checks structural integrity — every chunk file exists, every id in <code>map.yml</code>
+and <code>graph.yml</code> resolves:</p>
+<div class="highlight"><pre><span></span><code>$<span class="w"> </span>agentpack<span class="w"> </span>validate<span class="w"> </span>./out
+Validating<span class="w"> </span>pack<span class="w"> </span>at<span class="w"> </span>./out...
+Pack<span class="w"> </span>validation<span class="w"> </span>successful.
+</code></pre></div>
+<p>A failure lists each problem and exits <code>1</code>:</p>
+<div class="highlight"><pre><span></span><code>Validation failed with errors:
+- Chunk file missing: chunks/src_002_chunk_001.md
+</code></pre></div>
+<h2 id="citations-from-pdfs-and-csvs">Citations from PDFs and CSVs</h2>
+<p>This corpus is all Markdown, so its citations carry no page numbers. Formats that have
+them add the field automatically. A chunk from a PDF:</p>
+<div class="highlight"><pre><span></span><code><span class="p p-Indicator">-</span><span class="w"> </span><span class="nt">id</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">src_004_chunk_001</span>
+<span class="w">  </span><span class="nt">source_id</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">src_004</span>
+<span class="w">  </span><span class="nt">path</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">chunks/src_004_chunk_001.md</span>
+<span class="w">  </span><span class="nt">token_count</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">800</span>
+<span class="w">  </span><span class="nt">citation</span><span class="p">:</span>
+<span class="w">    </span><span class="nt">source_path</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">carc-claim-adjustment-reason-codes.pdf</span>
+<span class="w">    </span><span class="nt">section</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">Claim Adjustment Reason Codes (CARC)</span>
+<span class="w">    </span><span class="nt">section_path</span><span class="p">:</span>
+<span class="w">    </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">Claim Adjustment Reason Codes (CARC)</span>
+<span class="w">    </span><span class="nt">page</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">1</span>
+</code></pre></div>
+<p>and a chunk from a CSV, which carries a row range instead of a page:</p>
+<div class="highlight"><pre><span></span><code><span class="p p-Indicator">-</span><span class="w"> </span><span class="nt">id</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">src_002_chunk_000</span>
+<span class="w">  </span><span class="nt">source_id</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">src_002</span>
+<span class="w">  </span><span class="nt">path</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">chunks/src_002_chunk_000.md</span>
+<span class="w">  </span><span class="nt">token_count</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">800</span>
+<span class="w">  </span><span class="nt">citation</span><span class="p">:</span>
+<span class="w">    </span><span class="nt">source_path</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">medicare-payment-value-of-care-IL.csv</span>
+<span class="w">    </span><span class="nt">row_range</span><span class="p">:</span>
+<span class="w">    </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">1</span>
+<span class="w">    </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">50</span>
+</code></pre></div>
+<p>Those extra fields flow straight through to the CLI, which renders them as
+<code>report.pdf, page 12, Balance Sheets</code> and <code>data.csv, rows 1-50</code>.</p>
+<p>PDFs also produce a <code>tables/</code> directory that this corpus does not have — each extracted
+table written out as a standalone Markdown file, so a table never gets sliced in half by a
+chunk boundary.</p>
+<h2 id="where-to-go-next">Where to go next</h2>
+<ul>
+<li><a href="../cli-reference/">CLI Reference</a> — every command and flag</li>
+<li><a href="../architecture/">Architecture &amp; Internals</a> — how parsing, chunking, and indexing work</li>
+<li><a href="../knowledge-map/">Knowledge Map</a> — the full <code>map.yml</code> schema</li>
+<li><a href="../concept-graph/">Concept Graph</a> — concept promotion, communities, tuning</li>
+<li><a href="../corpus-explorer-ui/">Corpus Explorer UI</a> — the same pack, explored visually</li>
+</ul>
+
+
+
+
+
+
+
+
+
+
+
+
+                
+              </article>
+            </div>
+          
+          
+<script>var target=document.getElementById(location.hash.slice(1));target&&target.name&&(target.checked=target.name.startsWith("__tabbed_"))</script>
+        </div>
+        
+      </main>
+      
+        <footer class="md-footer">
+  
+  <div class="md-footer-meta md-typeset">
+    <div class="md-footer-meta__inner md-grid">
+      <div class="md-copyright">
+  
+  
+    Made with
+    <a href="https://squidfunk.github.io/mkdocs-material/" target="_blank" rel="noopener">
+      Material for MkDocs
+    </a>
+  
+</div>
+      
+    </div>
+  </div>
+</footer>
+      
+    </div>
+    <div class="md-dialog" data-md-component="dialog">
+      <div class="md-dialog__inner md-typeset"></div>
+    </div>
+    
+    
+    
+      
+      
+      <script id="__config" type="application/json">{"annotate": null, "base": "..", "features": [], "search": "../assets/javascripts/workers/search.2c215733.min.js", "tags": null, "translations": {"clipboard.copied": "Copied to clipboard", "clipboard.copy": "Copy to clipboard", "search.result.more.one": "1 more on this page", "search.result.more.other": "# more on this page", "search.result.none": "No matching documents", "search.result.one": "1 matching document", "search.result.other": "# matching documents", "search.result.placeholder": "Type to start searching", "search.result.term.missing": "Missing", "select.version": "Select version"}, "version": null}</script>
+    
+    
+      <script src="../assets/javascripts/bundle.79ae519e.min.js"></script>
+      
+    
+  </body>
+</html>
